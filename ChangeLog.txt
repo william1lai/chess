@@ -1,0 +1,21 @@
+ChangeLog
+
+
+Name: William Lai
+Date: 02-14-2013
+Description: Initial interface of critical classes and files were created. Most complex functions are stubs and some classes and definitions have not been created yet.
+Changes:
+     * Piece.java: Created abstract class Piece
+     * Pawn.java: Created Piece subclass Pawn
+     * Knight.java: Created Piece subclass Knight
+     * Bishop.java: Created Piece subclass Bishop
+     * Rook.java: Created Piece subclass Rook
+     * Queen.java: Created Piece subclass Queen
+     * King.java: Created Piece subclass King
+     * Board.java: Created class Board
+     * Game.java: Created abstract class Game
+     * Player.java: Created abstract class Player
+     * Move.java: Created helper class Move
+     * Definitions.java: Created definitions class Definitions
+     * README.txt: Created README file
+     * ChangeLog.txt: Created ChangeLog

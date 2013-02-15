@@ -1,16 +1,16 @@
 
 public class Move 
 {
-	public int m_r0;
-	public int m_c0;
-	public int m_rf;
-	public int m_cf;
+	public int r0;
+	public int c0;
+	public int rf;
+	public int cf;
 	
-	Move(int r0, int c0, int rf, int cf)
+	Move(int rr0, int cc0, int rrf, int ccf)
 	{
-		m_r0 = r0;
-		m_c0 = c0;
-		m_rf = rf;
-		m_cf = cf;
+		r0 = rr0;
+		c0 = cc0;
+		rf = rrf;
+		cf = ccf;
 	}
 }

@@ -21,6 +21,12 @@ public abstract class Piece
 	{
 		return m_col;
 	}
+	
+	public void setPos(int row, int col)
+	{
+		m_row = row;
+		m_col = col;
+	}
 
 	public Definitions.Color color()
 	{

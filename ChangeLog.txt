@@ -3,6 +3,16 @@ ChangeLog
 
 Name: William Lai
 Date: 02-14-2013
+Description: Made some changes and additions
+Changes:
+     * Piece.java: Added setPos function
+     * Pawn.java: Implemented moves function
+     * Queen.java: Partially implemented moves function
+     * Board.java: Implemented some functions
+     * Move.java: Changed variable names
+
+Name: William Lai
+Date: 02-14-2013
 Description: Initial interface of critical classes and files were created. Most complex functions are stubs and some classes and definitions have not been created yet.
 Changes:
      * Piece.java: Created abstract class Piece

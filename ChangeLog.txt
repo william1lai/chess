@@ -1,5 +1,16 @@
 ChangeLog
 
+Name: William Lai
+Date: 02-19-2013
+Description: Implemented all of the moves functions in each class and added helper functions that made them easier to implement.
+Changes:
+     * Piece.java: Added some helper functions
+     * Queen.java: Finished implementing moves function
+     * King.java: Implemented moves function
+     * Bishop.java: Implemented moves function
+     * Knight.java: Implemented moves function
+     * Rook.java: Implemented moves function
+     * Board.java: Added static helper function isLegal
 
 Name: William Lai
 Date: 02-14-2013

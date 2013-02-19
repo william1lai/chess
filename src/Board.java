@@ -66,6 +66,11 @@ public class Board
 		}		
 		return pic;
 	}
+	
+	public static boolean isLegal(int r, int c) //checks if square is within bounds of board
+	{
+		return ((r >= 0) && (r < Definitions.NUMROWS) && (c >= 0) && (c < Definitions.NUMCOLS));
+	}
 
 	//What else does a board need to have?
 	

@@ -9,7 +9,7 @@ public class Rook extends Piece
 	
 	public ArrayList<Move> moves()
 	{
-		return null; //stub
+		return getOrthogonals();
 	}
 
 	public String toString()

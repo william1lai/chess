@@ -9,7 +9,7 @@ public class Bishop extends Piece
 	
 	public ArrayList<Move> moves()
 	{
-		return null; //stub
+		return getDiagonals();
 	}
 	
 	public String toString()

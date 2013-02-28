@@ -6,7 +6,7 @@ public abstract class Game
 	private Definitions.Color m_turn;
 	
 	public abstract void init();
-	public abstract boolean isLegal(Move m);
+	public abstract boolean isLegalMove(Move m);
 	
 	
 	public Player getP1()
@@ -22,5 +22,6 @@ public abstract class Game
 	public Definitions.Color whoseTurn()
 	{
 		return m_turn;
-	}
+	}	
+
 }

@@ -1,6 +1,14 @@
 ChangeLog
 
 Name: William Lai
+Date: 02-28-2013
+Description: Made minor changes and added new class StandardChessGame.
+Changes:
+     * StandardChessGame.java: Created class and wrote stub skeleton
+     * Board.java: Added isLegalSquare helper function, implemented getPiece function with bounds checking, removed inCheck function.
+     * Game.java: Renamed isLegal function to isLegalMove
+
+Name: William Lai
 Date: 02-19-2013
 Description: Implemented all of the moves functions in each class and added helper functions that made them easier to implement.
 Changes:

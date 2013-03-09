@@ -1,6 +1,13 @@
 ChangeLog
 
 Name: William Lai
+Date: 03-09-2013
+Description: Started implementing isLegalMove function in StandardChessGame class
+Changes:
+     * StandardChessGame.java: Implemented most of isLegalMove function
+     * King.java: Added TODO note about adding castling to list of moves
+
+Name: William Lai
 Date: 02-28-2013
 Description: Made minor changes and added new class StandardChessGame.
 Changes:

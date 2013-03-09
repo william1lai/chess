@@ -1,5 +1,7 @@
 import java.util.ArrayList;
 
+//TODO: Need to implement castling in moves() function
+
 public class King extends Piece
 {
 	King(int row, int col)

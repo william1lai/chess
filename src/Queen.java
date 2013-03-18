@@ -2,9 +2,14 @@ import java.util.ArrayList;
 
 public class Queen extends Piece
 {
-	Queen(int row, int col)
+	public Queen(int row, int col)
 	{
 		super(row, col);
+	}
+	
+	public Queen(Queen other)
+	{
+		super(other.row(), other.col());
 	}
 
 	public ArrayList<Move> moves()
@@ -27,5 +32,10 @@ public class Queen extends Piece
 		{
 			return "BQ";
 		}
+	}
+	
+	public Piece clone()
+	{
+		return new Queen(this);
 	}
 }

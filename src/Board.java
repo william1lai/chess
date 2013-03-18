@@ -2,9 +2,21 @@ public class Board
 {
 	private Piece[][] m_board;
 
-	Board()
+	public Board()
 	{
 		init();
+	}
+
+	public Board(Board other) 
+	{
+		init();
+		for (int r = 0; r < Definitions.NUMROWS; r++)
+		{
+			for (int c = 0; c < Definitions.NUMCOLS; c++)
+			{
+				this.placePiece(other.getPiece(r,c).clone(), r, c);
+			}
+		}
 	}
 
 	public void init()

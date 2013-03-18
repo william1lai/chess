@@ -2,9 +2,14 @@ import java.util.ArrayList;
 
 public class Pawn extends Piece
 {
-	Pawn(int row, int col)
+	public Pawn(int row, int col)
 	{
 		super(row, col);
+	}
+	
+	public Pawn(Pawn other)
+	{
+		super(other.row(), other.col());
 	}
 	
 	public ArrayList<Move> moves()
@@ -63,4 +68,8 @@ public class Pawn extends Piece
 		}
 	}
 
+	public Piece clone()
+	{
+		return new Pawn(this);
+	}
 }

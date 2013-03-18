@@ -6,7 +6,7 @@ public abstract class Piece
 	private int m_col;
 	private Definitions.Color m_color;
 	
-	Piece(int row, int col)
+	public Piece(int row, int col)
 	{
 		m_row = row;
 		m_col = col;
@@ -83,4 +83,5 @@ public abstract class Piece
 	}
 	
 	public abstract ArrayList<Move> moves();
+	public abstract Piece clone();
 }

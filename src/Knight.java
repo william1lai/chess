@@ -2,9 +2,14 @@ import java.util.ArrayList;
 
 public class Knight extends Piece
 {
-	Knight(int row, int col)
+	public Knight(int row, int col)
 	{
 		super(row, col);
+	}
+	
+	public Knight(Knight other)
+	{
+		super(other.row(), other.col());
 	}
 
 	public ArrayList<Move> moves()
@@ -65,5 +70,9 @@ public class Knight extends Piece
 			return "BN";
 		}
 	}
-
+	
+	public Piece clone()
+	{
+		return new Knight(this);
+	}
 }

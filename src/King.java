@@ -4,9 +4,14 @@ import java.util.ArrayList;
 
 public class King extends Piece
 {
-	King(int row, int col)
+	public King(int row, int col)
 	{
 		super(row, col);
+	}
+	
+	public King(King other)
+	{
+		super(other.row(), other.col());
 	}
 
 	public ArrayList<Move> moves()
@@ -38,6 +43,11 @@ public class King extends Piece
 		{
 			return "BK";
 		}
+	}
+	
+	public Piece clone()
+	{
+		return new King(this);
 	}
 
 }

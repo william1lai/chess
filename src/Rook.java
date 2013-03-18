@@ -2,9 +2,14 @@ import java.util.ArrayList;
 
 public class Rook extends Piece
 {
-	Rook(int row, int col)
+	public Rook(int row, int col)
 	{
 		super(row, col);
+	}
+	
+	public Rook(Rook other)
+	{
+		super(other.row(), other.col());
 	}
 	
 	public ArrayList<Move> moves()
@@ -22,5 +27,10 @@ public class Rook extends Piece
 		{
 			return "BR";
 		}
+	}
+	
+	public Piece clone()
+	{
+		return new Rook(this);
 	}
 }

@@ -3,7 +3,7 @@ import java.util.ArrayList;
 
 public class StandardChessGame extends Game
 {
-	private Board m_board;
+	private Board m_game_board;
 
 	public StandardChessGame()
 	{
@@ -21,14 +21,14 @@ public class StandardChessGame extends Game
 		
 		//TODO: Check for check somehow
 		
-		Piece p = m_board.getPiece(m.r0, m.c0);
+		Piece p = m_game_board.getPiece(m.r0, m.c0);
 
 		if ((p == null) || (p.color() != whoseTurn()))
 		{
 			return false; //source square has no piece, or selected piece is opponent's piece
 		}
 
-		Piece destination = m_board.getPiece(m.rf, m.cf);
+		Piece destination = m_game_board.getPiece(m.rf, m.cf);
 		boolean occupiedDest = (destination != null);
 
 		ArrayList<Move> moves = p.moves();
@@ -39,7 +39,12 @@ public class StandardChessGame extends Game
 		}
 
 		if (moves.contains(m))
-		{	
+		{
+			//clone board
+			Board tempBoard = new Board(m_game_board);
+			tempBoard.move(m);
+			//TODO: now check if player is in check
+			
 			if (p instanceof Knight)
 			{
 				return true; //can jump to any of its valid squares no matter what
@@ -48,18 +53,18 @@ public class StandardChessGame extends Game
 			{
 				if (m.cf != m.c0) //changed columns; must be capture
 				{
-					return (m_board.getPiece(m.rf, m.cf) != null); //can't be our own piece because of earlier check
+					return (m_game_board.getPiece(m.rf, m.cf) != null); //can't be our own piece because of earlier check
 				}
 				else
 				{
 					if (m.rf - m.r0 == 2) //push two squares
 					{
-						return (m_board.getPiece((m.rf + m.r0) / 2, m.cf) == null)
-								&& (m_board.getPiece(m.rf, m.cf) == null); //both squares empty
+						return (m_game_board.getPiece((m.rf + m.r0) / 2, m.cf) == null)
+								&& (m_game_board.getPiece(m.rf, m.cf) == null); //both squares empty
 					}
 					else //push one square
 					{
-						return (m_board.getPiece(m.rf, m.cf) == null); //square empty
+						return (m_game_board.getPiece(m.rf, m.cf) == null); //square empty
 					}
 				}
 			}
@@ -111,7 +116,7 @@ public class StandardChessGame extends Game
 			int c = m.c0 + cinc;
 			while ((r != m.rf) && (c != m.cf))
 			{
-				if (m_board.getPiece(r, c) != null)
+				if (m_game_board.getPiece(r, c) != null)
 				{
 					return false; //there is a piece in our way
 				}

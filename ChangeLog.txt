@@ -1,6 +1,19 @@
 ChangeLog
 
 Name: William Lai
+Date: 03-18-2013
+Description: Added copy constructors, clone functions, and added more logic for move validity checking.
+     * Bishop.java: Added copy constructor and clone function
+     * Board.java: Added copy constructor
+     * King.java: Added copy constructor and clone function
+     * Knight.java: Added copy constructor and clone function
+     * Pawn.java: Added copy constructor and clone function
+     * Piece.java: Added abstract clone function
+     * Queen.java: Added copy constructor and clone function
+     * Rook.java: Added copy constructor and clone function
+     * StandardChessGame.java: Changed name of member variable from 'm_board' to 'm_game_board' to prevent ambiguity with variable in Board class, and added some more logic to check for move validity (not yet complete)
+
+Name: William Lai
 Date: 03-09-2013
 Description: Started implementing isLegalMove function in StandardChessGame class
 Changes:

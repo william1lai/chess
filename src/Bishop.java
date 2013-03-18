@@ -2,9 +2,14 @@ import java.util.ArrayList;
 
 public class Bishop extends Piece
 {
-	Bishop(int row, int col)
+	public Bishop(int row, int col)
 	{
 		super(row, col);
+	}
+	
+	public Bishop(Bishop other)
+	{
+		super(other.row(), other.col());
 	}
 	
 	public ArrayList<Move> moves()
@@ -24,4 +29,8 @@ public class Bishop extends Piece
 		}
 	}
 
+	public Piece clone()
+	{
+		return new Bishop(this);
+	}
 }

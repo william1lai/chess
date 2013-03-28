@@ -1,11 +1,11 @@
+import java.applet.*;
 
-public abstract class Game 
+public abstract class Game extends Applet implements Runnable
 {
 	private Player p1;
 	private Player p2;
 	private Definitions.Color m_turn;
 	
-	public abstract void init();
 	public abstract boolean isLegalMove(Move m);
 	
 	

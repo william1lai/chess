@@ -4,14 +4,14 @@ import java.util.ArrayList;
 
 public class King extends Piece
 {
-	public King(int row, int col)
+	public King(int row, int col, Definitions.Color color)
 	{
-		super(row, col);
+		super(row, col, color, "K");
 	}
 	
 	public King(King other)
 	{
-		super(other.row(), other.col());
+		super(other.row(), other.col(), other.color(), "K");
 	}
 
 	public ArrayList<Move> moves()
@@ -31,18 +31,6 @@ public class King extends Piece
 			}
 		}
 		return legalMoves;
-	}
-
-	public String toString()
-	{
-		if (color() == Definitions.Color.WHITE)
-		{
-			return "WK";
-		}
-		else
-		{
-			return "BK";
-		}
 	}
 	
 	public Piece clone()

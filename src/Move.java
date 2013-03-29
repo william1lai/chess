@@ -1,5 +1,5 @@
 
-public class Move 
+public class Move
 {
 	public int r0;
 	public int c0;
@@ -12,5 +12,10 @@ public class Move
 		c0 = cc0;
 		rf = rrf;
 		cf = ccf;
+	}
+	
+	public String toString()
+	{
+		return "(" + r0 + ", " + c0 + ")-(" + rf + ", " + cf + ")";
 	}
 }

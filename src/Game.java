@@ -1,6 +1,7 @@
 import java.applet.*;
+import java.awt.event.*;
 
-public abstract class Game extends Applet implements Runnable
+public abstract class Game extends Applet implements Runnable, MouseListener
 {
 	private Player p1;
 	private Player p2;
@@ -23,5 +24,10 @@ public abstract class Game extends Applet implements Runnable
 	{
 		return m_turn;
 	}	
+	
+	public void setTurn(Definitions.Color nextTurn)
+	{
+		m_turn = nextTurn;
+	}
 
 }

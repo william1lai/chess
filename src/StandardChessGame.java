@@ -1,11 +1,13 @@
 import java.util.ArrayList;
 import java.awt.*;
+import java.awt.event.*;
 
 public class StandardChessGame extends Game
 {
 	private Thread m_process;
 	private Board m_game_board;
 	private StandardChessGameGraphics m_graphics;
+	private Piece m_selected;
 
 	public StandardChessGame()
 	{
@@ -17,6 +19,9 @@ public class StandardChessGame extends Game
 		m_process = new Thread(this);
 		m_game_board = new Board();
 		m_graphics = new StandardChessGameGraphics();
+		m_selected = null;
+		
+		addMouseListener(this);
 		
 		//Placing standard pieces
 		//William y u do dis 2 me
@@ -42,16 +47,23 @@ public class StandardChessGame extends Game
 		for (int c = 0; c < 8; c++) {
 			m_game_board.placePiece(new Pawn(6, c, Definitions.Color.WHITE), 6, c); 
 		}
+		setTurn(Definitions.Color.BLACK);
 	}
 	
 	public void run()
 	{
-		
 	}
 	
 	public void paint(Graphics g)
 	{
-		m_graphics.drawBoard(g, m_game_board);
+		//Painting with a backbuffer reduces flickering
+		Image backbuffer = createImage(g.getClipBounds().width, g.getClipBounds().height);
+		Graphics backg = backbuffer.getGraphics();
+		
+		m_graphics.drawBoard(backg, m_game_board);
+		m_graphics.drawSelected(backg, m_selected);
+		
+		g.drawImage(backbuffer, 0, 0, this);
 	}
 
 	public boolean isLegalMove(Move m)
@@ -61,23 +73,27 @@ public class StandardChessGame extends Game
 		//TODO: Check for check somehow
 		
 		Piece p = m_game_board.getPiece(m.r0, m.c0);
-
+		
 		if ((p == null) || (p.color() != whoseTurn()))
 		{
 			return false; //source square has no piece, or selected piece is opponent's piece
 		}
-
+		
 		Piece destination = m_game_board.getPiece(m.rf, m.cf);
 		boolean occupiedDest = (destination != null);
-
+		
 		ArrayList<Move> moves = p.moves();
-
+		
 		if (occupiedDest && (destination.color() == whoseTurn())) //case of trying to move to source square is handled here
 		{
 			return false; //can't move to square occupied by same color piece
 		}
-
-		if (moves.contains(m))
+		
+		//moves.contain(m) doesn't work for me. Below is a super nasty temporary solution
+		boolean flag = false;
+		for (int i = 0; i < moves.size() && !flag; i++)
+			flag = moves.get(i).r0 == m.r0 && moves.get(i).rf == m.rf && moves.get(i).c0 == m.c0 && moves.get(i).cf == m.cf;
+		if (flag)
 		{
 			//clone board
 			Board tempBoard = new Board(m_game_board);
@@ -174,5 +190,51 @@ public class StandardChessGame extends Game
 		//this will check to see if the king of 'color' is threatened or not
 
 		return false; //stub
+	}
+
+	public void mousePressed(MouseEvent e)
+	{
+		int row = m_graphics.getRow(e.getY());
+		int col = m_graphics.getCol(e.getX());
+		//Left-click to select
+		if (e.getButton() == MouseEvent.BUTTON1) select(row, col);
+		//Right-click to move selected
+		else if (e.getButton() == MouseEvent.BUTTON3) moveSelected(row, col);
+		repaint();
+	}
+	
+	private void select(int row, int col)
+	{
+		m_selected = null;
+		if (row >= 0 && col >= 0) {
+			Piece p = m_game_board.getPiece(row, col);
+			if (p != null && p.color() == whoseTurn()) m_selected = p;
+		}
+	}
+	
+	private void moveSelected(int row, int col)
+	{
+		if (m_selected == null) return;
+		Move newMove = new Move(m_selected.row(), m_selected.col(), row, col);
+		if (!isLegalMove(newMove)) return;
+		m_game_board.move(newMove);
+	}
+	
+	//Useless for now
+	public void mouseReleased(MouseEvent e) {}
+	public void mouseClicked(MouseEvent e) {}
+	public void mouseEntered(MouseEvent e) {}
+	public void mouseExited(MouseEvent e) {}
+	
+	//Prevents flickering when repainting
+	public void update(Graphics g)
+	{
+		paint(g);
+	}
+	
+	//Upon exiting applet, stop all processes
+	public void stop()
+	{
+		if (m_process != null) m_process.interrupt();
 	}
 }

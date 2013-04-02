@@ -5,11 +5,14 @@ public abstract class Piece
 	private int m_row;
 	private int m_col;
 	private Definitions.Color m_color;
+	private String m_name;
 	
-	public Piece(int row, int col)
+	public Piece(int row, int col, Definitions.Color color, String name)
 	{
 		m_row = row;
 		m_col = col;
+		m_color = color;
+		m_name = name;
 	}
 	
 	public int row()
@@ -80,6 +83,17 @@ public abstract class Piece
 			}
 		}
 		return diagonals;
+	}
+	
+	public String getName()
+	{
+		return m_name;
+	}
+	
+	public String toString()
+	{
+		if (m_color == Definitions.Color.WHITE) return "W" + getName();
+		return "B" + getName();
 	}
 	
 	public abstract ArrayList<Move> moves();

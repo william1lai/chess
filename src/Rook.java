@@ -2,31 +2,19 @@ import java.util.ArrayList;
 
 public class Rook extends Piece
 {
-	public Rook(int row, int col)
+	public Rook(int row, int col, Definitions.Color color)
 	{
-		super(row, col);
+		super(row, col, color, "R");
 	}
 	
 	public Rook(Rook other)
 	{
-		super(other.row(), other.col());
+		super(other.row(), other.col(), other.color(), "R");
 	}
 	
 	public ArrayList<Move> moves()
 	{
 		return getOrthogonals();
-	}
-
-	public String toString()
-	{
-		if (color() == Definitions.Color.WHITE)
-		{
-			return "WR";
-		}
-		else
-		{
-			return "BR";
-		}
 	}
 	
 	public Piece clone()

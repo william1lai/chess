@@ -2,14 +2,14 @@ import java.util.ArrayList;
 
 public class Pawn extends Piece
 {
-	public Pawn(int row, int col)
+	public Pawn(int row, int col, Definitions.Color color)
 	{
-		super(row, col);
+		super(row, col, color, "P");
 	}
 	
 	public Pawn(Pawn other)
 	{
-		super(other.row(), other.col());
+		super(other.row(), other.col(), other.color(), "P");
 	}
 	
 	public ArrayList<Move> moves()
@@ -54,18 +54,6 @@ public class Pawn extends Piece
 		}
 		
 		return legalMoves;
-	}
-	
-	public String toString()
-	{
-		if (color() == Definitions.Color.WHITE)
-		{
-			return "WP";
-		}
-		else
-		{
-			return "BP";
-		}
 	}
 
 	public Piece clone()

@@ -1,70 +1,102 @@
 ChangeLog
 
 Name: William Lai
+Date: 04-02-2013
+Description: ChangeLog overhaul
+     * ChangeLog: Added several entries and clarified some file names
+
+Name: Vincent Wong
+Date: 03-29-2013
+Description: Minor tweaks to game logic and added some GUI functionality
+     * New files: Images/pieceBB.png, Images/pieceBK.png, Images/pieceBN.png, Images/pieceBP.png, Images/pieceBQ.png, Images/pieceBR.png, Images/pieceWB.png, Images/pieceWK.png, Images/pieceWN.png, Images/pieceWP.png, Images/pieceWQ.png, Images/pieceWR.png
+     * src/Board.java: Added check for NULL in copy constructor, used placePiece function instead of directly accessing private member variable
+     * src/Definitions.java: Changed values of NUMPIECES and PIECENAMES
+     * src/Game.java: Imported java.awt.event.*, now implements MouseListener, added function setTurn
+     * src/Move.java: Added toString function
+     * src/StandardChessGame.java: Imported java.awt.event.*, added new member variable Piece m_selected, added MouseListener in constructor, used setTurn function, reimplemented paint function to reduce flickering, added temporary solution because moves.contain seems to have an issue, added functions mousePressed, select, moveSelected, update, and stop for GUI
+     * src/StandardChessGameGraphics.java: Made some constants final and changed data structure to one Map instead of a Map and an ArrayList, added functions drawSelected, getRow, getCol
+
+Name: Vincent Wong
+Date: 03-28-2013
+Description: Some changes to data and toString, made Game class an Applet, and added StandardChessGameGraphics class for graphics
+     * New files: Images/pieceB.png, Images/pieceK.png, Images/pieceN.png, Images/pieceP.png, Images/pieceQ.png, Images/pieceR.png, src/StandardChessGameGraphics.java
+     * src/Bishop.java: Added color parameter to constructors, removed toString function
+     * src/Definitions.java: Added new constants NUMPIECES and PIECENAMES
+     * src/Game.java: Now extends Applet and implements Runnable, remove init function
+     * src/King.java: Added color parameter to constructors, removed toString function
+     * src/Knight.java: Added color parameter to constructors, removed toString function
+     * src/Pawn.java: Added color parameter to constructors, removed toString function
+     * src/Piece.java: Added name field, added color and name to constructors, added accessor function getName, added utility function toString
+     * src/Queen.java: Added color parameter to constructors, removed toString function
+     * src/Rook.java: Added color parameter to constructors, removed toString function
+     * src/StandardChessGame.java: Added private member variables of type Thread and StandardChessGameGraphics, overhauled init funciton, added new function run, add new function paint
+     * src/StandardChessGameGraphics.java: Created new class that draws pieces
+
+Name: William Lai
 Date: 03-18-2013
 Description: Added copy constructors, clone functions, and added more logic for move validity checking.
-     * Bishop.java: Added copy constructor and clone function
-     * Board.java: Added copy constructor
-     * King.java: Added copy constructor and clone function
-     * Knight.java: Added copy constructor and clone function
-     * Pawn.java: Added copy constructor and clone function
-     * Piece.java: Added abstract clone function
-     * Queen.java: Added copy constructor and clone function
-     * Rook.java: Added copy constructor and clone function
-     * StandardChessGame.java: Changed name of member variable from 'm_board' to 'm_game_board' to prevent ambiguity with variable in Board class, and added some more logic to check for move validity (not yet complete)
+     * src/Bishop.java: Added copy constructor and clone function
+     * src/Board.java: Added copy constructor
+     * src/King.java: Added copy constructor and clone function
+     * src/Knight.java: Added copy constructor and clone function
+     * src/Pawn.java: Added copy constructor and clone function
+     * src/Piece.java: Added abstract clone function
+     * src/Queen.java: Added copy constructor and clone function
+     * src/Rook.java: Added copy constructor and clone function
+     * src/StandardChessGame.java: Changed name of member variable from 'm_board' to 'm_game_board' to prevent ambiguity with variable in Board class, and added some more logic to check for move validity (not yet complete)
 
 Name: William Lai
 Date: 03-09-2013
 Description: Started implementing isLegalMove function in StandardChessGame class
 Changes:
-     * StandardChessGame.java: Implemented most of isLegalMove function
-     * King.java: Added TODO note about adding castling to list of moves
+     * src/StandardChessGame.java: Implemented most of isLegalMove function
+     * src/King.java: Added TODO note about adding castling to list of moves
 
 Name: William Lai
 Date: 02-28-2013
 Description: Made minor changes and added new class StandardChessGame.
 Changes:
-     * StandardChessGame.java: Created class and wrote stub skeleton
-     * Board.java: Added isLegalSquare helper function, implemented getPiece function with bounds checking, removed inCheck function.
-     * Game.java: Renamed isLegal function to isLegalMove
+     * src/StandardChessGame.java: Created class and wrote stub skeleton
+     * src/Board.java: Added isLegalSquare helper function, implemented getPiece function with bounds checking, removed inCheck function.
+     * src/Game.java: Renamed isLegal function to isLegalMove
 
 Name: William Lai
 Date: 02-19-2013
 Description: Implemented all of the moves functions in each class and added helper functions that made them easier to implement.
 Changes:
-     * Piece.java: Added some helper functions
-     * Queen.java: Finished implementing moves function
-     * King.java: Implemented moves function
-     * Bishop.java: Implemented moves function
-     * Knight.java: Implemented moves function
-     * Rook.java: Implemented moves function
-     * Board.java: Added static helper function isLegal
+     * src/Piece.java: Added some helper functions
+     * src/Queen.java: Finished implementing moves function
+     * src/King.java: Implemented moves function
+     * src/Bishop.java: Implemented moves function
+     * src/Knight.java: Implemented moves function
+     * src/Rook.java: Implemented moves function
+     * src/Board.java: Added static helper function isLegal
 
 Name: William Lai
 Date: 02-14-2013
 Description: Made some changes and additions
 Changes:
-     * Piece.java: Added setPos function
-     * Pawn.java: Implemented moves function
-     * Queen.java: Partially implemented moves function
-     * Board.java: Implemented some functions
-     * Move.java: Changed variable names
+     * src/Piece.java: Added setPos function
+     * src/Pawn.java: Implemented moves function
+     * src/Queen.java: Partially implemented moves function
+     * src/Board.java: Implemented some functions
+     * src/Move.java: Changed variable names
 
 Name: William Lai
 Date: 02-14-2013
 Description: Initial interface of critical classes and files were created. Most complex functions are stubs and some classes and definitions have not been created yet.
 Changes:
-     * Piece.java: Created abstract class Piece
-     * Pawn.java: Created Piece subclass Pawn
-     * Knight.java: Created Piece subclass Knight
-     * Bishop.java: Created Piece subclass Bishop
-     * Rook.java: Created Piece subclass Rook
-     * Queen.java: Created Piece subclass Queen
-     * King.java: Created Piece subclass King
-     * Board.java: Created class Board
-     * Game.java: Created abstract class Game
-     * Player.java: Created abstract class Player
-     * Move.java: Created helper class Move
-     * Definitions.java: Created definitions class Definitions
+     * src/Piece.java: Created abstract class Piece
+     * src/Pawn.java: Created Piece subclass Pawn
+     * src/Knight.java: Created Piece subclass Knight
+     * src/Bishop.java: Created Piece subclass Bishop
+     * src/Rook.java: Created Piece subclass Rook
+     * src/Queen.java: Created Piece subclass Queen
+     * src/King.java: Created Piece subclass King
+     * src/Board.java: Created class Board
+     * src/Game.java: Created abstract class Game
+     * src/Player.java: Created abstract class Player
+     * src/Move.java: Created helper class Move
+     * src/Definitions.java: Created definitions class Definitions
      * README.txt: Created README file
      * ChangeLog.txt: Created ChangeLog

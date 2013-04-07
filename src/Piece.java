@@ -97,5 +97,6 @@ public abstract class Piece
 	}
 	
 	public abstract ArrayList<Move> moves();
+	public abstract ArrayList<Move> threats(); //for checking checks; only different from moves for Pawn; is there a better way?
 	public abstract Piece clone();
 }

@@ -55,6 +55,34 @@ public class Pawn extends Piece
 		
 		return legalMoves;
 	}
+	
+	public ArrayList<Move> threats()
+	{
+		ArrayList<Move> t = new ArrayList<Move>();
+		if (color() == Definitions.Color.WHITE)
+		{
+			if (col() > 0)
+			{
+				t.add(new Move(row(), col(), row() - 1, col() - 1)); //capture northwest
+			}
+			if (col() < Definitions.NUMCOLS - 1)
+			{
+				t.add(new Move(row(), col(), row() - 1, col() + 1)); //capture northeast
+			}
+		}		
+		else //Black
+		{
+			if (col() > 0)
+			{
+				t.add(new Move(row(), col(), row() + 1, col() - 1)); //capture southwest
+			}
+			if (col() < Definitions.NUMCOLS - 1)
+			{
+				t.add(new Move(row(), col(), row() + 1, col() + 1)); //capture southeast
+			}
+		}
+		return t;
+	}
 
 	public Piece clone()
 	{

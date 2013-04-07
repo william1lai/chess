@@ -22,6 +22,11 @@ public class Queen extends Piece
 		return legalMoves;
 	}
 	
+	public ArrayList<Move> threats()
+	{
+		return moves();
+	}
+	
 	public Piece clone()
 	{
 		return new Queen(this);

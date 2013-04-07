@@ -17,6 +17,11 @@ public class Rook extends Piece
 		return getOrthogonals();
 	}
 	
+	public ArrayList<Move> threats()
+	{
+		return moves();
+	}
+	
 	public Piece clone()
 	{
 		return new Rook(this);

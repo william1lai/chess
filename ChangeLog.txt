@@ -1,6 +1,18 @@
 ChangeLog
 
 Name: William Lai
+Date: 04-07-2013
+Description: Added some functions to aid in game logic
+     * src/Bishop.java: Added threats function
+     * src/King.java: Added threats function
+     * src/Knight.java: Added threats function
+     * src/Move.java: Overrode equals function of Object to allow Arraylist's contains method to work as intended
+     * src/Pawn.java: Added threats function
+     * src/Piece.java: Added abstract function threats for use in checking for checks
+     * src/Rook.java: Added threats function
+     * src/StandardChessGame.java: Implemented inCheck function and added another parameter of type Board to allow for checking of clone boards
+
+Name: William Lai
 Date: 04-02-2013
 Description: ChangeLog overhaul
      * ChangeLog: Added several entries and clarified some file names

@@ -33,6 +33,11 @@ public class King extends Piece
 		return legalMoves;
 	}
 	
+	public ArrayList<Move> threats()
+	{
+		return moves();
+	}
+	
 	public Piece clone()
 	{
 		return new King(this);

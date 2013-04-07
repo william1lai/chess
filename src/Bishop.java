@@ -16,6 +16,11 @@ public class Bishop extends Piece
 	{
 		return getDiagonals();
 	}
+	
+	public ArrayList<Move> threats()
+	{
+		return getDiagonals();
+	}
 
 	public Piece clone()
 	{

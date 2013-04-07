@@ -20,9 +20,9 @@ public class StandardChessGame extends Game
 		m_game_board = new Board();
 		m_graphics = new StandardChessGameGraphics();
 		m_selected = null;
-		
+
 		addMouseListener(this);
-		
+
 		//Placing standard pieces
 		//William y u do dis 2 me
 		m_game_board.placePiece(new Rook(0, 0, Definitions.Color.BLACK), 0, 0);
@@ -49,60 +49,65 @@ public class StandardChessGame extends Game
 		}
 		setTurn(Definitions.Color.BLACK);
 	}
-	
+
 	public void run()
 	{
 	}
-	
+
 	public void paint(Graphics g)
 	{
 		//Painting with a backbuffer reduces flickering
 		Image backbuffer = createImage(g.getClipBounds().width, g.getClipBounds().height);
 		Graphics backg = backbuffer.getGraphics();
-		
+
 		m_graphics.drawBoard(backg, m_game_board);
 		m_graphics.drawSelected(backg, m_selected);
-		
+
 		g.drawImage(backbuffer, 0, 0, this);
 	}
 
 	public boolean isLegalMove(Move m)
 	{
 		//generate moves and use board to determine legality (is there a piece in the way? etc.)
-		
+
 		//TODO: Check for check somehow
-		
+
 		Piece p = m_game_board.getPiece(m.r0, m.c0);
-		
+
 		if ((p == null) || (p.color() != whoseTurn()))
 		{
 			return false; //source square has no piece, or selected piece is opponent's piece
 		}
-		
+
 		Piece destination = m_game_board.getPiece(m.rf, m.cf);
 		boolean occupiedDest = (destination != null);
-		
 		ArrayList<Move> moves = p.moves();
-		
+
 		if (occupiedDest && (destination.color() == whoseTurn())) //case of trying to move to source square is handled here
 		{
 			return false; //can't move to square occupied by same color piece
 		}
-		
-		//moves.contain(m) doesn't work for me. Below is a super nasty temporary solution
+
+		//moves.contains(m) doesn't work for me. Below is a super nasty temporary solution
+			//W - I think I fixed it by implementing equals() in Move class, so I'll comment out the workaround for now
+		/*
 		boolean flag = false;
 		for (int i = 0; i < moves.size() && !flag; i++)
 			flag = moves.get(i).r0 == m.r0 && moves.get(i).rf == m.rf && moves.get(i).c0 == m.c0 && moves.get(i).cf == m.cf;
-		if (flag)
+		*/
+		if (moves.contains(m))
 		{
-			//clone board
-			Board tempBoard = new Board(m_game_board);
+			Board tempBoard = new Board(m_game_board); //clone board
 			tempBoard.move(m);
-			//TODO: now check if player is in check
-			
-			if (p instanceof Knight)
+			if (inCheck(whoseTurn(), tempBoard))
 			{
-				return true; //can jump to any of its valid squares no matter what
+				return false; //illegal move because you will be in check after move
+			}
+
+			if ((p instanceof Knight) || (p instanceof King))
+			{
+				return true; //all possible moves are automatically legal because we already checked earlier
+							 //that the destination square does not contain a piece of same color
 			}
 			if (p instanceof Pawn) //must split into cases
 			{
@@ -123,24 +128,20 @@ public class StandardChessGame extends Game
 					}
 				}
 			}
-			if (p instanceof King) //must account for check
-			{
-				//TODO: Need to implement
-				return true; //stub; will fix later
-			}
-			
+
+
 			//all other pieces have the similar property of not being able to get to
 			//target location if there is a piece in the way
-			
+
 			//TODO: The following code seems a bit inefficient. Maybe find way to reduce length
 			// 	and/or put it in another function for readability
-			
+
 			int dc = m.cf - m.c0;
 			int dr = m.rf - m.r0; //remember rows are counted from the top
-			
+
 			int cinc; //1, 0, or -1, depending on which direction the piece is headed
 			int rinc; //1, 0, or -1
-			
+
 			if (dc < 0)
 			{
 				cinc = -1;
@@ -153,7 +154,7 @@ public class StandardChessGame extends Game
 			{
 				cinc = 0;
 			}
-			
+
 			if (dr < 0)
 			{
 				rinc = -1;
@@ -166,7 +167,7 @@ public class StandardChessGame extends Game
 			{
 				rinc = 0;
 			}
-			
+
 			int r = m.r0 + rinc;
 			int c = m.c0 + cinc;
 			while ((r != m.rf) && (c != m.cf))
@@ -180,16 +181,48 @@ public class StandardChessGame extends Game
 			}
 			return true; //no pieces in way
 		}
-		
+
 		return false; //move is not in our move list
 	}
 
 	//moving to Game class from Board class, since the Board doesn't necessarily know rules of game
-	public boolean inCheck(Definitions.Color color)
+	//added Board argument since you might want to check temporary boards too
+	public boolean inCheck(Definitions.Color color, Board b)
 	{
 		//this will check to see if the king of 'color' is threatened or not
+		int kingR = -1; //default values to satisfy compiler
+		int kingC = -1;
+		//might want to have a king location variable in each board
+		//or we can use an arraylist to hold all pieces on board, maybe separated by color?
+		//efficiency considerations?
 
-		return false; //stub
+		for (int r = 0; r < Definitions.NUMROWS; r++)
+		{
+			for (int c = 0; c < Definitions.NUMCOLS; c++)
+			{
+				Piece temp = b.getPiece(r, c);
+				if ((temp instanceof King) && (temp.color() == color))
+				{
+					kingR = r;
+					kingC = c;
+					break; //is there a way to jump outside both loops without using goto?
+				}
+			}
+		}
+
+		for (int r = 0; r < Definitions.NUMROWS; r++)
+		{
+			for (int c = 0; c < Definitions.NUMCOLS; c++)
+			{
+				Piece temp = b.getPiece(r, c);
+				Move m = new Move(r, c, kingR, kingC);
+				if ((temp.color() != color) && (temp.threats().contains(m)))
+				{
+					return true;
+				}
+			}
+		}
+		return false; //no pieces can capture king
 	}
 
 	public void mousePressed(MouseEvent e)
@@ -202,7 +235,7 @@ public class StandardChessGame extends Game
 		else if (e.getButton() == MouseEvent.BUTTON3) moveSelected(row, col);
 		repaint();
 	}
-	
+
 	private void select(int row, int col)
 	{
 		m_selected = null;
@@ -211,7 +244,7 @@ public class StandardChessGame extends Game
 			if (p != null && p.color() == whoseTurn()) m_selected = p;
 		}
 	}
-	
+
 	private void moveSelected(int row, int col)
 	{
 		if (m_selected == null) return;
@@ -219,19 +252,19 @@ public class StandardChessGame extends Game
 		if (!isLegalMove(newMove)) return;
 		m_game_board.move(newMove);
 	}
-	
+
 	//Useless for now
 	public void mouseReleased(MouseEvent e) {}
 	public void mouseClicked(MouseEvent e) {}
 	public void mouseEntered(MouseEvent e) {}
 	public void mouseExited(MouseEvent e) {}
-	
+
 	//Prevents flickering when repainting
 	public void update(Graphics g)
 	{
 		paint(g);
 	}
-	
+
 	//Upon exiting applet, stop all processes
 	public void stop()
 	{

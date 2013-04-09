@@ -2,6 +2,10 @@ import java.util.ArrayList;
 import java.awt.*;
 import java.awt.event.*;
 
+//TODO:
+//Implement Castling
+//Implement Checkmate-checking
+
 public class StandardChessGame extends Game
 {
 	private Thread m_process;
@@ -47,7 +51,7 @@ public class StandardChessGame extends Game
 		for (int c = 0; c < 8; c++) {
 			m_game_board.placePiece(new Pawn(6, c, Definitions.Color.WHITE), 6, c); 
 		}
-		setTurn(Definitions.Color.BLACK);
+		setTurn(Definitions.Color.WHITE);
 	}
 
 	public void run()
@@ -70,8 +74,6 @@ public class StandardChessGame extends Game
 	{
 		//generate moves and use board to determine legality (is there a piece in the way? etc.)
 
-		//TODO: Check for check somehow
-
 		Piece p = m_game_board.getPiece(m.r0, m.c0);
 
 		if ((p == null) || (p.color() != whoseTurn()))
@@ -89,16 +91,23 @@ public class StandardChessGame extends Game
 		}
 
 		//moves.contains(m) doesn't work for me. Below is a super nasty temporary solution
-			//W - I think I fixed it by implementing equals() in Move class, so I'll comment out the workaround for now
+		//W - I think I fixed it by implementing equals() in Move class, so I'll comment out the workaround for now
 		/*
 		boolean flag = false;
 		for (int i = 0; i < moves.size() && !flag; i++)
 			flag = moves.get(i).r0 == m.r0 && moves.get(i).rf == m.rf && moves.get(i).c0 == m.c0 && moves.get(i).cf == m.cf;
-		*/
+		 */
 		if (moves.contains(m))
 		{
 			Board tempBoard = new Board(m_game_board); //clone board
 			tempBoard.move(m);
+
+			if (!(p instanceof Knight) && (hasPieceInWay(m, m_game_board))) 
+				//if it's not a knight, it can't jump
+			{
+				return false;
+			}
+
 			if (inCheck(whoseTurn(), tempBoard))
 			{
 				return false; //illegal move because you will be in check after move
@@ -107,7 +116,7 @@ public class StandardChessGame extends Game
 			if ((p instanceof Knight) || (p instanceof King))
 			{
 				return true; //all possible moves are automatically legal because we already checked earlier
-							 //that the destination square does not contain a piece of same color
+				//that the destination square does not contain a piece of same color
 			}
 			if (p instanceof Pawn) //must split into cases
 			{
@@ -128,61 +137,57 @@ public class StandardChessGame extends Game
 					}
 				}
 			}
+			return true;
+		}
+		return false; //move is not in our move list
+	}
 
+	private boolean hasPieceInWay(Move m, Board b)
+	{
+		int dc = m.cf - m.c0;
+		int dr = m.rf - m.r0; //remember rows are counted from the top
+		int cinc; //1, 0, or -1, depending on which direction the piece is headed
+		int rinc; //1, 0, or -1
 
-			//all other pieces have the similar property of not being able to get to
-			//target location if there is a piece in the way
-
-			//TODO: The following code seems a bit inefficient. Maybe find way to reduce length
-			// 	and/or put it in another function for readability
-
-			int dc = m.cf - m.c0;
-			int dr = m.rf - m.r0; //remember rows are counted from the top
-
-			int cinc; //1, 0, or -1, depending on which direction the piece is headed
-			int rinc; //1, 0, or -1
-
-			if (dc < 0)
-			{
-				cinc = -1;
-			}
-			else if (dc > 0)
-			{
-				cinc = 1;
-			}
-			else
-			{
-				cinc = 0;
-			}
-
-			if (dr < 0)
-			{
-				rinc = -1;
-			}
-			else if (dr > 0)
-			{
-				rinc = 1;
-			}
-			else
-			{
-				rinc = 0;
-			}
-
-			int r = m.r0 + rinc;
-			int c = m.c0 + cinc;
-			while ((r != m.rf) && (c != m.cf))
-			{
-				if (m_game_board.getPiece(r, c) != null)
-				{
-					return false; //there is a piece in our way
-				}
-				r = r + rinc;
-				c = c + cinc;
-			}
-			return true; //no pieces in way
+		if (dc < 0)
+		{
+			cinc = -1;
+		}
+		else if (dc > 0)
+		{
+			cinc = 1;
+		}
+		else
+		{
+			cinc = 0;
 		}
 
-		return false; //move is not in our move list
+		if (dr < 0)
+		{
+			rinc = -1;
+		}
+		else if (dr > 0)
+		{
+			rinc = 1;
+		}
+		else
+		{
+			rinc = 0;
+		}
+
+		int r = m.r0 + rinc;
+		int c = m.c0 + cinc;
+		while (!((r == m.rf) && (c == m.cf)))
+		{
+			if (b.getPiece(r, c) != null)
+			{
+				//System.out.println("Piece in way. Row: " + r + ", Col: " + c); //debugging pieces
+				return true; //there is a piece in our way
+			}
+			r = r + rinc;
+			c = c + cinc;
+		}
+		return false; //no pieces in way
 	}
 
 	//moving to Game class from Board class, since the Board doesn't necessarily know rules of game
@@ -216,13 +221,22 @@ public class StandardChessGame extends Game
 			{
 				Piece temp = b.getPiece(r, c);
 				Move m = new Move(r, c, kingR, kingC);
-				if ((temp.color() != color) && (temp.threats().contains(m)))
+				if ((temp != null) && (temp.color() != color) && (temp.threats().contains(m)))
 				{
-					return true;
+					if ((!(hasPieceInWay(m, b))) && (!(temp instanceof Knight)))
+					{
+						//System.out.println("In check. Row: " + r + ", Column: " + c); //for debugging purposes
+						return true;
+					}
 				}
 			}
 		}
 		return false; //no pieces can capture king
+	}
+
+	private void flipTurn()
+	{
+		setTurn(Definitions.flip(whoseTurn()));
 	}
 
 	public void mousePressed(MouseEvent e)
@@ -251,6 +265,7 @@ public class StandardChessGame extends Game
 		Move newMove = new Move(m_selected.row(), m_selected.col(), row, col);
 		if (!isLegalMove(newMove)) return;
 		m_game_board.move(newMove);
+		flipTurn();
 	}
 
 	//Useless for now

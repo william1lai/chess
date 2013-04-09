@@ -1,6 +1,12 @@
 ChangeLog
 
 Name: William Lai
+Date: 04-09-2013
+Description: Added and fixed more game logic
+     * src/Definitions.java: Added helper function flip for changing colors
+     * src/StandardChessGame.java: Changed initial turn color to White, fixed isLegalMove function (at least for now), moved part of function to new helper function hasPieceInWay, created new helper function flipTurn, cleaned up and fixed some other code
+
+Name: William Lai
 Date: 04-07-2013
 Description: Added some functions to aid in game logic
      * src/Bishop.java: Added threats function

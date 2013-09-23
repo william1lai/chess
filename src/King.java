@@ -30,6 +30,19 @@ public class King extends Piece
 				}
 			}
 		}
+		
+		int castlingRow;
+		if (color() == Definitions.Color.WHITE)
+		{
+			castlingRow = 7;
+		}
+		else //BLACK
+		{
+			castlingRow = 0;
+		}
+		legalMoves.add(new Move(row(), col(), castlingRow, 6)); //kingside castling
+		legalMoves.add(new Move(row(), col(), castlingRow, 2)); //queenside castling
+		
 		return legalMoves;
 	}
 	

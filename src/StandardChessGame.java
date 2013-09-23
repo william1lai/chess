@@ -3,8 +3,8 @@ import java.awt.*;
 import java.awt.event.*;
 
 //TODO:
-//Implement Castling
-//Implement Checkmate-checking
+//En passant
+//Checkmate-checking: Is there any way better than brute-forcing all moves to see if legal or not?
 
 public class StandardChessGame extends Game
 {
@@ -12,6 +12,11 @@ public class StandardChessGame extends Game
 	private Board m_game_board;
 	private StandardChessGameGraphics m_graphics;
 	private Piece m_selected;
+
+	private boolean whiteCanCastleKingside; //false if king's rook or king have moved
+	private boolean whiteCanCastleQueenside; //false if queen's rook or king have moved
+	private boolean blackCanCastleKingside;
+	private boolean blackCanCastleQueenside;
 
 	public StandardChessGame()
 	{
@@ -24,6 +29,11 @@ public class StandardChessGame extends Game
 		m_game_board = new Board();
 		m_graphics = new StandardChessGameGraphics();
 		m_selected = null;
+
+		whiteCanCastleKingside = true;
+		whiteCanCastleQueenside = true;		
+		blackCanCastleKingside = true;
+		blackCanCastleQueenside = true;
 
 		addMouseListener(this);
 
@@ -71,7 +81,7 @@ public class StandardChessGame extends Game
 	}
 
 	public boolean isLegalMove(Move m)
-	{
+	{		
 		//generate moves and use board to determine legality (is there a piece in the way? etc.)
 
 		Piece p = m_game_board.getPiece(m.r0, m.c0);
@@ -90,13 +100,6 @@ public class StandardChessGame extends Game
 			return false; //can't move to square occupied by same color piece
 		}
 
-		//moves.contains(m) doesn't work for me. Below is a super nasty temporary solution
-		//W - I think I fixed it by implementing equals() in Move class, so I'll comment out the workaround for now
-		/*
-		boolean flag = false;
-		for (int i = 0; i < moves.size() && !flag; i++)
-			flag = moves.get(i).r0 == m.r0 && moves.get(i).rf == m.rf && moves.get(i).c0 == m.c0 && moves.get(i).cf == m.cf;
-		 */
 		if (moves.contains(m))
 		{
 			Board tempBoard = new Board(m_game_board); //clone board
@@ -113,10 +116,42 @@ public class StandardChessGame extends Game
 				return false; //illegal move because you will be in check after move
 			}
 
-			if ((p instanceof Knight) || (p instanceof King))
+			if (p instanceof Knight) //Update: king moves no longer automatically legal
 			{
 				return true; //all possible moves are automatically legal because we already checked earlier
 				//that the destination square does not contain a piece of same color
+			}
+			if (p instanceof King)
+			{
+				//Is there a better way to do this? Seems ugly
+				boolean canCastleKingside;
+				boolean canCastleQueenside;
+				if (whoseTurn() == Definitions.Color.WHITE)
+				{
+					canCastleKingside = whiteCanCastleKingside;
+					canCastleQueenside = whiteCanCastleQueenside;
+				}
+				else
+				{
+					canCastleKingside = blackCanCastleKingside;
+					canCastleQueenside = blackCanCastleQueenside;
+				}
+
+				if (m.cf - m.c0 == 2) //kingside castle attempt
+				{
+					Board temp = new Board(m_game_board);
+					Move intermediate = new Move(m.r0, m.c0, m.r0, m.c0 + 1);
+					temp.move(intermediate);
+					return (canCastleKingside && !inCheck(whoseTurn(), temp) && !inCheck(whoseTurn(), m_game_board)); //can't be in check
+				}
+				if (m.cf - m.c0 == -2) //queenside castle attempt
+				{
+					Board temp = new Board(m_game_board);
+					Move intermediate = new Move(m.r0, m.c0, m.r0, m.c0 - 1);
+					temp.move(intermediate);
+					return (canCastleQueenside && !inCheck(whoseTurn(), temp) && !inCheck(whoseTurn(), m_game_board)); //can't be in check
+				}
+				return true; //all other possible moves are legal one-square moves
 			}
 			if (p instanceof Pawn) //must split into cases
 			{
@@ -234,9 +269,47 @@ public class StandardChessGame extends Game
 		return false; //no pieces can capture king
 	}
 
+	public boolean isCheckmate(Definitions.Color color, Board b)
+	{
+		ArrayList<Move> allMoves = new ArrayList<Move>();
+		for (int r = 0; r < 8; r++)
+		{
+			for (int c = 0; c < 8; c++)
+			{
+				Piece p = m_game_board.getPiece(r, c);
+				if (p != null && p.color() == color)
+				{
+					allMoves.addAll(p.moves());
+				}
+			}
+		}
+		
+		for (Move m : allMoves)
+		{
+			if (isLegalMove(m) == true)
+			{
+				return false; //found at least one legal move; not checkmate
+			}
+		}
+		return true; //checkmate; all possible moves are illegal
+	}
+	
 	private void flipTurn()
 	{
 		setTurn(Definitions.flip(whoseTurn()));
+		if (isCheckmate(whoseTurn(), m_game_board))
+		{
+			System.out.print("Checkmate! ");
+			if (whoseTurn() == Definitions.Color.WHITE) //white is in checkmate; black wins
+			{
+				System.out.println("Black wins!");
+			}
+			else //black is in checkmate; white wins
+			{
+				System.out.println("White wins!");
+			}
+			//do whatever you have to do when you want the game to end
+		}
 	}
 
 	public void mousePressed(MouseEvent e)
@@ -264,6 +337,72 @@ public class StandardChessGame extends Game
 		if (m_selected == null) return;
 		Move newMove = new Move(m_selected.row(), m_selected.col(), row, col);
 		if (!isLegalMove(newMove)) return;
+
+		Piece movedPiece = m_game_board.getPiece(m_selected.row(), m_selected.col());
+		int castlingRow;
+		if (whoseTurn() == Definitions.Color.WHITE)
+		{
+			castlingRow = 7;
+		}
+		else //Black
+		{
+			castlingRow = 0;
+		}
+
+		if (movedPiece instanceof King)
+		{
+			if (whoseTurn() == Definitions.Color.WHITE)
+			{
+				whiteCanCastleKingside = false;
+				whiteCanCastleQueenside = false;
+			}
+			else
+			{
+				blackCanCastleKingside = false;
+				blackCanCastleQueenside = false;
+			}
+
+			int kingMoveLength = col - m_selected.col(); //should be 2 or -2, if the move was a castling move
+			if (m_selected.row() == castlingRow)
+			{
+				if (kingMoveLength == 2) //kingside
+				{
+					Move correspondingRookMove = new Move(castlingRow, 7, castlingRow, 5);
+					m_game_board.move(correspondingRookMove);
+				}
+				else if (kingMoveLength == -2) //queenside
+				{
+					Move correspondingRookMove = new Move(castlingRow, 0, castlingRow, 3);
+					m_game_board.move(correspondingRookMove);
+				}
+			}
+		}
+		else if (m_selected.row() == castlingRow)
+		{
+			if (m_selected.col() == 0) //queen's rook
+			{
+				if (whoseTurn() == Definitions.Color.WHITE)
+				{
+					whiteCanCastleQueenside = false;
+				}
+				else
+				{
+					blackCanCastleQueenside = false;
+				}
+			}
+			else if (m_selected.col() == 7) //king's rook
+			{			
+				if (whoseTurn() == Definitions.Color.WHITE)
+				{
+					whiteCanCastleKingside = false;
+				}
+				else
+				{
+					blackCanCastleKingside = false;
+				}
+			}
+		}
+
 		m_game_board.move(newMove);
 		flipTurn();
 	}

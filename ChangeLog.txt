@@ -1,6 +1,13 @@
 ChangeLog
 
 Name: William Lai
+Date: 09-23-2013
+Description: Been a little while. More game logic, almost all done now.
+     * src/King.java: Added castling as possible moves
+     * src/Player.java: Fixed a silly comment typo
+     * src/StandardChessGame.java: Finished off castling conditionals and implemented a checkmate check.
+
+Name: William Lai
 Date: 04-09-2013
 Description: Added and fixed more game logic
      * src/Definitions.java: Added helper function flip for changing colors

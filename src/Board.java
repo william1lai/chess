@@ -14,7 +14,10 @@ public class Board
 		{
 			for (int c = 0; c < Definitions.NUMCOLS; c++)
 			{
-				this.placePiece(other.getPiece(r,c).clone(), r, c);
+				Piece otherPiece = other.getPiece(r,c);
+				if (otherPiece != null) {
+					this.placePiece(otherPiece.clone(), r, c);					
+				}
 			}
 		}
 	}
@@ -56,10 +59,10 @@ public class Board
 	{
 		//should we check for legality or should we assume that it has already been checked?
 		//probably should assume, since only Game class knows legality rules
-
+		
 		Piece temp = m_board[m.r0][m.c0];
 		m_board[m.r0][m.c0] = null;
-		m_board[m.rf][m.cf] = temp;
+		placePiece(temp, m.rf, m.cf);
 	}
 
 	public String toString()

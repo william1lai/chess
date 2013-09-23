@@ -2,14 +2,14 @@ import java.util.ArrayList;
 
 public class Queen extends Piece
 {
-	public Queen(int row, int col)
+	public Queen(int row, int col, Definitions.Color color)
 	{
-		super(row, col);
+		super(row, col, color, "Q");
 	}
 	
 	public Queen(Queen other)
 	{
-		super(other.row(), other.col());
+		super(other.row(), other.col(), other.color(), "Q");
 	}
 
 	public ArrayList<Move> moves()
@@ -21,17 +21,10 @@ public class Queen extends Piece
 
 		return legalMoves;
 	}
-
-	public String toString()
+	
+	public ArrayList<Move> threats()
 	{
-		if (color() == Definitions.Color.WHITE)
-		{
-			return "WQ";
-		}
-		else
-		{
-			return "BQ";
-		}
+		return moves();
 	}
 	
 	public Piece clone()

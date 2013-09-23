@@ -1,9 +1,22 @@
 import java.util.ArrayList;
+import java.awt.*;
+import java.awt.event.*;
 
+//TODO:
+//En passant
+//Checkmate-checking: Is there any way better than brute-forcing all moves to see if legal or not?
 
 public class StandardChessGame extends Game
 {
+	private Thread m_process;
 	private Board m_game_board;
+	private StandardChessGameGraphics m_graphics;
+	private Piece m_selected;
+
+	private boolean whiteCanCastleKingside; //false if king's rook or king have moved
+	private boolean whiteCanCastleQueenside; //false if queen's rook or king have moved
+	private boolean blackCanCastleKingside;
+	private boolean blackCanCastleQueenside;
 
 	public StandardChessGame()
 	{
@@ -12,15 +25,65 @@ public class StandardChessGame extends Game
 
 	public void init()
 	{
+		m_process = new Thread(this);
+		m_game_board = new Board();
+		m_graphics = new StandardChessGameGraphics();
+		m_selected = null;
 
+		whiteCanCastleKingside = true;
+		whiteCanCastleQueenside = true;		
+		blackCanCastleKingside = true;
+		blackCanCastleQueenside = true;
+
+		addMouseListener(this);
+
+		//Placing standard pieces
+		//William y u do dis 2 me
+		m_game_board.placePiece(new Rook(0, 0, Definitions.Color.BLACK), 0, 0);
+		m_game_board.placePiece(new Knight(0, 1, Definitions.Color.BLACK), 0, 1);
+		m_game_board.placePiece(new Bishop(0, 2, Definitions.Color.BLACK), 0, 2);
+		m_game_board.placePiece(new Queen(0, 3, Definitions.Color.BLACK), 0, 3);
+		m_game_board.placePiece(new King(0, 4, Definitions.Color.BLACK), 0, 4);
+		m_game_board.placePiece(new Bishop(0, 5, Definitions.Color.BLACK), 0, 5);
+		m_game_board.placePiece(new Knight(0, 6, Definitions.Color.BLACK), 0, 6);
+		m_game_board.placePiece(new Rook(0, 7, Definitions.Color.BLACK), 0, 7);
+		for (int c = 0; c < 8; c++) {
+			m_game_board.placePiece(new Pawn(1, c, Definitions.Color.BLACK), 1, c); 
+		}
+		m_game_board.placePiece(new Rook(7, 0, Definitions.Color.WHITE), 7, 0);
+		m_game_board.placePiece(new Knight(7, 1, Definitions.Color.WHITE), 7, 1);
+		m_game_board.placePiece(new Bishop(7, 2, Definitions.Color.WHITE), 7, 2);
+		m_game_board.placePiece(new Queen(7, 3, Definitions.Color.WHITE), 7, 3);
+		m_game_board.placePiece(new King(7, 4, Definitions.Color.WHITE), 7, 4);
+		m_game_board.placePiece(new Bishop(7, 5, Definitions.Color.WHITE), 7, 5);
+		m_game_board.placePiece(new Knight(7, 6, Definitions.Color.WHITE), 7, 6);
+		m_game_board.placePiece(new Rook(7, 7, Definitions.Color.WHITE), 7, 7);
+		for (int c = 0; c < 8; c++) {
+			m_game_board.placePiece(new Pawn(6, c, Definitions.Color.WHITE), 6, c); 
+		}
+		setTurn(Definitions.Color.WHITE);
+	}
+
+	public void run()
+	{
+	}
+
+	public void paint(Graphics g)
+	{
+		//Painting with a backbuffer reduces flickering
+		Image backbuffer = createImage(g.getClipBounds().width, g.getClipBounds().height);
+		Graphics backg = backbuffer.getGraphics();
+
+		m_graphics.drawBoard(backg, m_game_board);
+		m_graphics.drawSelected(backg, m_selected);
+
+		g.drawImage(backbuffer, 0, 0, this);
 	}
 
 	public boolean isLegalMove(Move m)
-	{
+	{		
 		//generate moves and use board to determine legality (is there a piece in the way? etc.)
-		
-		//TODO: Check for check somehow
-		
+
 		Piece p = m_game_board.getPiece(m.r0, m.c0);
 
 		if ((p == null) || (p.color() != whoseTurn()))
@@ -30,7 +93,6 @@ public class StandardChessGame extends Game
 
 		Piece destination = m_game_board.getPiece(m.rf, m.cf);
 		boolean occupiedDest = (destination != null);
-
 		ArrayList<Move> moves = p.moves();
 
 		if (occupiedDest && (destination.color() == whoseTurn())) //case of trying to move to source square is handled here
@@ -40,14 +102,56 @@ public class StandardChessGame extends Game
 
 		if (moves.contains(m))
 		{
-			//clone board
-			Board tempBoard = new Board(m_game_board);
+			Board tempBoard = new Board(m_game_board); //clone board
 			tempBoard.move(m);
-			//TODO: now check if player is in check
-			
-			if (p instanceof Knight)
+
+			if (!(p instanceof Knight) && (hasPieceInWay(m, m_game_board))) 
+				//if it's not a knight, it can't jump
 			{
-				return true; //can jump to any of its valid squares no matter what
+				return false;
+			}
+
+			if (inCheck(whoseTurn(), tempBoard))
+			{
+				return false; //illegal move because you will be in check after move
+			}
+
+			if (p instanceof Knight) //Update: king moves no longer automatically legal
+			{
+				return true; //all possible moves are automatically legal because we already checked earlier
+				//that the destination square does not contain a piece of same color
+			}
+			if (p instanceof King)
+			{
+				//Is there a better way to do this? Seems ugly
+				boolean canCastleKingside;
+				boolean canCastleQueenside;
+				if (whoseTurn() == Definitions.Color.WHITE)
+				{
+					canCastleKingside = whiteCanCastleKingside;
+					canCastleQueenside = whiteCanCastleQueenside;
+				}
+				else
+				{
+					canCastleKingside = blackCanCastleKingside;
+					canCastleQueenside = blackCanCastleQueenside;
+				}
+
+				if (m.cf - m.c0 == 2) //kingside castle attempt
+				{
+					Board temp = new Board(m_game_board);
+					Move intermediate = new Move(m.r0, m.c0, m.r0, m.c0 + 1);
+					temp.move(intermediate);
+					return (canCastleKingside && !inCheck(whoseTurn(), temp) && !inCheck(whoseTurn(), m_game_board)); //can't be in check
+				}
+				if (m.cf - m.c0 == -2) //queenside castle attempt
+				{
+					Board temp = new Board(m_game_board);
+					Move intermediate = new Move(m.r0, m.c0, m.r0, m.c0 - 1);
+					temp.move(intermediate);
+					return (canCastleQueenside && !inCheck(whoseTurn(), temp) && !inCheck(whoseTurn(), m_game_board)); //can't be in check
+				}
+				return true; //all other possible moves are legal one-square moves
 			}
 			if (p instanceof Pawn) //must split into cases
 			{
@@ -68,72 +172,256 @@ public class StandardChessGame extends Game
 					}
 				}
 			}
-			if (p instanceof King) //must account for check
-			{
-				//TODO: Need to implement
-				return true; //stub; will fix later
-			}
-			
-			//all other pieces have the similar property of not being able to get to
-			//target location if there is a piece in the way
-			
-			//TODO: The following code seems a bit inefficient. Maybe find way to reduce length
-			// 	and/or put it in another function for readability
-			
-			int dc = m.cf - m.c0;
-			int dr = m.rf - m.r0; //remember rows are counted from the top
-			
-			int cinc; //1, 0, or -1, depending on which direction the piece is headed
-			int rinc; //1, 0, or -1
-			
-			if (dc < 0)
-			{
-				cinc = -1;
-			}
-			else if (dc > 0)
-			{
-				cinc = 1;
-			}
-			else
-			{
-				cinc = 0;
-			}
-			
-			if (dr < 0)
-			{
-				rinc = -1;
-			}
-			else if (dr > 0)
-			{
-				rinc = 1;
-			}
-			else
-			{
-				rinc = 0;
-			}
-			
-			int r = m.r0 + rinc;
-			int c = m.c0 + cinc;
-			while ((r != m.rf) && (c != m.cf))
-			{
-				if (m_game_board.getPiece(r, c) != null)
-				{
-					return false; //there is a piece in our way
-				}
-				r = r + rinc;
-				c = c + cinc;
-			}
-			return true; //no pieces in way
+			return true;
 		}
-		
 		return false; //move is not in our move list
 	}
 
+	private boolean hasPieceInWay(Move m, Board b)
+	{
+		int dc = m.cf - m.c0;
+		int dr = m.rf - m.r0; //remember rows are counted from the top
+		int cinc; //1, 0, or -1, depending on which direction the piece is headed
+		int rinc; //1, 0, or -1
+
+		if (dc < 0)
+		{
+			cinc = -1;
+		}
+		else if (dc > 0)
+		{
+			cinc = 1;
+		}
+		else
+		{
+			cinc = 0;
+		}
+
+		if (dr < 0)
+		{
+			rinc = -1;
+		}
+		else if (dr > 0)
+		{
+			rinc = 1;
+		}
+		else
+		{
+			rinc = 0;
+		}
+
+		int r = m.r0 + rinc;
+		int c = m.c0 + cinc;
+		while (!((r == m.rf) && (c == m.cf)))
+		{
+			if (b.getPiece(r, c) != null)
+			{
+				//System.out.println("Piece in way. Row: " + r + ", Col: " + c); //debugging pieces
+				return true; //there is a piece in our way
+			}
+			r = r + rinc;
+			c = c + cinc;
+		}
+		return false; //no pieces in way
+	}
+
 	//moving to Game class from Board class, since the Board doesn't necessarily know rules of game
-	public boolean inCheck(Definitions.Color color)
+	//added Board argument since you might want to check temporary boards too
+	public boolean inCheck(Definitions.Color color, Board b)
 	{
 		//this will check to see if the king of 'color' is threatened or not
+		int kingR = -1; //default values to satisfy compiler
+		int kingC = -1;
+		//might want to have a king location variable in each board
+		//or we can use an arraylist to hold all pieces on board, maybe separated by color?
+		//efficiency considerations?
 
-		return false; //stub
+		for (int r = 0; r < Definitions.NUMROWS; r++)
+		{
+			for (int c = 0; c < Definitions.NUMCOLS; c++)
+			{
+				Piece temp = b.getPiece(r, c);
+				if ((temp instanceof King) && (temp.color() == color))
+				{
+					kingR = r;
+					kingC = c;
+					break; //is there a way to jump outside both loops without using goto?
+				}
+			}
+		}
+
+		for (int r = 0; r < Definitions.NUMROWS; r++)
+		{
+			for (int c = 0; c < Definitions.NUMCOLS; c++)
+			{
+				Piece temp = b.getPiece(r, c);
+				Move m = new Move(r, c, kingR, kingC);
+				if ((temp != null) && (temp.color() != color) && (temp.threats().contains(m)))
+				{
+					if ((!(hasPieceInWay(m, b))) && (!(temp instanceof Knight)))
+					{
+						//System.out.println("In check. Row: " + r + ", Column: " + c); //for debugging purposes
+						return true;
+					}
+				}
+			}
+		}
+		return false; //no pieces can capture king
+	}
+
+	public boolean isCheckmate(Definitions.Color color, Board b)
+	{
+		ArrayList<Move> allMoves = new ArrayList<Move>();
+		for (int r = 0; r < 8; r++)
+		{
+			for (int c = 0; c < 8; c++)
+			{
+				Piece p = m_game_board.getPiece(r, c);
+				if (p != null && p.color() == color)
+				{
+					allMoves.addAll(p.moves());
+				}
+			}
+		}
+		
+		for (Move m : allMoves)
+		{
+			if (isLegalMove(m) == true)
+			{
+				return false; //found at least one legal move; not checkmate
+			}
+		}
+		return true; //checkmate; all possible moves are illegal
+	}
+	
+	private void flipTurn()
+	{
+		setTurn(Definitions.flip(whoseTurn()));
+		if (isCheckmate(whoseTurn(), m_game_board))
+		{
+			System.out.print("Checkmate! ");
+			if (whoseTurn() == Definitions.Color.WHITE) //white is in checkmate; black wins
+			{
+				System.out.println("Black wins!");
+			}
+			else //black is in checkmate; white wins
+			{
+				System.out.println("White wins!");
+			}
+			//do whatever you have to do when you want the game to end
+		}
+	}
+
+	public void mousePressed(MouseEvent e)
+	{
+		int row = m_graphics.getRow(e.getY());
+		int col = m_graphics.getCol(e.getX());
+		//Left-click to select
+		if (e.getButton() == MouseEvent.BUTTON1) select(row, col);
+		//Right-click to move selected
+		else if (e.getButton() == MouseEvent.BUTTON3) moveSelected(row, col);
+		repaint();
+	}
+
+	private void select(int row, int col)
+	{
+		m_selected = null;
+		if (row >= 0 && col >= 0) {
+			Piece p = m_game_board.getPiece(row, col);
+			if (p != null && p.color() == whoseTurn()) m_selected = p;
+		}
+	}
+
+	private void moveSelected(int row, int col)
+	{
+		if (m_selected == null) return;
+		Move newMove = new Move(m_selected.row(), m_selected.col(), row, col);
+		if (!isLegalMove(newMove)) return;
+
+		Piece movedPiece = m_game_board.getPiece(m_selected.row(), m_selected.col());
+		int castlingRow;
+		if (whoseTurn() == Definitions.Color.WHITE)
+		{
+			castlingRow = 7;
+		}
+		else //Black
+		{
+			castlingRow = 0;
+		}
+
+		if (movedPiece instanceof King)
+		{
+			if (whoseTurn() == Definitions.Color.WHITE)
+			{
+				whiteCanCastleKingside = false;
+				whiteCanCastleQueenside = false;
+			}
+			else
+			{
+				blackCanCastleKingside = false;
+				blackCanCastleQueenside = false;
+			}
+
+			int kingMoveLength = col - m_selected.col(); //should be 2 or -2, if the move was a castling move
+			if (m_selected.row() == castlingRow)
+			{
+				if (kingMoveLength == 2) //kingside
+				{
+					Move correspondingRookMove = new Move(castlingRow, 7, castlingRow, 5);
+					m_game_board.move(correspondingRookMove);
+				}
+				else if (kingMoveLength == -2) //queenside
+				{
+					Move correspondingRookMove = new Move(castlingRow, 0, castlingRow, 3);
+					m_game_board.move(correspondingRookMove);
+				}
+			}
+		}
+		else if (m_selected.row() == castlingRow)
+		{
+			if (m_selected.col() == 0) //queen's rook
+			{
+				if (whoseTurn() == Definitions.Color.WHITE)
+				{
+					whiteCanCastleQueenside = false;
+				}
+				else
+				{
+					blackCanCastleQueenside = false;
+				}
+			}
+			else if (m_selected.col() == 7) //king's rook
+			{			
+				if (whoseTurn() == Definitions.Color.WHITE)
+				{
+					whiteCanCastleKingside = false;
+				}
+				else
+				{
+					blackCanCastleKingside = false;
+				}
+			}
+		}
+
+		m_game_board.move(newMove);
+		flipTurn();
+	}
+
+	//Useless for now
+	public void mouseReleased(MouseEvent e) {}
+	public void mouseClicked(MouseEvent e) {}
+	public void mouseEntered(MouseEvent e) {}
+	public void mouseExited(MouseEvent e) {}
+
+	//Prevents flickering when repainting
+	public void update(Graphics g)
+	{
+		paint(g);
+	}
+
+	//Upon exiting applet, stop all processes
+	public void stop()
+	{
+		if (m_process != null) m_process.interrupt();
 	}
 }

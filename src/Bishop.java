@@ -2,14 +2,14 @@ import java.util.ArrayList;
 
 public class Bishop extends Piece
 {
-	public Bishop(int row, int col)
+	public Bishop(int row, int col, Definitions.Color color)
 	{
-		super(row, col);
+		super(row, col, color, "B");
 	}
 	
 	public Bishop(Bishop other)
 	{
-		super(other.row(), other.col());
+		super(other.row(), other.col(), other.color(), "B");
 	}
 	
 	public ArrayList<Move> moves()
@@ -17,16 +17,9 @@ public class Bishop extends Piece
 		return getDiagonals();
 	}
 	
-	public String toString()
+	public ArrayList<Move> threats()
 	{
-		if (color() == Definitions.Color.WHITE)
-		{
-			return "WB";
-		}
-		else
-		{
-			return "BB";
-		}
+		return getDiagonals();
 	}
 
 	public Piece clone()

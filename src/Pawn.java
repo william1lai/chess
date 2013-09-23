@@ -2,14 +2,14 @@ import java.util.ArrayList;
 
 public class Pawn extends Piece
 {
-	public Pawn(int row, int col)
+	public Pawn(int row, int col, Definitions.Color color)
 	{
-		super(row, col);
+		super(row, col, color, "P");
 	}
 	
 	public Pawn(Pawn other)
 	{
-		super(other.row(), other.col());
+		super(other.row(), other.col(), other.color(), "P");
 	}
 	
 	public ArrayList<Move> moves()
@@ -56,16 +56,32 @@ public class Pawn extends Piece
 		return legalMoves;
 	}
 	
-	public String toString()
+	public ArrayList<Move> threats()
 	{
+		ArrayList<Move> t = new ArrayList<Move>();
 		if (color() == Definitions.Color.WHITE)
 		{
-			return "WP";
-		}
-		else
+			if (col() > 0)
+			{
+				t.add(new Move(row(), col(), row() - 1, col() - 1)); //capture northwest
+			}
+			if (col() < Definitions.NUMCOLS - 1)
+			{
+				t.add(new Move(row(), col(), row() - 1, col() + 1)); //capture northeast
+			}
+		}		
+		else //Black
 		{
-			return "BP";
+			if (col() > 0)
+			{
+				t.add(new Move(row(), col(), row() + 1, col() - 1)); //capture southwest
+			}
+			if (col() < Definitions.NUMCOLS - 1)
+			{
+				t.add(new Move(row(), col(), row() + 1, col() + 1)); //capture southeast
+			}
 		}
+		return t;
 	}
 
 	public Piece clone()

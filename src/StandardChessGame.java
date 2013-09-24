@@ -93,7 +93,7 @@ public class StandardChessGame extends Game
 
 		Piece destination = m_game_board.getPiece(m.rf, m.cf);
 		boolean occupiedDest = (destination != null);
-		ArrayList<Move> moves = p.moves();
+		ArrayList<Move> moves = p.getMoves();
 
 		if (occupiedDest && (destination.color() == whoseTurn())) //case of trying to move to source square is handled here
 		{
@@ -256,7 +256,7 @@ public class StandardChessGame extends Game
 			{
 				Piece temp = b.getPiece(r, c);
 				Move m = new Move(r, c, kingR, kingC);
-				if ((temp != null) && (temp.color() != color) && (temp.threats().contains(m)))
+				if ((temp != null) && (temp.color() != color) && (temp.getThreats().contains(m)))
 				{
 					if ((!(hasPieceInWay(m, b))) && (!(temp instanceof Knight)))
 					{
@@ -279,7 +279,7 @@ public class StandardChessGame extends Game
 				Piece p = m_game_board.getPiece(r, c);
 				if (p != null && p.color() == color)
 				{
-					allMoves.addAll(p.moves());
+					allMoves.addAll(p.getMoves());
 				}
 			}
 		}

@@ -12,12 +12,12 @@ public class Bishop extends Piece
 		super(other.row(), other.col(), other.color(), "B");
 	}
 	
-	public ArrayList<Move> moves()
+	public ArrayList<Move> getMoves()
 	{
 		return getDiagonals();
 	}
 	
-	public ArrayList<Move> threats()
+	public ArrayList<Move> getThreats()
 	{
 		return getDiagonals();
 	}

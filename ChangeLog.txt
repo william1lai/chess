@@ -1,5 +1,10 @@
 ChangeLog
 
+Name: Eric Du
+Date: 09-23-2013
+Description: Changed function names to keep consistency with program (getThreats, getMoves)
+     * src/Board.java: Added clone function
+
 Name: William Lai
 Date: 09-23-2013
 Description: Been a little while. More game logic, almost all done now.

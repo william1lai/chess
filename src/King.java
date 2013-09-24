@@ -14,7 +14,7 @@ public class King extends Piece
 		super(other.row(), other.col(), other.color(), "K");
 	}
 
-	public ArrayList<Move> moves()
+	public ArrayList<Move> getMoves()
 	{
 		ArrayList<Move> legalMoves = new ArrayList<Move>();
 		for (int r = row() - 1; r <= row() + 1; r++)
@@ -46,7 +46,7 @@ public class King extends Piece
 		return legalMoves;
 	}
 	
-	public ArrayList<Move> threats()
+	public ArrayList<Move> getThreats()
 	{
 		return moves();
 	}

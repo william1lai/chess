@@ -93,5 +93,8 @@ public class Board
 	}
 
 	//What else does a board need to have?
-
+	public Board clone()
+	{
+		return new Board(this);
+	}
 }

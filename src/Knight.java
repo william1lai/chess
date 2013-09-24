@@ -12,7 +12,7 @@ public class Knight extends Piece
 		super(other.row(), other.col(), other.color(), "N");
 	}
 
-	public ArrayList<Move> moves()
+	public ArrayList<Move> getMoves()
 	{
 		ArrayList<Move> legalMoves = new ArrayList<Move>();
 
@@ -59,7 +59,7 @@ public class Knight extends Piece
 		return legalMoves;
 	}
 	
-	public ArrayList<Move> threats()
+	public ArrayList<Move> getThreats()
 	{
 		return moves();
 	}

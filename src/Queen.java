@@ -12,7 +12,7 @@ public class Queen extends Piece
 		super(other.row(), other.col(), other.color(), "Q");
 	}
 
-	public ArrayList<Move> moves()
+	public ArrayList<Move> getMoves()
 	{
 		ArrayList<Move> legalMoves = new ArrayList<Move>();
 
@@ -22,7 +22,7 @@ public class Queen extends Piece
 		return legalMoves;
 	}
 	
-	public ArrayList<Move> threats()
+	public ArrayList<Move> getThreats()
 	{
 		return moves();
 	}

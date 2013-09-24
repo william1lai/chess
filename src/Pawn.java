@@ -12,7 +12,7 @@ public class Pawn extends Piece
 		super(other.row(), other.col(), other.color(), "P");
 	}
 	
-	public ArrayList<Move> moves()
+	public ArrayList<Move> getMoves()
 	{
 		//knows nothing of board, so just generate all possible moves given position
 		
@@ -56,7 +56,7 @@ public class Pawn extends Piece
 		return legalMoves;
 	}
 	
-	public ArrayList<Move> threats()
+	public ArrayList<Move> getThreats()
 	{
 		ArrayList<Move> t = new ArrayList<Move>();
 		if (color() == Definitions.Color.WHITE)

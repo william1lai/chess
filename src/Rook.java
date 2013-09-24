@@ -12,12 +12,12 @@ public class Rook extends Piece
 		super(other.row(), other.col(), other.color(), "R");
 	}
 	
-	public ArrayList<Move> moves()
+	public ArrayList<Move> getMoves()
 	{
 		return getOrthogonals();
 	}
 	
-	public ArrayList<Move> threats()
+	public ArrayList<Move> getThreats()
 	{
 		return moves();
 	}

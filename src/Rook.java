@@ -19,7 +19,7 @@ public class Rook extends Piece
 	
 	public ArrayList<Move> getThreats()
 	{
-		return moves();
+		return getMoves();
 	}
 	
 	public Piece clone()

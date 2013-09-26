@@ -33,6 +33,11 @@ public class Board
 		return ((row >= 0) && (row < Definitions.NUMROWS) && (col >= 0) && (col < Definitions.NUMCOLS));
 	}
 
+	public void removePiece(int row, int col) //mostly for en passant
+	{
+		m_board[row][col] = null; //delete any piece that is here
+	}
+	
 	public void placePiece(Piece p, int row, int col)
 	{
 		//need to consider: should we check if location is already occupied
@@ -65,9 +70,9 @@ public class Board
 		placePiece(temp, m.rf, m.cf);
 	}
 
-	public String toString()
-	{	//prints board position
-		String pic = ""; //ugly variable name, needs better name
+	public String toString() //prints board position
+	{	
+		String diagram = "";
 
 		for (int r = 0; r < Definitions.NUMROWS; r++)
 		{
@@ -75,16 +80,16 @@ public class Board
 			{
 				if (m_board[r][c] == null) //if square is empty
 				{
-					pic = pic + ' ';
+					diagram = diagram + ' ';
 				}
 				else
 				{
-					pic = pic + m_board[r][c].toString();
+					diagram = diagram + m_board[r][c].toString();
 				}
 			}
-			pic = pic + '\n';
+			diagram = diagram + '\n';
 		}		
-		return pic;
+		return diagram;
 	}
 
 	public static boolean isLegal(int r, int c) //checks if square is within bounds of board
@@ -92,7 +97,6 @@ public class Board
 		return ((r >= 0) && (r < Definitions.NUMROWS) && (c >= 0) && (c < Definitions.NUMCOLS));
 	}
 
-	//What else does a board need to have?
 	public Board clone()
 	{
 		return new Board(this);

@@ -61,7 +61,7 @@ public class Knight extends Piece
 	
 	public ArrayList<Move> getThreats()
 	{
-		return moves();
+		return getMoves();
 	}
 	
 	public Piece clone()

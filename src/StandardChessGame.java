@@ -3,9 +3,10 @@ import java.awt.*;
 import java.awt.event.*;
 
 //TODO:
-//En passant
+//Add functionality to make testing more automated. Should be able to interpret move lists, and step forward, maybe even step back
 //Checkmate-checking: Is there any way better than brute-forcing all moves to see if legal or not?
 
+@SuppressWarnings("serial")
 public class StandardChessGame extends Game
 {
 	private Thread m_process;
@@ -13,6 +14,7 @@ public class StandardChessGame extends Game
 	private StandardChessGameGraphics m_graphics;
 	private Piece m_selected;
 
+	private int enpassantCol; //the column (0-7) of the pawn to move two spaces last turn, -1 if no pawn moved two spaces
 	private boolean whiteCanCastleKingside; //false if king's rook or king have moved
 	private boolean whiteCanCastleQueenside; //false if queen's rook or king have moved
 	private boolean blackCanCastleKingside;
@@ -157,7 +159,14 @@ public class StandardChessGame extends Game
 			{
 				if (m.cf != m.c0) //changed columns; must be capture
 				{
-					return (m_game_board.getPiece(m.rf, m.cf) != null); //can't be our own piece because of earlier check
+					boolean validCapture = (m_game_board.getPiece(m.rf, m.cf) != null); //can't be our own piece because of earlier check
+					boolean enpassant;
+					if (whoseTurn() == Definitions.Color.WHITE)
+						enpassant = ((m.cf == enpassantCol) && (m.r0 == 3));
+					else
+						enpassant = ((m.cf == enpassantCol) && (m.r0 == 4));
+					
+					return (validCapture || enpassant);
 				}
 				else
 				{
@@ -312,6 +321,33 @@ public class StandardChessGame extends Game
 		}
 	}
 
+	//TODO
+	public static Move algebraicToMove(String algebraic) //STUB
+	{
+		return new Move(0, 0, 0, 0);
+	}
+	
+	public void interpretMoveList(String movelist) //does not work yet
+	{
+		//start with naive format of "1.e4 c5 2.Nc3 Nc6 3.f4 g6 4.Bb5 Nd4", with proper spacing and all
+		String[] moves = movelist.split(" ");
+		
+		for (int i = 0; i < moves.length; i++)
+		{
+			String mv = moves[i];
+			if (Character.isDigit(mv.charAt(0)))
+			{
+				System.out.print(mv + " "); //print out moves
+				m_game_board.move(algebraicToMove(mv.split(".")[1])); //want the part after the period
+			}
+			else
+			{
+				System.out.println(mv);
+				m_game_board.move(algebraicToMove(mv));
+			}
+		}
+	}
+	
 	public void mousePressed(MouseEvent e)
 	{
 		int row = m_graphics.getRow(e.getY());
@@ -339,6 +375,7 @@ public class StandardChessGame extends Game
 		if (!isLegalMove(newMove)) return;
 
 		Piece movedPiece = m_game_board.getPiece(m_selected.row(), m_selected.col());
+		
 		int castlingRow;
 		if (whoseTurn() == Definitions.Color.WHITE)
 		{
@@ -348,8 +385,28 @@ public class StandardChessGame extends Game
 		{
 			castlingRow = 0;
 		}
-
-		if (movedPiece instanceof King)
+		
+		enpassantCol = -1; //default
+		if (movedPiece instanceof Pawn)
+		{
+			if (Math.abs(newMove.rf - newMove.r0) == 2)
+			{
+				enpassantCol = newMove.c0; //enpassant now available on this column
+			}
+			else if ((Math.abs(newMove.cf - newMove.c0) == 1) && (m_game_board.getPiece(newMove.rf, newMove.cf) == null))
+				//en passant
+			{
+				if (whoseTurn() == Definitions.Color.WHITE)
+				{
+					m_game_board.removePiece(3, newMove.cf); //not sure if this is best way, but "move" call will not erase piece
+				}
+				else
+				{
+					m_game_board.removePiece(4, newMove.cf);
+				}
+			}
+		}
+		else if (movedPiece instanceof King)
 		{
 			if (whoseTurn() == Definitions.Color.WHITE)
 			{
@@ -403,7 +460,7 @@ public class StandardChessGame extends Game
 			}
 		}
 
-		m_game_board.move(newMove);
+		m_game_board.move(newMove); //has to be down here for time being because en passant needs to know dest sq is empty; fix if you can
 		flipTurn();
 	}
 

@@ -1,6 +1,7 @@
 import java.applet.*;
 import java.awt.event.*;
 
+@SuppressWarnings("serial")
 public abstract class Game extends Applet implements Runnable, MouseListener
 {
 	private Player p1;

@@ -1,5 +1,11 @@
 ChangeLog
 
+Name: William Lai
+Date: 09-25-2013
+Description: Finished game logic, started adding test functions
+     * src/Board.java: Added removePiece function for en passant.
+     * src/StandardChessGame.java: Added en passant logic. Started writing function to parse algebraic notation and make moves from them.
+
 Name: Eric Du
 Date: 09-23-2013
 Description: Changed function names to keep consistency with program (getThreats, getMoves)

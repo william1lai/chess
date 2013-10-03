@@ -192,6 +192,10 @@ public class StandardChessGame extends Game
 		int dr = m.rf - m.r0; //remember rows are counted from the top
 		int cinc; //1, 0, or -1, depending on which direction the piece is headed
 		int rinc; //1, 0, or -1
+		
+		Piece p = b.getPiece(m.r0, m.c0);
+		if (p == null || p instanceof Knight)
+			return false; //vacuously false for no piece, and automatically false for knights
 
 		if (dc < 0)
 		{
@@ -267,7 +271,7 @@ public class StandardChessGame extends Game
 				Move m = new Move(r, c, kingR, kingC);
 				if ((temp != null) && (temp.color() != color) && (temp.getThreats().contains(m)))
 				{
-					if ((!(hasPieceInWay(m, b))) && (!(temp instanceof Knight)))
+					if (temp instanceof Knight || !hasPieceInWay(m, b))
 					{
 						//System.out.println("In check. Row: " + r + ", Column: " + c); //for debugging purposes
 						return true;

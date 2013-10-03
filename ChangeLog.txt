@@ -1,6 +1,11 @@
 ChangeLog
 
 Name: William Lai
+Date: 10-02-2013
+Description: Fixed knight check bug
+    * src/StandardChessGame.java: Fixed bug that did not account for knight when resolving checks. Made isInWay function more robust to handle null piece and knights.
+
+Name: William Lai
 Date: 09-25-2013
 Description: Finished game logic, started adding test functions
      * src/Board.java: Added removePiece function for en passant.

@@ -2,6 +2,8 @@ import java.util.ArrayList;
 import java.awt.*;
 import java.awt.event.*;
 
+import javax.swing.JOptionPane;
+
 //TODO:
 //Add functionality to make testing more automated. Should be able to interpret move lists, and step forward, maybe even step back
 //Checkmate-checking: Is there any way better than brute-forcing all moves to see if legal or not?
@@ -307,6 +309,29 @@ public class StandardChessGame extends Game
 		return true; //checkmate; all possible moves are illegal
 	}
 	
+	public void promotePawn(int r, int c, Definitions.Color color)
+	{
+		String[] param = { "Queen", "Rook", "Knight", "Bishop" };
+		String input = (String) JOptionPane.showInputDialog(null, "Which piece do you want to promote to?", "Pawn Promotion", JOptionPane.QUESTION_MESSAGE, null, param, param[0]);
+		
+		if (input == "Queen")
+		{
+			m_game_board.placePiece(new Queen(r, c, color), r, c);
+		}
+		else if (input == "Rook")
+		{
+			m_game_board.placePiece(new Rook(r, c, color), r, c);
+		}
+		else if (input == "Knight")
+		{
+			m_game_board.placePiece(new Knight(r, c, color), r, c);			
+		}
+		else //Bishop
+		{
+			m_game_board.placePiece(new Bishop(r, c, color), r, c);
+		}
+	}
+	
 	private void flipTurn()
 	{
 		setTurn(Definitions.flip(whoseTurn()));
@@ -465,11 +490,23 @@ public class StandardChessGame extends Game
 		}
 
 		m_game_board.move(newMove); //has to be down here for time being because en passant needs to know dest sq is empty; fix if you can
+		
+		if (movedPiece instanceof Pawn)
+		{
+			if (((whoseTurn() == Definitions.Color.WHITE) && (newMove.rf == 0)) 
+					|| ((whoseTurn() == Definitions.Color.BLACK) && (newMove.rf == 7)))
+			{
+				promotePawn(newMove.rf, newMove.cf, whoseTurn());
+			}
+		}
+		
 		flipTurn();
 	}
 
 	//Useless for now
-	public void mouseReleased(MouseEvent e) {}
+	public void mouseReleased(MouseEvent e) 
+	{
+		}
 	public void mouseClicked(MouseEvent e) {}
 	public void mouseEntered(MouseEvent e) {}
 	public void mouseExited(MouseEvent e) {}

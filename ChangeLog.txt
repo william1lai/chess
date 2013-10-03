@@ -1,6 +1,11 @@
 ChangeLog
 
 Name: William Lai
+Date: 10-03-2013
+Description: Implemented pawn promotion
+    * src/StandardChessGame.java: Forgot about pawn promotion. It is now implemented.
+
+Name: William Lai
 Date: 10-02-2013
 Description: Fixed knight check bug
     * src/StandardChessGame.java: Fixed bug that did not account for knight when resolving checks. Made isInWay function more robust to handle null piece and knights.

@@ -1,5 +1,13 @@
 ChangeLog
 
+Name: Vincent Wong
+Date: 10-03-2013
+Description: Added standard chess piece images, added animation
+    * src/StandardChessGame.java: Tweaked selection mechanics (left click to select and move,
+    right click to deselect).
+    * src/StandardChessGameGraphics.java: Added utility painting functions for animation.
+    * src/StandardChessGameAnimation.java: New class. Runs a thread to animate chess moves.
+
 Name: William Lai
 Date: 10-03-2013
 Description: Implemented pawn promotion

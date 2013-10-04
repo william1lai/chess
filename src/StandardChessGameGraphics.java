@@ -27,13 +27,30 @@ public class StandardChessGameGraphics
 		}
 	}
 	
+	public void eraseBoard(Graphics g)
+	{
+		g.setColor(Color.WHITE);
+		g.fillRect(m_boardOffsetX, m_boardOffsetY, Definitions.NUMCOLS * m_blockSize, Definitions.NUMROWS * m_blockSize);
+	}
+	
+	public void eraseBlock(Graphics g, int row, int col)
+	{
+		g.setColor(Color.WHITE);
+		g.fillRect(m_boardOffsetX + col * m_blockSize + 1, m_boardOffsetY + row * m_blockSize + 1, m_blockSize - 2, m_blockSize - 2);
+	}
+	
+	public void drawPiece(Graphics g, Piece p, int x, int y)
+	{
+		g.drawImage(m_gPieces.get(p.toString()), x, y, m_blockSize, m_blockSize, null);
+	}
+	
 	public void drawBoard(Graphics g, Board b)
 	{
 		g.setColor(Color.BLACK);
 		for (int r = 0, y = m_boardOffsetY; r < Definitions.NUMROWS; r++, y += m_blockSize) {
 			for (int c = 0, x = m_boardOffsetX; c < Definitions.NUMCOLS; c++, x += m_blockSize) {
 				if (b.getPiece(r, c) != null) {
-					g.drawImage(m_gPieces.get(b.getPiece(r, c).toString()), x, y, m_blockSize, m_blockSize, null);
+					drawPiece(g, b.getPiece(r, c), x, y);
 				}
 			}
 		}
@@ -73,5 +90,17 @@ public class StandardChessGameGraphics
 			return -1;
 		}
 		return relativeX / m_blockSize;
+	}
+	
+	public int getY(int row)
+	{
+		if (row < 0 || row >= Definitions.NUMROWS) return -1;
+		return m_boardOffsetY + row*m_blockSize;
+	}
+	
+	public int getX(int col)
+	{
+		if (col < 0 || col >= Definitions.NUMCOLS) return -1;
+		return m_boardOffsetX + col*m_blockSize;
 	}
 }

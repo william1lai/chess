@@ -14,6 +14,7 @@ public class StandardChessGame extends Game
 	private Thread m_process;
 	private Board m_game_board;
 	private StandardChessGameGraphics m_graphics;
+	private StandardChessGameAnimation m_animation;
 	private Piece m_selected;
 
 	private int enpassantCol; //the column (0-7) of the pawn to move two spaces last turn, -1 if no pawn moved two spaces
@@ -22,16 +23,12 @@ public class StandardChessGame extends Game
 	private boolean blackCanCastleKingside;
 	private boolean blackCanCastleQueenside;
 
-	public StandardChessGame()
-	{
-
-	}
-
 	public void init()
 	{
 		m_process = new Thread(this);
 		m_game_board = new Board();
 		m_graphics = new StandardChessGameGraphics();
+		m_animation = new StandardChessGameAnimation(m_graphics);
 		m_selected = null;
 
 		whiteCanCastleKingside = true;
@@ -41,8 +38,6 @@ public class StandardChessGame extends Game
 
 		addMouseListener(this);
 
-		//Placing standard pieces
-		//William y u do dis 2 me
 		m_game_board.placePiece(new Rook(0, 0, Definitions.Color.BLACK), 0, 0);
 		m_game_board.placePiece(new Knight(0, 1, Definitions.Color.BLACK), 0, 1);
 		m_game_board.placePiece(new Bishop(0, 2, Definitions.Color.BLACK), 0, 2);
@@ -66,10 +61,6 @@ public class StandardChessGame extends Game
 			m_game_board.placePiece(new Pawn(6, c, Definitions.Color.WHITE), 6, c); 
 		}
 		setTurn(Definitions.Color.WHITE);
-	}
-
-	public void run()
-	{
 	}
 
 	public void paint(Graphics g)
@@ -197,7 +188,7 @@ public class StandardChessGame extends Game
 		
 		Piece p = b.getPiece(m.r0, m.c0);
 		if (p == null || p instanceof Knight)
-			return false; //vacuously false for no piece, and automatically false for knights
+			return false; //vacuously false for no piece, and automatically false for knights 
 
 		if (dc < 0)
 		{
@@ -335,6 +326,7 @@ public class StandardChessGame extends Game
 	private void flipTurn()
 	{
 		setTurn(Definitions.flip(whoseTurn()));
+		deselect();
 		if (isCheckmate(whoseTurn(), m_game_board))
 		{
 			System.out.print("Checkmate! ");
@@ -381,20 +373,28 @@ public class StandardChessGame extends Game
 	{
 		int row = m_graphics.getRow(e.getY());
 		int col = m_graphics.getCol(e.getX());
+		//Right-click to deselect
+		if (e.getButton() == MouseEvent.BUTTON3)
+			deselect();
 		//Left-click to select
-		if (e.getButton() == MouseEvent.BUTTON1) select(row, col);
-		//Right-click to move selected
-		else if (e.getButton() == MouseEvent.BUTTON3) moveSelected(row, col);
+		else if (e.getButton() == MouseEvent.BUTTON1 && row >= 0 && col >= 0) {
+			Piece p = m_game_board.getPiece(row, col);
+			if (p != null && p.color() == whoseTurn())
+				select(p);
+			else if (m_selected != null)
+				moveSelected(row, col);
+		}
 		repaint();
 	}
-
-	private void select(int row, int col)
+	
+	private void select(Piece p)
+	{
+		m_selected = p;
+	}
+	
+	private void deselect()
 	{
 		m_selected = null;
-		if (row >= 0 && col >= 0) {
-			Piece p = m_game_board.getPiece(row, col);
-			if (p != null && p.color() == whoseTurn()) m_selected = p;
-		}
 	}
 
 	private void moveSelected(int row, int col)
@@ -489,6 +489,7 @@ public class StandardChessGame extends Game
 			}
 		}
 
+		m_animation.animateMove(getGraphics(), newMove, m_game_board);
 		m_game_board.move(newMove); //has to be down here for time being because en passant needs to know dest sq is empty; fix if you can
 		
 		if (movedPiece instanceof Pawn)
@@ -504,12 +505,11 @@ public class StandardChessGame extends Game
 	}
 
 	//Useless for now
-	public void mouseReleased(MouseEvent e) 
-	{
-		}
+	public void mouseReleased(MouseEvent e) {}
 	public void mouseClicked(MouseEvent e) {}
 	public void mouseEntered(MouseEvent e) {}
 	public void mouseExited(MouseEvent e) {}
+	public void run() {}
 
 	//Prevents flickering when repainting
 	public void update(Graphics g)

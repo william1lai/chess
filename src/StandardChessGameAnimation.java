@@ -53,11 +53,11 @@ public class StandardChessGameAnimation implements Runnable
 			for (int tick = 0; tick < m_moveContext.fTick; tick++) {
 				curY += dY;
 				curX += dX;
-				Image backbuffer = new BufferedImage(StandardChessGameGraphics.WIDTH, StandardChessGameGraphics.HEIGHT, BufferedImage.TYPE_4BYTE_ABGR);
+				Image backbuffer = new BufferedImage(Definitions.WIDTH, Definitions.HEIGHT, BufferedImage.TYPE_4BYTE_ABGR);
 				Graphics backg = backbuffer.getGraphics();
-				m_graphics.eraseBoard(backg);
 				m_graphics.drawBoard(backg, m_moveContext.board);
-				m_graphics.eraseBlock(backg, m_moveContext.move.r0, m_moveContext.move.c0);
+				m_graphics.drawBlock(backg, m_moveContext.move.r0, m_moveContext.move.c0);
+				m_graphics.drawBorders(backg);
 				m_graphics.drawPiece(backg, traveler, (int)curX, (int)curY);
 				m_gContext.drawImage(backbuffer, 0, 0, null);
 		 		try { Thread.sleep(30); }

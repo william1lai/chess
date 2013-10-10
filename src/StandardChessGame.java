@@ -11,7 +11,6 @@ import javax.swing.JOptionPane;
 @SuppressWarnings("serial")
 public class StandardChessGame extends Game
 {
-	private Thread m_process;
 	private Board m_game_board;
 	private StandardChessGameGraphics m_graphics;
 	private StandardChessGameAnimation m_animation;
@@ -25,7 +24,6 @@ public class StandardChessGame extends Game
 
 	public void init()
 	{
-		m_process = new Thread(this);
 		m_game_board = new Board();
 		m_graphics = new StandardChessGameGraphics();
 		m_animation = new StandardChessGameAnimation(m_graphics);
@@ -61,6 +59,9 @@ public class StandardChessGame extends Game
 			m_game_board.placePiece(new Pawn(6, c, Definitions.Color.WHITE), 6, c); 
 		}
 		setTurn(Definitions.Color.WHITE);
+
+		p1 = new HumanPlayer("Human WHITE");
+		p2 = new HumanPlayer("Human BLACK");
 	}
 
 	public void paint(Graphics g)
@@ -70,7 +71,10 @@ public class StandardChessGame extends Game
 		Graphics backg = backbuffer.getGraphics();
 
 		m_graphics.drawBoard(backg, m_game_board);
+		m_graphics.drawBorders(backg);
 		m_graphics.drawSelected(backg, m_selected);
+		m_graphics.drawMarkers(backg);
+		m_graphics.drawNames(backg, p1, p2, whoseTurn());
 
 		g.drawImage(backbuffer, 0, 0, this);
 	}
@@ -504,22 +508,17 @@ public class StandardChessGame extends Game
 		flipTurn();
 	}
 
+	//Prevents flickering when repainting
+	public void update(Graphics g)
+	{
+		paint(g);
+	}
+	
 	//Useless for now
 	public void mouseReleased(MouseEvent e) {}
 	public void mouseClicked(MouseEvent e) {}
 	public void mouseEntered(MouseEvent e) {}
 	public void mouseExited(MouseEvent e) {}
 	public void run() {}
-
-	//Prevents flickering when repainting
-	public void update(Graphics g)
-	{
-		paint(g);
-	}
-
-	//Upon exiting applet, stop all processes
-	public void stop()
-	{
-		if (m_process != null) m_process.interrupt();
-	}
+	public void stop() {}
 }

@@ -4,22 +4,11 @@ import java.awt.event.*;
 @SuppressWarnings("serial")
 public abstract class Game extends Applet implements Runnable, MouseListener
 {
-	private Player p1;
-	private Player p2;
+	protected Player p1;
+	protected Player p2;
 	private Definitions.Color m_turn;
 	
 	public abstract boolean isLegalMove(Move m);
-	
-	
-	public Player getP1()
-	{
-		return p1;
-	}
-	
-	public Player getP2()
-	{
-		return p2;
-	}
 
 	public Definitions.Color whoseTurn()
 	{

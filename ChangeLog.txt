@@ -1,6 +1,13 @@
 ChangeLog
 
 Name: Vincent Wong
+Date: 10-10-2013
+Description: Added board markers, added player names
+    * src/StandardChessGame.java: Implemented a bit of Player integration
+    * src/StandardChessGameGraphics.java: Added board marker painting, player name painting
+    * src/HumanPlayer.java: New file. Doesn't really do anything though except allows instantiation
+
+Name: Vincent Wong
 Date: 10-03-2013
 Description: Added standard chess piece images, added animation
     * src/StandardChessGame.java: Tweaked selection mechanics (left click to select and move,

@@ -1,6 +1,15 @@
 ChangeLog
 
 Name: William Lai
+Date: 10-15-2013
+Description: Static Evaluation 1-ply AI
+    * src/ComputerPlayer.java: New file. Computer player uses static board evaluation (1-ply) to make its moves.
+    * src/Game.java: Added abstract function getHumanMove
+    * src/HumanPlayer.java: Added new constructor, prompts move by using call to its Game object
+    * src/Player.java: Player now has a Game object associated with it
+    * src/StandardChessGame.java: Added new helper functions and moved some more lines from moveSelected to processMove for flexibility.
+
+Name: William Lai
 Date: 10-14-2013
 Description: Stalemate, legal move lists, animation tweaking
     * src/Game.java: Changed some function signatures for flexibility

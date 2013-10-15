@@ -7,6 +7,8 @@ import javax.swing.JOptionPane;
 //TODO:
 //Add functionality to make testing more automated. Should be able to interpret move lists, and step forward, maybe even step back
 //Checkmate-checking: Is there any way better than brute-forcing all moves to see if legal or not?
+//
+//Right now, the promptMove part for Players is a bit circular. Need to think about how to restructure program.
 
 @SuppressWarnings("serial")
 public class StandardChessGame extends Game
@@ -15,7 +17,8 @@ public class StandardChessGame extends Game
 	private StandardChessGameGraphics m_graphics;
 	private StandardChessGameAnimation m_animation;
 	private Piece m_selected;
-
+	
+	private Move lastMove;
 	private int enpassantCol; //the column (0-7) of the pawn to move two spaces last turn, -1 if no pawn moved two spaces
 	private boolean whiteCanCastleKingside; //false if king's rook or king have moved
 	private boolean whiteCanCastleQueenside; //false if queen's rook or king have moved
@@ -34,7 +37,7 @@ public class StandardChessGame extends Game
 		blackCanCastleKingside = true;
 		blackCanCastleQueenside = true;
 
-		addMouseListener(this);
+		//addMouseListener(this);
 
 		m_game_board.placePiece(new Rook(0, 0, Definitions.Color.BLACK), 0, 0);
 		m_game_board.placePiece(new Knight(0, 1, Definitions.Color.BLACK), 0, 1);
@@ -60,10 +63,28 @@ public class StandardChessGame extends Game
 		}
 		setTurn(Definitions.Color.WHITE);
 
-		p1 = new HumanPlayer("Human WHITE");
-		p2 = new HumanPlayer("Human BLACK");
+		p1 = new HumanPlayer("Human WHITE", this);
+		//p2 = new HumanPlayer("Human BLACK");
+		p2 = new ComputerPlayer("CPU BLACK", this);
+		
+		p1.promptMove();
 	}
 
+	public Board getBoard()
+	{
+		return m_game_board;
+	}
+	
+	public Move getLastMove()
+	{
+		return lastMove;
+	}
+	
+	public void getHumanMove()
+	{
+		addMouseListener(this);
+	}
+	
 	public void paint(Graphics g)
 	{
 		//Painting with a backbuffer reduces flickering
@@ -456,10 +477,12 @@ public class StandardChessGame extends Game
 	{
 		m_selected = null;
 	}
-
-	private void processMove(Move newMove)
+	
+	public void processMove(Move newMove)
 	{
-		Piece movedPiece = m_game_board.getPiece(m_selected.row(), m_selected.col());
+		int row = newMove.r0;
+		int col = newMove.c0;
+		Piece movedPiece = m_game_board.getPiece(row, col);
 		
 		int castlingRow;
 		if (whoseTurn() == Definitions.Color.WHITE)
@@ -504,8 +527,8 @@ public class StandardChessGame extends Game
 				blackCanCastleQueenside = false;
 			}
 
-			int kingMoveLength = newMove.cf - m_selected.col(); //should be 2 or -2, if the move was a castling move
-			if (m_selected.row() == castlingRow)
+			int kingMoveLength = newMove.cf - col; //should be 2 or -2, if the move was a castling move
+			if (row == castlingRow)
 			{
 				if (kingMoveLength == 2) //kingside
 				{
@@ -519,9 +542,9 @@ public class StandardChessGame extends Game
 				}
 			}
 		}
-		else if (m_selected.row() == castlingRow)
+		else if (row == castlingRow)
 		{
-			if (m_selected.col() == 0) //queen's rook
+			if (col == 0) //queen's rook
 			{
 				if (whoseTurn() == Definitions.Color.WHITE)
 				{
@@ -532,7 +555,7 @@ public class StandardChessGame extends Game
 					blackCanCastleQueenside = false;
 				}
 			}
-			else if (m_selected.col() == 7) //king's rook
+			else if (col == 7) //king's rook
 			{			
 				if (whoseTurn() == Definitions.Color.WHITE)
 				{
@@ -556,6 +579,21 @@ public class StandardChessGame extends Game
 				promotePawn(newMove.rf, newMove.cf, whoseTurn());
 			}
 		}
+		
+		flipTurn();
+		checkBoardState();
+		
+		this.removeMouseListener(this);
+		if (whoseTurn() == Definitions.Color.WHITE)
+		{
+			p1.promptMove();
+		}
+		else
+		{
+			p2.promptMove();
+		}
+		
+		lastMove = newMove;
 	}
 	
 	private void moveSelected(int row, int col)
@@ -571,9 +609,6 @@ public class StandardChessGame extends Game
 		}
 
 		processMove(newMove);
-		
-		flipTurn();
-		checkBoardState();
 	}
 
 	//Prevents flickering when repainting

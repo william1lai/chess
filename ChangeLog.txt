@@ -2,6 +2,11 @@ ChangeLog
 
 Name: William Lai
 Date: 10-15-2013
+Description: Readme update
+    * README.txt: Added instructions on how to download and run program from Eclipse.
+
+Name: William Lai
+Date: 10-15-2013
 Description: Static Evaluation 1-ply AI
     * src/ComputerPlayer.java: New file. Computer player uses static board evaluation (1-ply) to make its moves.
     * src/Game.java: Added abstract function getHumanMove

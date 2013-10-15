@@ -8,7 +8,7 @@ public abstract class Game extends Applet implements Runnable, MouseListener
 	protected Player p2;
 	private Definitions.Color m_turn;
 	
-	public abstract boolean isLegalMove(Move m);
+	public abstract boolean isLegalMove(Move m, Board b, Definitions.Color color);
 
 	public Definitions.Color whoseTurn()
 	{

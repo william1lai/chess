@@ -40,8 +40,12 @@ public class King extends Piece
 		{
 			castlingRow = 0;
 		}
-		legalMoves.add(new Move(row(), col(), castlingRow, 6)); //kingside castling
-		legalMoves.add(new Move(row(), col(), castlingRow, 2)); //queenside castling
+		
+		if (row() == castlingRow)
+		{
+			legalMoves.add(new Move(row(), col(), castlingRow, 6)); //kingside castling
+			legalMoves.add(new Move(row(), col(), castlingRow, 2)); //queenside castling
+		}
 		
 		return legalMoves;
 	}

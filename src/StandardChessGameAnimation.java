@@ -2,6 +2,7 @@ import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
 
+//Note to Vincent: Setting fTick to 3 and getting rid of the Thread.Sleep part seems to make the animation look nice
 
 public class StandardChessGameAnimation implements Runnable
 {
@@ -14,7 +15,7 @@ public class StandardChessGameAnimation implements Runnable
 		}
 		public Move move;
 		public Board board;
-		public int fTick = 15;
+		public int fTick = 3;
 	};
 	
 	private StandardChessGameGraphics m_graphics;
@@ -60,8 +61,9 @@ public class StandardChessGameAnimation implements Runnable
 				m_graphics.drawBorders(backg);
 				m_graphics.drawPiece(backg, traveler, (int)curX, (int)curY);
 				m_gContext.drawImage(backbuffer, 0, 0, null);
-		 		try { Thread.sleep(30); }
-		 		catch (InterruptedException ex) {}
+				/*
+		 		try { Thread.sleep(0); }
+		 		catch (InterruptedException ex) {}*/
 			}
 			m_moveContext = null;
 		}

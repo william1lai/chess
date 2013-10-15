@@ -1,5 +1,13 @@
 ChangeLog
 
+Name: William Lai
+Date: 10-14-2013
+Description: Stalemate, legal move lists, animation tweaking
+    * src/Game.java: Changed some function signatures for flexibility
+    * src/King.java: Changed some legal move conditions
+    * src/StandardChessGame.java: Implemented stalemate, added allMoves function for future utility
+    * src/StandardChessGameAnimation.java: Tweaked animation parameters to make the UI a bit smoother.
+
 Name: Vincent Wong
 Date: 10-10-2013
 Description: Added board markers, added player names

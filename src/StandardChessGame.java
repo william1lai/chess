@@ -79,38 +79,38 @@ public class StandardChessGame extends Game
 		g.drawImage(backbuffer, 0, 0, this);
 	}
 
-	public boolean isLegalMove(Move m)
+	public boolean isLegalMove(Move m, Board b, Definitions.Color color)
 	{		
 		//generate moves and use board to determine legality (is there a piece in the way? etc.)
 
-		Piece p = m_game_board.getPiece(m.r0, m.c0);
+		Piece p = b.getPiece(m.r0, m.c0);
 
-		if ((p == null) || (p.color() != whoseTurn()))
+		if ((p == null) || (p.color() != color))
 		{
 			return false; //source square has no piece, or selected piece is opponent's piece
 		}
 
-		Piece destination = m_game_board.getPiece(m.rf, m.cf);
+		Piece destination = b.getPiece(m.rf, m.cf);
 		boolean occupiedDest = (destination != null);
 		ArrayList<Move> moves = p.getMoves();
 
-		if (occupiedDest && (destination.color() == whoseTurn())) //case of trying to move to source square is handled here
+		if (occupiedDest && (destination.color() == color)) //case of trying to move to source square is handled here
 		{
 			return false; //can't move to square occupied by same color piece
 		}
 
 		if (moves.contains(m))
 		{
-			Board tempBoard = new Board(m_game_board); //clone board
+			Board tempBoard = new Board(b); //clone board
 			tempBoard.move(m);
 
-			if (!(p instanceof Knight) && (hasPieceInWay(m, m_game_board))) 
+			if (!(p instanceof Knight) && (hasPieceInWay(m, b))) 
 				//if it's not a knight, it can't jump
 			{
 				return false;
 			}
 
-			if (inCheck(whoseTurn(), tempBoard))
+			if (inCheck(color, tempBoard))
 			{
 				return false; //illegal move because you will be in check after move
 			}
@@ -125,7 +125,7 @@ public class StandardChessGame extends Game
 				//Is there a better way to do this? Seems ugly
 				boolean canCastleKingside;
 				boolean canCastleQueenside;
-				if (whoseTurn() == Definitions.Color.WHITE)
+				if (color == Definitions.Color.WHITE)
 				{
 					canCastleKingside = whiteCanCastleKingside;
 					canCastleQueenside = whiteCanCastleQueenside;
@@ -136,29 +136,33 @@ public class StandardChessGame extends Game
 					canCastleQueenside = blackCanCastleQueenside;
 				}
 
-				if (m.cf - m.c0 == 2) //kingside castle attempt
+				if (canCastleKingside && m.cf - m.c0 > 1) //kingside castle attempt
 				{
-					Board temp = new Board(m_game_board);
+					Board temp = new Board(b);
 					Move intermediate = new Move(m.r0, m.c0, m.r0, m.c0 + 1);
 					temp.move(intermediate);
-					return (canCastleKingside && !inCheck(whoseTurn(), temp) && !inCheck(whoseTurn(), m_game_board)); //can't be in check
+					return (canCastleKingside && !inCheck(color, temp) && !inCheck(color, b)); //can't be in check
 				}
-				if (m.cf - m.c0 == -2) //queenside castle attempt
+				if (canCastleQueenside && m.cf - m.c0 < -1) //queenside castle attempt
 				{
-					Board temp = new Board(m_game_board);
+					Board temp = new Board(b);
 					Move intermediate = new Move(m.r0, m.c0, m.r0, m.c0 - 1);
 					temp.move(intermediate);
-					return (canCastleQueenside && !inCheck(whoseTurn(), temp) && !inCheck(whoseTurn(), m_game_board)); //can't be in check
+					return (canCastleQueenside && !inCheck(color, temp) && !inCheck(color, b)); //can't be in check
 				}
-				return true; //all other possible moves are legal one-square moves
+				if (Math.abs(m.cf - m.c0) <= 1)
+				{
+					return true; //one square moves are legal
+				}
+				else return false; //can't castle, so >1 square moves illegal
 			}
 			if (p instanceof Pawn) //must split into cases
 			{
 				if (m.cf != m.c0) //changed columns; must be capture
 				{
-					boolean validCapture = (m_game_board.getPiece(m.rf, m.cf) != null); //can't be our own piece because of earlier check
+					boolean validCapture = (b.getPiece(m.rf, m.cf) != null); //can't be our own piece because of earlier check
 					boolean enpassant;
-					if (whoseTurn() == Definitions.Color.WHITE)
+					if (color == Definitions.Color.WHITE)
 						enpassant = ((m.cf == enpassantCol) && (m.r0 == 3));
 					else
 						enpassant = ((m.cf == enpassantCol) && (m.r0 == 4));
@@ -169,12 +173,12 @@ public class StandardChessGame extends Game
 				{
 					if (m.rf - m.r0 == 2) //push two squares
 					{
-						return (m_game_board.getPiece((m.rf + m.r0) / 2, m.cf) == null)
-								&& (m_game_board.getPiece(m.rf, m.cf) == null); //both squares empty
+						return (b.getPiece((m.rf + m.r0) / 2, m.cf) == null)
+								&& (b.getPiece(m.rf, m.cf) == null); //both squares empty
 					}
 					else //push one square
 					{
-						return (m_game_board.getPiece(m.rf, m.cf) == null); //square empty
+						return (b.getPiece(m.rf, m.cf) == null); //square empty
 					}
 				}
 			}
@@ -183,6 +187,33 @@ public class StandardChessGame extends Game
 		return false; //move is not in our move list
 	}
 
+	public ArrayList<Move> allMoves(Definitions.Color color, Board b)
+	{
+		//get all pieces and find their generated moves; then prune list
+		ArrayList<Move> legalMoves = new ArrayList<Move>();
+		
+		for (int r = 0; r < 8; r++)
+		{
+			for (int c = 0; c < 8; c++)
+			{
+				Piece p = b.getPiece(r, c);
+				if (p != null && p.color() == color)
+				{
+					ArrayList<Move> temp = p.getMoves();
+					for (Move m : temp)
+					{
+						if (this.isLegalMove(m, b, color))
+						{
+							legalMoves.add(m);
+						}
+					}
+				}
+			}
+		}
+
+		return legalMoves;
+	}
+	
 	private boolean hasPieceInWay(Move m, Board b)
 	{
 		int dc = m.cf - m.c0;
@@ -281,6 +312,10 @@ public class StandardChessGame extends Game
 
 	public boolean isCheckmate(Definitions.Color color, Board b)
 	{
+		boolean check = inCheck(color, b);
+		return (check && allMoves(color, b).size() == 0);
+		
+		/*
 		ArrayList<Move> allMoves = new ArrayList<Move>();
 		for (int r = 0; r < 8; r++)
 		{
@@ -302,6 +337,18 @@ public class StandardChessGame extends Game
 			}
 		}
 		return true; //checkmate; all possible moves are illegal
+		*/
+	}
+	
+	public boolean isStalemate(Definitions.Color color, Board b)
+	{
+		boolean check = inCheck(color, b);
+		ArrayList<Move> mvs = allMoves(whoseTurn(), b);
+		/*	for (Move m : mvs)
+		{
+			System.out.println(m.cf + "" + m.rf);
+		} */
+		return (!check && mvs.size() == 0);
 	}
 	
 	public void promotePawn(int r, int c, Definitions.Color color)
@@ -331,6 +378,10 @@ public class StandardChessGame extends Game
 	{
 		setTurn(Definitions.flip(whoseTurn()));
 		deselect();
+	}
+
+	private void checkBoardState() //for checkmate/stalemate
+	{
 		if (isCheckmate(whoseTurn(), m_game_board))
 		{
 			System.out.print("Checkmate! ");
@@ -342,12 +393,17 @@ public class StandardChessGame extends Game
 			{
 				System.out.println("White wins!");
 			}
-			//do whatever you have to do when you want the game to end
 		}
+		else if (isStalemate(whoseTurn(), m_game_board))
+		{
+			System.out.println("Stalemate! The game is drawn!");
+		}
+		
+		//do whatever you have to do when you want the game to end
 	}
-
+	
 	//TODO
-	public static Move algebraicToMove(String algebraic) //STUB
+	public static Move algebraicToMove(Definitions.Color color, String algebraic) //STUB
 	{
 		return new Move(0, 0, 0, 0);
 	}
@@ -363,12 +419,12 @@ public class StandardChessGame extends Game
 			if (Character.isDigit(mv.charAt(0)))
 			{
 				System.out.print(mv + " "); //print out moves
-				m_game_board.move(algebraicToMove(mv.split(".")[1])); //want the part after the period
+				m_game_board.move(algebraicToMove(Definitions.Color.WHITE, mv.split(".")[1])); //want the part after the period
 			}
 			else
 			{
 				System.out.println(mv);
-				m_game_board.move(algebraicToMove(mv));
+				m_game_board.move(algebraicToMove(Definitions.Color.BLACK, mv));
 			}
 		}
 	}
@@ -401,12 +457,8 @@ public class StandardChessGame extends Game
 		m_selected = null;
 	}
 
-	private void moveSelected(int row, int col)
+	private void processMove(Move newMove)
 	{
-		if (m_selected == null) return;
-		Move newMove = new Move(m_selected.row(), m_selected.col(), row, col);
-		if (!isLegalMove(newMove)) return;
-
 		Piece movedPiece = m_game_board.getPiece(m_selected.row(), m_selected.col());
 		
 		int castlingRow;
@@ -452,7 +504,7 @@ public class StandardChessGame extends Game
 				blackCanCastleQueenside = false;
 			}
 
-			int kingMoveLength = col - m_selected.col(); //should be 2 or -2, if the move was a castling move
+			int kingMoveLength = newMove.cf - m_selected.col(); //should be 2 or -2, if the move was a castling move
 			if (m_selected.row() == castlingRow)
 			{
 				if (kingMoveLength == 2) //kingside
@@ -504,8 +556,24 @@ public class StandardChessGame extends Game
 				promotePawn(newMove.rf, newMove.cf, whoseTurn());
 			}
 		}
+	}
+	
+	private void moveSelected(int row, int col)
+	{
+		if (m_selected == null) return;
+		Move newMove = new Move(m_selected.row(), m_selected.col(), row, col);
+		
+		ArrayList<Move> mvs = this.allMoves(whoseTurn(), m_game_board);
+		
+		if (!mvs.contains(newMove))
+		{
+			return;
+		}
+
+		processMove(newMove);
 		
 		flipTurn();
+		checkBoardState();
 	}
 
 	//Prevents flickering when repainting

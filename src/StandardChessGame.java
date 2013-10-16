@@ -414,10 +414,27 @@ public class StandardChessGame extends Game
 			{
 				System.out.println("White wins!");
 			}
+			
+			//stopgap until we implement something for game end
+			try {
+				Thread.sleep(5000);
+			} 
+			catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+			System.exit(0);
 		}
 		else if (isStalemate(whoseTurn(), m_game_board))
 		{
 			System.out.println("Stalemate! The game is drawn!");
+
+			try {
+				Thread.sleep(5000);
+			} 
+			catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+			System.exit(0);
 		}
 		
 		//do whatever you have to do when you want the game to end

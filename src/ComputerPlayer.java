@@ -1,5 +1,8 @@
 import java.util.*;
 
+//TODO: Notes
+//Most of the latency lies in Checkmate and Stalemate checking!
+
 public class ComputerPlayer extends Player
 {
 	private double [][] PawnVals = {
@@ -57,8 +60,9 @@ public class ComputerPlayer extends Player
 	{
 		if (getGame() instanceof StandardChessGame)
 		{
-			Move m = evaluate((StandardChessGame) getGame());
-			((StandardChessGame) getGame()).processMove(m);
+			StandardChessGame g = (StandardChessGame)getGame();
+			Move m = evaluate(g, g.whoseTurn(), g.getBoard(), Definitions.PLY_DEPTH);
+			g.processMove(m);
 			return m;
 		}
 		else
@@ -67,36 +71,58 @@ public class ComputerPlayer extends Player
 		}
 	}
 	
-	public Move evaluate(StandardChessGame g)
+	public Move evaluate(StandardChessGame g, Definitions.Color turn, Board b, int depth) //uses brute force
 	{
-		ArrayList<Move> mvs = g.allMoves(g.whoseTurn(), g.getBoard());
+		ArrayList<Move> mvs = g.allMoves(turn, b);
 		Move best = new Move(0, 0, 0, 0);
 		double highScore = Double.NEGATIVE_INFINITY;
 		
-		Board t = g.getBoard().clone();
-		System.out.println("Current Score: " + this.staticEval(g.whoseTurn(), t));
-		
 		for (Move m : mvs)
 		{
-			Board temp = g.getBoard().clone();
+			Board temp = b.clone();
 			temp.move(m);
-			double score = this.staticEval(g.whoseTurn(), temp);
 			
-			//System.out.println(m + ", Score: " + score);
+			double score;
 			
-			if (score > highScore)
+			if (depth > 1)
+			{
+				Move subBest = this.evaluate(g, Definitions.flip(turn), temp, depth - 1);
+				temp.move(subBest);
+				score = this.staticEval(turn, temp);
+			}
+			else
+			{
+				score = this.staticEval(turn, temp);
+			}
+			
+			//if (depth == Definitions.PLY_DEPTH)
+				//System.out.println(m + ", Score: " + score);
+			
+			if (score > highScore || highScore == Double.NEGATIVE_INFINITY)
 			{
 				highScore = score;
 				best = m;
 			}
 		}
 		
-		System.out.println(best + ", High Score: " + highScore);
 		return best;
 	}
 	
 	private double staticEval(Definitions.Color color, Board b)
 	{
+		if (getGame() instanceof StandardChessGame)
+		{
+			StandardChessGame g = (StandardChessGame)getGame();
+			if (g.isCheckmate(color, b)) //instant loss
+			{
+				return Double.NEGATIVE_INFINITY;
+			}
+			else if (g.isCheckmate(Definitions.flip(color), b)) //instant win
+			{
+				return Double.POSITIVE_INFINITY;
+			}
+		}
+		
 		double score = 0.0;
 		for (int r = 0; r < 8; r++)
 		{

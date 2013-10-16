@@ -2,6 +2,13 @@ ChangeLog
 
 Name: William Lai
 Date: 10-15-2013
+Description: 2-ply brute force AI
+    * src/ComputerPlayer.java: Upgraded AI to 2-ply (changeable, but >3 ply is untolerably slow). Now knows how to checkmate.
+    * src/Definitions.java: Added PLY_DEPTH constant that can be changed for setting AI depth
+    * src/StandardChessGame.java: Added stopgap in checkBoardState. Still need something to bring applet to graceful end.
+
+Name: William Lai
+Date: 10-15-2013
 Description: Readme update
     * README.txt: Added instructions on how to download and run program from Eclipse.
 

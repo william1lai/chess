@@ -1,8 +1,11 @@
 
-public abstract class Player 
+public abstract class Player implements Runnable
 {
 	private String m_name;
 	private Game m_game;
+	private Definitions.Color m_color;
+	protected Move m_move;
+	protected boolean m_done;
 	
 	public void setName(String name)
 	{
@@ -12,6 +15,11 @@ public abstract class Player
 	public void setGame(Game g)
 	{
 		m_game = g;
+	}
+	
+	public void setColor(Definitions.Color c)
+	{
+		m_color = c;
 	}
 	
 	public String getName()
@@ -24,7 +32,22 @@ public abstract class Player
 		return m_game;
 	}
 	
-	public abstract Move promptMove();
+	public Definitions.Color getColor()
+	{
+		return m_color;
+	}
+	
+	public boolean isDone()
+	{
+		return m_done;
+	}
+	
+	public Move getMove()
+	{
+		return m_move;
+	}
+	
+	public abstract void promptMove();
 	
 	//what else do all players need?
 	//remember that human players and computer players are two different kinds of players

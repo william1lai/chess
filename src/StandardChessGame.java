@@ -11,14 +11,13 @@ import javax.swing.JOptionPane;
 //Right now, the promptMove part for Players is a bit circular. Need to think about how to restructure program.
 
 @SuppressWarnings("serial")
-public class StandardChessGame extends Game
+public class StandardChessGame extends Game implements Runnable
 {
+	private Thread m_thread;
 	private Board m_game_board;
 	private StandardChessGameGraphics m_graphics;
 	private StandardChessGameAnimation m_animation;
-	private Piece m_selected;
 	
-	private Move lastMove;
 	private int enpassantCol; //the column (0-7) of the pawn to move two spaces last turn, -1 if no pawn moved two spaces
 	private boolean whiteCanCastleKingside; //false if king's rook or king have moved
 	private boolean whiteCanCastleQueenside; //false if queen's rook or king have moved
@@ -30,14 +29,11 @@ public class StandardChessGame extends Game
 		m_game_board = new Board();
 		m_graphics = new StandardChessGameGraphics();
 		m_animation = new StandardChessGameAnimation(m_graphics);
-		m_selected = null;
 
 		whiteCanCastleKingside = true;
 		whiteCanCastleQueenside = true;		
 		blackCanCastleKingside = true;
 		blackCanCastleQueenside = true;
-
-		//addMouseListener(this);
 
 		m_game_board.placePiece(new Rook(0, 0, Definitions.Color.BLACK), 0, 0);
 		m_game_board.placePiece(new Knight(0, 1, Definitions.Color.BLACK), 0, 1);
@@ -61,28 +57,33 @@ public class StandardChessGame extends Game
 		for (int c = 0; c < 8; c++) {
 			m_game_board.placePiece(new Pawn(6, c, Definitions.Color.WHITE), 6, c); 
 		}
+
+		p1 = new HumanPlayer("Human WHITE", Definitions.Color.WHITE, this);
+		p2 = new ComputerPlayer("CPU BLACK", Definitions.Color.BLACK, this);
+
 		setTurn(Definitions.Color.WHITE);
-
-		p1 = new HumanPlayer("Human WHITE", this);
-		//p2 = new HumanPlayer("Human BLACK");
-		p2 = new ComputerPlayer("CPU BLACK", this);
-		
 		p1.promptMove();
-	}
-
-	public Board getBoard()
-	{
-		return m_game_board;
+		
+		m_thread = new Thread(this);
+		m_thread.start();
 	}
 	
-	public Move getLastMove()
+	public void run()
 	{
-		return lastMove;
-	}
-	
-	public void getHumanMove()
-	{
-		addMouseListener(this);
+		while (true) {
+			Player cur = (whoseTurn() == Definitions.Color.WHITE ? p1 : p2);
+			if (cur.isDone()) {
+				int state = processMove(cur.getMove());
+				if (state > 0) {
+					break;
+				}
+				flipTurn();
+			}
+			try { Thread.sleep(30); }
+			catch (InterruptedException e) {}
+			repaint();
+		}
+		System.out.println("Error: Somebody won");
 	}
 	
 	public void paint(Graphics g)
@@ -91,13 +92,20 @@ public class StandardChessGame extends Game
 		Image backbuffer = createImage(g.getClipBounds().width, g.getClipBounds().height);
 		Graphics backg = backbuffer.getGraphics();
 
-		m_graphics.drawBoard(backg, m_game_board);
+		m_graphics.drawBoard(backg);
+		m_graphics.drawMovable(backg, allMovesPiece(((HumanPlayer)p1).getSelected(), m_game_board));
 		m_graphics.drawBorders(backg);
-		m_graphics.drawSelected(backg, m_selected);
+		m_graphics.drawSelected(backg, ((HumanPlayer)p1).getSelected());
 		m_graphics.drawMarkers(backg);
 		m_graphics.drawNames(backg, p1, p2, whoseTurn());
+		m_graphics.drawPieces(backg, m_game_board);
 
 		g.drawImage(backbuffer, 0, 0, this);
+	}
+
+	public Board getBoard()
+	{
+		return m_game_board;
 	}
 
 	public boolean isLegalMove(Move m, Board b, Definitions.Color color)
@@ -122,7 +130,7 @@ public class StandardChessGame extends Game
 
 		if (moves.contains(m))
 		{
-			Board tempBoard = new Board(b); //clone board
+			Board tempBoard = b.clone(); //clone board
 			tempBoard.move(m);
 
 			if (!(p instanceof Knight) && (hasPieceInWay(m, b))) 
@@ -208,6 +216,21 @@ public class StandardChessGame extends Game
 		return false; //move is not in our move list
 	}
 
+	public ArrayList<Move> allMovesPiece(Piece p, Board b)
+	{
+		if (p == null) return null;
+		ArrayList<Move> legalMoves = new ArrayList<Move>();
+		ArrayList<Move> temp = p.getMoves();
+		for (Move m : temp)
+		{
+			if (this.isLegalMove(m, b, p.color()))
+			{
+				legalMoves.add(m);
+			}
+		}
+		return legalMoves;
+	}
+	
 	public ArrayList<Move> allMoves(Definitions.Color color, Board b)
 	{
 		//get all pieces and find their generated moves; then prune list
@@ -220,14 +243,7 @@ public class StandardChessGame extends Game
 				Piece p = b.getPiece(r, c);
 				if (p != null && p.color() == color)
 				{
-					ArrayList<Move> temp = p.getMoves();
-					for (Move m : temp)
-					{
-						if (this.isLegalMove(m, b, color))
-						{
-							legalMoves.add(m);
-						}
-					}
+					legalMoves.addAll(allMovesPiece(p, b));
 				}
 			}
 		}
@@ -398,46 +414,8 @@ public class StandardChessGame extends Game
 	private void flipTurn()
 	{
 		setTurn(Definitions.flip(whoseTurn()));
-		deselect();
-	}
-
-	private void checkBoardState() //for checkmate/stalemate
-	{
-		if (isCheckmate(whoseTurn(), m_game_board))
-		{
-			System.out.print("Checkmate! ");
-			if (whoseTurn() == Definitions.Color.WHITE) //white is in checkmate; black wins
-			{
-				System.out.println("Black wins!");
-			}
-			else //black is in checkmate; white wins
-			{
-				System.out.println("White wins!");
-			}
-			
-			//stopgap until we implement something for game end
-			try {
-				Thread.sleep(5000);
-			} 
-			catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-			System.exit(0);
-		}
-		else if (isStalemate(whoseTurn(), m_game_board))
-		{
-			System.out.println("Stalemate! The game is drawn!");
-
-			try {
-				Thread.sleep(5000);
-			} 
-			catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-			System.exit(0);
-		}
-		
-		//do whatever you have to do when you want the game to end
+		Player next = (whoseTurn() == Definitions.Color.WHITE ? p1 : p2);
+		next.promptMove();
 	}
 	
 	//TODO
@@ -466,36 +444,8 @@ public class StandardChessGame extends Game
 			}
 		}
 	}
-	
-	public void mousePressed(MouseEvent e)
-	{
-		int row = m_graphics.getRow(e.getY());
-		int col = m_graphics.getCol(e.getX());
-		//Right-click to deselect
-		if (e.getButton() == MouseEvent.BUTTON3)
-			deselect();
-		//Left-click to select
-		else if (e.getButton() == MouseEvent.BUTTON1 && row >= 0 && col >= 0) {
-			Piece p = m_game_board.getPiece(row, col);
-			if (p != null && p.color() == whoseTurn())
-				select(p);
-			else if (m_selected != null)
-				moveSelected(row, col);
-		}
-		repaint();
-	}
-	
-	private void select(Piece p)
-	{
-		m_selected = p;
-	}
-	
-	private void deselect()
-	{
-		m_selected = null;
-	}
-	
-	public void processMove(Move newMove)
+
+	public int processMove(Move newMove)
 	{
 		int row = newMove.r0;
 		int col = newMove.c0;
@@ -550,11 +500,13 @@ public class StandardChessGame extends Game
 				if (kingMoveLength == 2) //kingside
 				{
 					Move correspondingRookMove = new Move(castlingRow, 7, castlingRow, 5);
+					m_animation.animateMove(getGraphics(), correspondingRookMove, m_game_board);
 					m_game_board.move(correspondingRookMove);
 				}
 				else if (kingMoveLength == -2) //queenside
 				{
 					Move correspondingRookMove = new Move(castlingRow, 0, castlingRow, 3);
+					m_animation.animateMove(getGraphics(), correspondingRookMove, m_game_board);
 					m_game_board.move(correspondingRookMove);
 				}
 			}
@@ -597,35 +549,13 @@ public class StandardChessGame extends Game
 			}
 		}
 		
-		flipTurn();
-		checkBoardState();
-		
-		this.removeMouseListener(this);
-		if (whoseTurn() == Definitions.Color.WHITE)
-		{
-			p1.promptMove();
+		if (isCheckmate(whoseTurn(), m_game_board)) {
+			return 1;
 		}
-		else
-		{
-			p2.promptMove();
+		else if (isStalemate(whoseTurn(), m_game_board)) {
+			return 2;
 		}
-		
-		lastMove = newMove;
-	}
-	
-	private void moveSelected(int row, int col)
-	{
-		if (m_selected == null) return;
-		Move newMove = new Move(m_selected.row(), m_selected.col(), row, col);
-		
-		ArrayList<Move> mvs = this.allMoves(whoseTurn(), m_game_board);
-		
-		if (!mvs.contains(newMove))
-		{
-			return;
-		}
-
-		processMove(newMove);
+		return 0;
 	}
 
 	//Prevents flickering when repainting
@@ -633,12 +563,19 @@ public class StandardChessGame extends Game
 	{
 		paint(g);
 	}
+
+	public void stop()
+	{
+		if (m_thread.isAlive()) {
+			m_thread.interrupt();
+		}
+	}
 	
 	//Useless for now
 	public void mouseReleased(MouseEvent e) {}
 	public void mouseClicked(MouseEvent e) {}
 	public void mouseEntered(MouseEvent e) {}
 	public void mouseExited(MouseEvent e) {}
-	public void run() {}
-	public void stop() {}
+	public void mousePressed(MouseEvent e) {}
+
 }

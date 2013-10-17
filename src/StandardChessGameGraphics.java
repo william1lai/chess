@@ -5,8 +5,9 @@ import java.awt.image.*;
 
 public class StandardChessGameGraphics
 {
-	private int m_boardOffsetX, m_boardOffsetY, m_blockSize;
+	private static int m_boardOffsetX, m_boardOffsetY, m_blockSize;
 	private Map<String, BufferedImage> m_gPieces;
+	private BufferedImage m_gMovable;
 	private BufferedImage[] m_gBlocks = new BufferedImage[2];
 	
 	public StandardChessGameGraphics()
@@ -22,6 +23,7 @@ public class StandardChessGameGraphics
 			}
 			m_gBlocks[0] = ImageIO.read(getClass().getResourceAsStream("Images/blockW.png"));
 			m_gBlocks[1] = ImageIO.read(getClass().getResourceAsStream("Images/blockB.png"));
+			m_gMovable = ImageIO.read(getClass().getResourceAsStream("Images/blockMovable.png"));
 		}
 		catch (Exception ex) {
 			System.out.println("Error loading images!");
@@ -31,10 +33,10 @@ public class StandardChessGameGraphics
 	public void drawNames(Graphics g, Player p1, Player p2, Definitions.Color turn)
 	{
 		g.setColor(Color.BLACK);
-		g.setFont(new Font("Lucida Bright", (turn == Definitions.Color.WHITE? Font.BOLD : Font.PLAIN), 15));
-		g.drawString(p1.getName(), m_boardOffsetX + m_blockSize * (Definitions.NUMCOLS+1) + 20, m_boardOffsetY + 20);
-		g.setFont(new Font("Lucida Bright", (turn == Definitions.Color.BLACK? Font.BOLD : Font.PLAIN), 15));
-		g.drawString(p2.getName(), m_boardOffsetX + m_blockSize * (Definitions.NUMCOLS+1) + 20, m_boardOffsetY + 40);
+		g.setFont(new Font("Lucida Bright", (turn == p1.getColor()? Font.BOLD : Font.PLAIN), 15));
+		g.drawString(p1.getName(), m_boardOffsetX + m_blockSize * (Definitions.NUMCOLS+1) + 15, m_boardOffsetY + m_blockSize * Definitions.NUMROWS);
+		g.setFont(new Font("Lucida Bright", (turn == p2.getColor()? Font.BOLD : Font.PLAIN), 15));
+		g.drawString(p2.getName(), m_boardOffsetX + m_blockSize * (Definitions.NUMCOLS+1) + 15, m_boardOffsetY + 20);
 		//int turnOffset = (turn == Definitions.Color.BLACK? 20 : 0);
 		//g.setColor(new Color(0x006600));
 		//g.fillOval(m_boardOffsetX + m_blockSize * (Definitions.NUMCOLS+1) + 5, m_boardOffsetY + 10 + turnOffset, 10, 10);
@@ -74,14 +76,22 @@ public class StandardChessGameGraphics
 		}
 	}
 	
-	public void drawBoard(Graphics g, Board b)
+	public void drawPieces(Graphics g, Board b)
 	{
 		for (int r = 0, y = m_boardOffsetY; r < Definitions.NUMROWS; r++, y += m_blockSize) {
 			for (int c = 0, x = m_boardOffsetX; c < Definitions.NUMCOLS; c++, x += m_blockSize) {
-				drawBlock(g, r, c);
 				if (b.getPiece(r, c) != null) {
 					drawPiece(g, b.getPiece(r, c), x, y);
 				}
+			}
+		}
+	}
+	
+	public void drawBoard(Graphics g)
+	{
+		for (int r = 0; r < Definitions.NUMROWS; r++) {
+			for (int c = 0; c < Definitions.NUMCOLS; c++) {
+				drawBlock(g, r, c);
 			}
 		}
 	}
@@ -98,7 +108,17 @@ public class StandardChessGameGraphics
 		g.drawLine(x + m_blockSize, y, x + m_blockSize, y + m_blockSize);
 	}
 	
-	public int getRow(int y)
+	public void drawMovable(Graphics g, ArrayList<Move> list)
+	{
+		if (list == null) return;
+		for (Move m : list) {
+			int x = getX(m.cf);
+			int y = getY(m.rf);
+			g.drawImage(m_gMovable, x, y, m_blockSize, m_blockSize, null);
+		}
+	}
+	
+	public static int getRow(int y)
 	{
 		int relativeY = y - m_boardOffsetY;
 		if (relativeY < 0 || relativeY >= Definitions.NUMROWS*m_blockSize) {
@@ -107,7 +127,7 @@ public class StandardChessGameGraphics
 		return relativeY / m_blockSize;
 	}
 	
-	public int getCol(int x)
+	public static int getCol(int x)
 	{
 		int relativeX = x - m_boardOffsetX;
 		if (relativeX < 0 || relativeX >= Definitions.NUMCOLS*m_blockSize) {
@@ -116,13 +136,13 @@ public class StandardChessGameGraphics
 		return relativeX / m_blockSize;
 	}
 	
-	public int getY(int row)
+	public static int getY(int row)
 	{
 		if (row < 0 || row >= Definitions.NUMROWS) return -1;
 		return m_boardOffsetY + row*m_blockSize;
 	}
 	
-	public int getX(int col)
+	public static int getX(int col)
 	{
 		if (col < 0 || col >= Definitions.NUMCOLS) return -1;
 		return m_boardOffsetX + col*m_blockSize;

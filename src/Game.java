@@ -20,5 +20,4 @@ public abstract class Game extends Applet implements Runnable, MouseListener
 		m_turn = nextTurn;
 	}
 	
-	public abstract void getHumanMove(); //not 100% sure about this choice
 }

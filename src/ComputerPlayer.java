@@ -50,25 +50,28 @@ public class ComputerPlayer extends Player
 		setName(name);
 	}
 	
-	public ComputerPlayer(String name, Game g)
+	public ComputerPlayer(String name, Definitions.Color c, Game g)
 	{
 		setName(name);
 		setGame(g);
+		setColor(c);
 	}
 
-	public Move promptMove()
+	public void promptMove()
 	{
 		if (getGame() instanceof StandardChessGame)
 		{
-			StandardChessGame g = (StandardChessGame)getGame();
-			Move m = evaluate(g, g.whoseTurn(), g.getBoard(), Definitions.PLY_DEPTH);
-			g.processMove(m);
-			return m;
+			m_done = false;
+			m_move = null;
+			(new Thread(this)).start();
 		}
-		else
-		{
-			return null;
-		}
+	}
+
+	public void run()
+	{
+		StandardChessGame g = (StandardChessGame)getGame();
+		m_move = evaluate(g, g.whoseTurn(), g.getBoard(), Definitions.PLY_DEPTH);
+		m_done = true;
 	}
 	
 	public Move evaluate(StandardChessGame g, Definitions.Color turn, Board b, int depth) //uses brute force

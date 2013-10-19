@@ -1,10 +1,14 @@
 public class Board 
 {
 	private Piece[][] m_board;
+	private Definitions.State m_white_state;
+	private Definitions.State m_black_state;
 
 	public Board()
 	{
 		init();
+		m_white_state = Definitions.State.UNCHECKED;
+		m_black_state = Definitions.State.UNCHECKED;
 	}
 
 	public Board(Board other) 
@@ -20,12 +24,38 @@ public class Board
 				}
 			}
 		}
+		m_white_state = other.m_white_state;
+		m_black_state = other.m_black_state;
 	}
 
 	public void init()
 	{
 		m_board = new Piece[Definitions.NUMROWS][Definitions.NUMCOLS];
 		//we don't put pieces on board, because game may have different set-up
+	}
+	
+	public Definitions.State getState(Definitions.Color color)
+	{
+		if (color == Definitions.Color.WHITE)
+		{
+			return m_white_state;
+		}
+		else
+		{
+			return m_black_state;
+		}
+	}
+	
+	public void setState(Definitions.Color color, Definitions.State state)
+	{
+		if (color == Definitions.Color.WHITE)
+		{
+			m_white_state = state;
+		}
+		else
+		{
+			m_black_state = state;
+		}
 	}
 
 	public boolean isLegalSquare(int row, int col)
@@ -68,6 +98,9 @@ public class Board
 		Piece temp = m_board[m.r0][m.c0];
 		m_board[m.r0][m.c0] = null;
 		placePiece(temp, m.rf, m.cf);
+		
+		m_white_state = Definitions.State.UNCHECKED;
+		m_white_state = Definitions.State.UNCHECKED;
 	}
 
 	public String toString() //prints board position

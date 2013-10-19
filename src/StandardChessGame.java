@@ -348,44 +348,43 @@ public class StandardChessGame extends Game implements Runnable
 	}
 
 	public boolean isCheckmate(Definitions.Color color, Board b)
-	{
+	{		
 		boolean check = inCheck(color, b);
 		return (check && allMoves(color, b).size() == 0);
-		
-		/*
-		ArrayList<Move> allMoves = new ArrayList<Move>();
-		for (int r = 0; r < 8; r++)
-		{
-			for (int c = 0; c < 8; c++)
-			{
-				Piece p = m_game_board.getPiece(r, c);
-				if (p != null && p.color() == color)
-				{
-					allMoves.addAll(p.getMoves());
-				}
-			}
-		}
-		
-		for (Move m : allMoves)
-		{
-			if (isLegalMove(m) == true)
-			{
-				return false; //found at least one legal move; not checkmate
-			}
-		}
-		return true; //checkmate; all possible moves are illegal
-		*/
 	}
 	
 	public boolean isStalemate(Definitions.Color color, Board b)
-	{
+	{		
 		boolean check = inCheck(color, b);
 		ArrayList<Move> mvs = allMoves(whoseTurn(), b);
-		/*	for (Move m : mvs)
-		{
-			System.out.println(m.cf + "" + m.rf);
-		} */
 		return (!check && mvs.size() == 0);
+	}
+	
+	public Definitions.State getState(Definitions.Color color, Board b)
+	{
+		if (b.getState(color) == Definitions.State.UNCHECKED)
+		{
+			boolean isInCheck = inCheck(color, b);
+			int moves = allMoves(color, b).size();
+			
+			if (moves == 0)
+			{
+				if (isInCheck)
+				{
+					b.setState(color, Definitions.State.CHECKMATE);
+				}
+				else
+				{
+					b.setState(color, Definitions.State.STALEMATE);
+				}
+			}
+			else
+			{
+				b.setState(color, Definitions.State.NORMAL);
+			}
+		}
+		
+		return b.getState(color);
 	}
 	
 	public void promotePawn(int r, int c, Definitions.Color color)
@@ -549,10 +548,12 @@ public class StandardChessGame extends Game implements Runnable
 			}
 		}
 		
-		if (isCheckmate(whoseTurn(), m_game_board)) {
+		Definitions.State state = getState(Definitions.flip(whoseTurn()), m_game_board);
+		
+		if (state == Definitions.State.CHECKMATE) {
 			return 1;
 		}
-		else if (isStalemate(whoseTurn(), m_game_board)) {
+		else if (state == Definitions.State.STALEMATE) {
 			return 2;
 		}
 		return 0;

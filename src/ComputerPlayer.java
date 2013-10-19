@@ -116,13 +116,14 @@ public class ComputerPlayer extends Player
 		if (getGame() instanceof StandardChessGame)
 		{
 			StandardChessGame g = (StandardChessGame)getGame();
-			if (g.isCheckmate(color, b)) //instant loss
-			{
-				return Double.NEGATIVE_INFINITY;
-			}
-			else if (g.isCheckmate(Definitions.flip(color), b)) //instant win
+			Definitions.State their_state = g.getState(Definitions.flip(color), b);
+			if (their_state == Definitions.State.CHECKMATE) //instant win
 			{
 				return Double.POSITIVE_INFINITY;
+			}
+			else if (their_state == Definitions.State.STALEMATE)
+			{
+				return 0.0;
 			}
 		}
 		

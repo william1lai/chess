@@ -1,5 +1,14 @@
 ChangeLog
 
+Name; William Lai
+Date: 10-18-2013
+Description: Restructuring of program
+    * src/Board.java: Included "state" variables to determine if a board represents checkmate/stalemate for either side, to prevent recalculating for subsequent calls for the same position
+    * src/ComputerPlayer.java: Changed static evaluation to account for changes to Board.java
+    * src/Definitions.java: Added new enum for the "state" of a board
+    * src/StandardChessGame.java: Changed move procedure to account for changes to Board.java. Also fixed the inability for the game to detect checkmate/stalemate (a bug that came up from the last commit).
+    * TODO.txt: New file. A file that we can put tasks that need to be done in our project.
+
 Name: William Lai
 Date: 10-15-2013
 Description: 2-ply brute force AI

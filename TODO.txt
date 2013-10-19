@@ -1,0 +1,10 @@
+Game Logic
+- Make isLegalMove more efficient
+
+Animation/UI
+- For castling, make the rook move after the king moves if possible
+- Menu when starting up applet
+- Display something when the game ends
+
+Miscellaneous
+- Move parser for better testing

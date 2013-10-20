@@ -1,6 +1,13 @@
 ChangeLog
 
-Name; William Lai
+Name: Vincent Wong
+Date: 10-19-2013
+Description: Selected block highlight
+    * src/StandardChessGame.java: Slight modification to paint order
+    * src/StandardChessGameGraphics.java: Uses an actual image to highlight a selected block
+    * New files: Images/blockSelected.png
+    
+Name: William Lai
 Date: 10-18-2013
 Description: Restructuring of program
     * src/Board.java: Included "state" variables to determine if a board represents checkmate/stalemate for either side, to prevent recalculating for subsequent calls for the same position
@@ -8,6 +15,23 @@ Description: Restructuring of program
     * src/Definitions.java: Added new enum for the "state" of a board
     * src/StandardChessGame.java: Changed move procedure to account for changes to Board.java. Also fixed the inability for the game to detect checkmate/stalemate (a bug that came up from the last commit).
     * TODO.txt: New file. A file that we can put tasks that need to be done in our project.
+
+Name: Vincent Wong
+Date: 10-17-2013
+Description: Threading, game loop, highlighted blocks
+    * src/Player.java: Added threading components. Added knowledge of color
+    * src/ComputerPlayer.java: Threaded. promptMove to start evaluating
+    board, isDone and getMove to retrieve results
+    * src/HumanPlayer.java: Threaded. promptMove to activate mouse listener,
+    isDone and getMove to retrieve results
+    * src/Game.java: Removed getHumanMove
+    * src/StandardChessGame.java: Added game loop, each tick 30 ms. Moved
+    selection mechanism to HumanPlayer.
+    * src/StandardChessGameAnimation.java: Adjusted animation for slightly
+    changed functions
+    * src/StandardChessGameGraphics.java: Added function to highlight
+    blocks.
+    * New files: Images/blockW.png, Images/blockB.png, Images/blockMovable.png
 
 Name: William Lai
 Date: 10-15-2013

@@ -7,7 +7,7 @@ public class StandardChessGameGraphics
 {
 	private static int m_boardOffsetX, m_boardOffsetY, m_blockSize;
 	private Map<String, BufferedImage> m_gPieces;
-	private BufferedImage m_gMovable;
+	private BufferedImage m_gMovable, m_gSelected;
 	private BufferedImage[] m_gBlocks = new BufferedImage[2];
 	
 	public StandardChessGameGraphics()
@@ -24,6 +24,7 @@ public class StandardChessGameGraphics
 			m_gBlocks[0] = ImageIO.read(getClass().getResourceAsStream("Images/blockW.png"));
 			m_gBlocks[1] = ImageIO.read(getClass().getResourceAsStream("Images/blockB.png"));
 			m_gMovable = ImageIO.read(getClass().getResourceAsStream("Images/blockMovable.png"));
+			m_gSelected = ImageIO.read(getClass().getResourceAsStream("Images/blockSelected.png"));
 		}
 		catch (Exception ex) {
 			System.out.println("Error loading images!");
@@ -99,13 +100,9 @@ public class StandardChessGameGraphics
 	public void drawSelected(Graphics g, Piece p)
 	{
 		if (p == null) return;
-		int x = m_boardOffsetX + p.col()*m_blockSize;
-		int y = m_boardOffsetY + p.row()*m_blockSize;
-		g.setColor(Color.RED);
-		g.drawLine(x, y, x, y + m_blockSize);
-		g.drawLine(x, y, x + m_blockSize, y);
-		g.drawLine(x, y + m_blockSize, x + m_blockSize, y + m_blockSize);
-		g.drawLine(x + m_blockSize, y, x + m_blockSize, y + m_blockSize);
+		int x = getX(p.col());
+		int y = getY(p.row());
+		g.drawImage(m_gSelected, x, y, m_blockSize, m_blockSize, null);
 	}
 	
 	public void drawMovable(Graphics g, ArrayList<Move> list)

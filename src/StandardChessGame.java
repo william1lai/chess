@@ -94,8 +94,8 @@ public class StandardChessGame extends Game implements Runnable
 
 		m_graphics.drawBoard(backg);
 		m_graphics.drawMovable(backg, allMovesPiece(((HumanPlayer)p1).getSelected(), m_game_board));
-		m_graphics.drawBorders(backg);
 		m_graphics.drawSelected(backg, ((HumanPlayer)p1).getSelected());
+		m_graphics.drawBorders(backg);
 		m_graphics.drawMarkers(backg);
 		m_graphics.drawNames(backg, p1, p2, whoseTurn());
 		m_graphics.drawPieces(backg, m_game_board);

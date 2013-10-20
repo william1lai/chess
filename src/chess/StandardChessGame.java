@@ -1,3 +1,5 @@
+package chess;
+
 import java.util.ArrayList;
 import java.awt.*;
 import java.awt.event.*;
@@ -73,17 +75,18 @@ public class StandardChessGame extends Game implements Runnable
 		while (true) {
 			Player cur = (whoseTurn() == Definitions.Color.WHITE ? p1 : p2);
 			if (cur.isDone()) {
-				int state = processMove(cur.getMove());
-				if (state > 0) {
+				processMove(cur.getMove());
+				flipTurn();
+				Definitions.State state = getState(whoseTurn(), m_game_board);				
+				if (state != Definitions.State.NORMAL) {
 					break;
 				}
-				flipTurn();
 			}
 			try { Thread.sleep(30); }
 			catch (InterruptedException e) {}
 			repaint();
 		}
-		System.out.println("Error: Somebody won");
+		System.out.println("The game has ended.");
 	}
 	
 	public void paint(Graphics g)
@@ -233,7 +236,6 @@ public class StandardChessGame extends Game implements Runnable
 	
 	public ArrayList<Move> allMoves(Definitions.Color color, Board b)
 	{
-		//get all pieces and find their generated moves; then prune list
 		ArrayList<Move> legalMoves = new ArrayList<Move>();
 		
 		for (int r = 0; r < 8; r++)
@@ -247,7 +249,6 @@ public class StandardChessGame extends Game implements Runnable
 				}
 			}
 		}
-
 		return legalMoves;
 	}
 	
@@ -306,26 +307,20 @@ public class StandardChessGame extends Game implements Runnable
 	//moving to Game class from Board class, since the Board doesn't necessarily know rules of game
 	//added Board argument since you might want to check temporary boards too
 	public boolean inCheck(Definitions.Color color, Board b)
-	{
-		//this will check to see if the king of 'color' is threatened or not
-		int kingR = -1; //default values to satisfy compiler
-		int kingC = -1;
-		//might want to have a king location variable in each board
-		//or we can use an arraylist to hold all pieces on board, maybe separated by color?
-		//efficiency considerations?
-
-		for (int r = 0; r < Definitions.NUMROWS; r++)
+	{		
+		int kingR; 
+		int kingC;
+		if (color == Definitions.Color.WHITE)
 		{
-			for (int c = 0; c < Definitions.NUMCOLS; c++)
-			{
-				Piece temp = b.getPiece(r, c);
-				if ((temp instanceof King) && (temp.color() == color))
-				{
-					kingR = r;
-					kingC = c;
-					break; //is there a way to jump outside both loops without using goto?
-				}
-			}
+			int temp = b.getWhiteKingLoc();
+			kingR = temp / 10;
+			kingC = temp % 10;
+		}
+		else
+		{
+			int temp = b.getBlackKingLoc();
+			kingR = temp / 10;
+			kingC = temp % 10;
 		}
 
 		for (int r = 0; r < Definitions.NUMROWS; r++)
@@ -372,19 +367,24 @@ public class StandardChessGame extends Game implements Runnable
 				if (isInCheck)
 				{
 					b.setState(color, Definitions.State.CHECKMATE);
+					return Definitions.State.CHECKMATE;
 				}
 				else
 				{
 					b.setState(color, Definitions.State.STALEMATE);
+					return Definitions.State.STALEMATE;
 				}
 			}
 			else
 			{
 				b.setState(color, Definitions.State.NORMAL);
+				return Definitions.State.NORMAL;
 			}
 		}
-		
-		return b.getState(color);
+		else
+		{
+			return b.getState(color);
+		}
 	}
 	
 	public void promotePawn(int r, int c, Definitions.Color color)
@@ -444,11 +444,13 @@ public class StandardChessGame extends Game implements Runnable
 		}
 	}
 
-	public int processMove(Move newMove)
+	public void processMove(Move newMove)
 	{
 		int row = newMove.r0;
 		int col = newMove.c0;
 		Piece movedPiece = m_game_board.getPiece(row, col);
+		m_animation.animateMove(getGraphics(), newMove, m_game_board);
+		m_game_board.move(newMove); //has to be down here for time being because en passant needs to know dest sq is empty; fix if you can
 		
 		int castlingRow;
 		if (whoseTurn() == Definitions.Color.WHITE)
@@ -481,7 +483,7 @@ public class StandardChessGame extends Game implements Runnable
 			}
 		}
 		else if (movedPiece instanceof King)
-		{
+		{			
 			if (whoseTurn() == Definitions.Color.WHITE)
 			{
 				whiteCanCastleKingside = false;
@@ -536,9 +538,6 @@ public class StandardChessGame extends Game implements Runnable
 			}
 		}
 
-		m_animation.animateMove(getGraphics(), newMove, m_game_board);
-		m_game_board.move(newMove); //has to be down here for time being because en passant needs to know dest sq is empty; fix if you can
-		
 		if (movedPiece instanceof Pawn)
 		{
 			if (((whoseTurn() == Definitions.Color.WHITE) && (newMove.rf == 0)) 
@@ -547,16 +546,6 @@ public class StandardChessGame extends Game implements Runnable
 				promotePawn(newMove.rf, newMove.cf, whoseTurn());
 			}
 		}
-		
-		Definitions.State state = getState(Definitions.flip(whoseTurn()), m_game_board);
-		
-		if (state == Definitions.State.CHECKMATE) {
-			return 1;
-		}
-		else if (state == Definitions.State.STALEMATE) {
-			return 2;
-		}
-		return 0;
 	}
 
 	//Prevents flickering when repainting

@@ -1,3 +1,5 @@
+package chess;
+
 public class Definitions
 {
 	public static final int HEIGHT = 480;
@@ -10,7 +12,7 @@ public class Definitions
 	public static final String PIECENAMES[] = {"BK","BQ","BN","BB","BR","BP","WK","WQ","WN","WB","WR","WP"};
 	public static final String RMARKERS[] = {"8","7","6","5","4","3","2","1"};
 	public static final String CMARKERS[] = {"a","b","c","d","e","f","g","h"};
-	public static final int PLY_DEPTH = 3;
+	public static final int PLY_DEPTH = 2;
 	
 	public static Color flip(Color c)
 	{

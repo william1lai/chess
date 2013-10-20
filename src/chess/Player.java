@@ -1,3 +1,5 @@
+package chess;
+
 
 public abstract class Player implements Runnable
 {

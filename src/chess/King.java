@@ -1,6 +1,6 @@
-import java.util.ArrayList;
+package chess;
 
-//TODO: Need to implement castling in moves() function
+import java.util.ArrayList;
 
 public class King extends Piece
 {

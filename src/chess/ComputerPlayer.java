@@ -1,7 +1,6 @@
-import java.util.*;
+package chess;
 
-//TODO: Notes
-//Most of the latency lies in Checkmate and Stalemate checking!
+import java.util.*;
 
 public class ComputerPlayer extends Player
 {
@@ -77,7 +76,7 @@ public class ComputerPlayer extends Player
 	public Move evaluate(StandardChessGame g, Definitions.Color turn, Board b, int depth) //uses brute force
 	{
 		ArrayList<Move> mvs = g.allMoves(turn, b);
-		Move best = new Move(0, 0, 0, 0);
+		Move best = null;
 		double highScore = Double.NEGATIVE_INFINITY;
 		
 		for (Move m : mvs)
@@ -117,14 +116,20 @@ public class ComputerPlayer extends Player
 		{
 			StandardChessGame g = (StandardChessGame)getGame();
 			Definitions.State their_state = g.getState(Definitions.flip(color), b);
-			if (their_state == Definitions.State.CHECKMATE) //instant win
+			Definitions.State my_state = g.getState(color, b);
+			if (my_state == Definitions.State.CHECKMATE) //instant loss
 			{
-				return Double.POSITIVE_INFINITY;
+				return Double.NEGATIVE_INFINITY;
 			}
-			else if (their_state == Definitions.State.STALEMATE)
+			else if (my_state == Definitions.State.STALEMATE)
 			{
 				return 0.0;
 			}
+			else if (their_state == Definitions.State.CHECKMATE) //instant win
+			{
+				return Double.POSITIVE_INFINITY;
+			}
+			
 		}
 		
 		double score = 0.0;

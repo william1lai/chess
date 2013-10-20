@@ -1,6 +1,8 @@
+package chess;
 import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
+
 
 //Note to Vincent: Setting fTick to 3 and getting rid of the Thread.Sleep part seems to make the animation look nice
 

@@ -1,4 +1,6 @@
+package chess;
 import java.util.ArrayList;
+
 
 public abstract class Piece 
 {

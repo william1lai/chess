@@ -1,14 +1,21 @@
+package chess;
+
 public class Board 
 {
 	private Piece[][] m_board;
 	private Definitions.State m_white_state;
 	private Definitions.State m_black_state;
 
+	private int m_whiteKingLoc;
+	private int m_blackKingLoc;
+
 	public Board()
 	{
 		init();
 		m_white_state = Definitions.State.UNCHECKED;
 		m_black_state = Definitions.State.UNCHECKED;
+		m_whiteKingLoc = 74; //default locations
+		m_blackKingLoc = 4;
 	}
 
 	public Board(Board other) 
@@ -26,6 +33,8 @@ public class Board
 		}
 		m_white_state = other.m_white_state;
 		m_black_state = other.m_black_state;
+		m_whiteKingLoc = other.m_whiteKingLoc;
+		m_blackKingLoc = other.m_blackKingLoc;
 	}
 
 	public void init()
@@ -33,7 +42,17 @@ public class Board
 		m_board = new Piece[Definitions.NUMROWS][Definitions.NUMCOLS];
 		//we don't put pieces on board, because game may have different set-up
 	}
-	
+
+	public int getWhiteKingLoc()
+	{
+		return m_whiteKingLoc;
+	}
+
+	public int getBlackKingLoc()
+	{
+		return m_blackKingLoc;
+	}
+
 	public Definitions.State getState(Definitions.Color color)
 	{
 		if (color == Definitions.Color.WHITE)
@@ -45,7 +64,7 @@ public class Board
 			return m_black_state;
 		}
 	}
-	
+
 	public void setState(Definitions.Color color, Definitions.State state)
 	{
 		if (color == Definitions.Color.WHITE)
@@ -67,7 +86,7 @@ public class Board
 	{
 		m_board[row][col] = null; //delete any piece that is here
 	}
-	
+
 	public void placePiece(Piece p, int row, int col)
 	{
 		//need to consider: should we check if location is already occupied
@@ -94,13 +113,26 @@ public class Board
 	{
 		//should we check for legality or should we assume that it has already been checked?
 		//probably should assume, since only Game class knows legality rules
-		
+
 		Piece temp = m_board[m.r0][m.c0];
 		m_board[m.r0][m.c0] = null;
 		placePiece(temp, m.rf, m.cf);
-		
+
+		if (temp instanceof King)
+		{
+			int sq = (m.rf * 10 + m.cf);
+			if (temp.color() == Definitions.Color.WHITE)
+			{
+				m_whiteKingLoc = sq;
+			}
+			else
+			{
+				m_blackKingLoc = sq;
+			}
+		}
+
 		m_white_state = Definitions.State.UNCHECKED;
-		m_white_state = Definitions.State.UNCHECKED;
+		m_black_state = Definitions.State.UNCHECKED;
 	}
 
 	public String toString() //prints board position

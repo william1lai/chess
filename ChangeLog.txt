@@ -1,5 +1,13 @@
 ChangeLog
 
+Name: William Lai
+Date: 10-20-2013
+Description: Slight efficiency and AI improvement, packaged files
+    * src/chess/*.java: Moved files into a package named "chess"
+    * src/chess/Board.java: Added new private member variables for the squares of each King, to aid in efficiency elsewhere
+    * src/chess/ComputerPlayer.java: Fixed the AI refusing to make move, as well as AI not seeing incoming checkmate
+    * src/chess/StandardChessGame.java: Used Board.java change to efficiently find king locations when checking for check. Also now has rook animating after king when castling
+
 Name: Vincent Wong
 Date: 10-19-2013
 Description: Selected block highlight

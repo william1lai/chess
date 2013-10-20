@@ -1,6 +1,9 @@
+package chess;
 import java.util.*;
 import java.awt.*;
 import javax.imageio.*;
+
+
 import java.awt.image.*;
 
 public class StandardChessGameGraphics
@@ -19,12 +22,12 @@ public class StandardChessGameGraphics
 		m_gPieces = new HashMap<String, BufferedImage>();
 		try {
 			for (int i = 0; i < Definitions.NUMPIECES; i++) {
-				m_gPieces.put(Definitions.PIECENAMES[i], ImageIO.read(getClass().getResourceAsStream("Images/piece" + Definitions.PIECENAMES[i] + ".png")));
+				m_gPieces.put(Definitions.PIECENAMES[i], ImageIO.read(getClass().getResourceAsStream("/Images/piece" + Definitions.PIECENAMES[i] + ".png")));
 			}
-			m_gBlocks[0] = ImageIO.read(getClass().getResourceAsStream("Images/blockW.png"));
-			m_gBlocks[1] = ImageIO.read(getClass().getResourceAsStream("Images/blockB.png"));
-			m_gMovable = ImageIO.read(getClass().getResourceAsStream("Images/blockMovable.png"));
-			m_gSelected = ImageIO.read(getClass().getResourceAsStream("Images/blockSelected.png"));
+			m_gBlocks[0] = ImageIO.read(getClass().getResourceAsStream("/Images/blockW.png"));
+			m_gBlocks[1] = ImageIO.read(getClass().getResourceAsStream("/Images/blockB.png"));
+			m_gMovable = ImageIO.read(getClass().getResourceAsStream("/Images/blockMovable.png"));
+			m_gSelected = ImageIO.read(getClass().getResourceAsStream("/Images/blockSelected.png"));
 		}
 		catch (Exception ex) {
 			System.out.println("Error loading images!");

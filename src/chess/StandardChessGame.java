@@ -19,7 +19,7 @@ public class StandardChessGame extends Game implements Runnable
 	private Board m_game_board;
 	private StandardChessGameGraphics m_graphics;
 	private StandardChessGameAnimation m_animation;
-	
+
 	private int enpassantCol; //the column (0-7) of the pawn to move two spaces last turn, -1 if no pawn moved two spaces
 	private boolean whiteCanCastleKingside; //false if king's rook or king have moved
 	private boolean whiteCanCastleQueenside; //false if queen's rook or king have moved
@@ -36,6 +36,9 @@ public class StandardChessGame extends Game implements Runnable
 		whiteCanCastleQueenside = true;		
 		blackCanCastleKingside = true;
 		blackCanCastleQueenside = true;
+
+		//String [] testFEN = { "k-------", "--P----R", "-------K", "--------", "--------", "--------", "--------", "--------"};
+		//pseudoFENtoPosition(testFEN);
 
 		m_game_board.placePiece(new Rook(0, 0, Definitions.Color.BLACK), 0, 0);
 		m_game_board.placePiece(new Knight(0, 1, Definitions.Color.BLACK), 0, 1);
@@ -65,11 +68,11 @@ public class StandardChessGame extends Game implements Runnable
 
 		setTurn(Definitions.Color.WHITE);
 		p1.promptMove();
-		
+
 		m_thread = new Thread(this);
 		m_thread.start();
 	}
-	
+
 	public void run()
 	{
 		while (true) {
@@ -88,7 +91,66 @@ public class StandardChessGame extends Game implements Runnable
 		}
 		System.out.println("The game has ended.");
 	}
-	
+
+	public void pseudoFENtoPosition(String[] FEN)
+	{
+		for (int r = 0; r < 8; r++)
+		{
+			String rFEN = FEN[r];
+			for (int c = 0; c < 8; c++)
+			{
+				char p = rFEN.charAt(c);
+				Piece pp = null;
+
+				switch (p)
+				{
+				case '-':
+					break;
+				case 'P':
+					pp = new Pawn(r, c, Definitions.Color.WHITE);
+					break;
+				case 'p':
+					pp = new Pawn(r, c, Definitions.Color.BLACK);
+					break;
+				case 'B':
+					pp = new Bishop(r, c, Definitions.Color.WHITE);
+					break;
+				case 'b':
+					pp = new Bishop(r, c, Definitions.Color.BLACK);
+					break;
+				case 'N':
+					pp = new Knight(r, c, Definitions.Color.WHITE);
+					break;
+				case 'n':
+					pp = new Knight(r, c, Definitions.Color.BLACK);
+					break;
+				case 'R':
+					pp = new Rook(r, c, Definitions.Color.WHITE);
+					break;
+				case 'r':
+					pp = new Rook(r, c, Definitions.Color.BLACK);
+					break;
+				case 'Q':
+					pp = new Queen(r, c, Definitions.Color.WHITE);
+					break;
+				case 'q':
+					pp = new Queen(r, c, Definitions.Color.BLACK);
+					break;
+				case 'K':
+					pp = new King(r, c, Definitions.Color.WHITE);
+					break;
+				case 'k':
+					pp = new King(r, c, Definitions.Color.BLACK);
+					break;
+				}
+				if (pp != null)
+				{
+					m_game_board.placePiece(pp, r, c);
+				}
+			}
+		}
+	}
+
 	public void paint(Graphics g)
 	{
 		//Painting with a backbuffer reduces flickering
@@ -198,7 +260,7 @@ public class StandardChessGame extends Game implements Runnable
 						enpassant = ((m.cf == enpassantCol) && (m.r0 == 3));
 					else
 						enpassant = ((m.cf == enpassantCol) && (m.r0 == 4));
-					
+
 					return (validCapture || enpassant);
 				}
 				else
@@ -233,11 +295,11 @@ public class StandardChessGame extends Game implements Runnable
 		}
 		return legalMoves;
 	}
-	
+
 	public ArrayList<Move> allMoves(Definitions.Color color, Board b)
 	{
 		ArrayList<Move> legalMoves = new ArrayList<Move>();
-		
+
 		for (int r = 0; r < 8; r++)
 		{
 			for (int c = 0; c < 8; c++)
@@ -251,14 +313,14 @@ public class StandardChessGame extends Game implements Runnable
 		}
 		return legalMoves;
 	}
-	
+
 	private boolean hasPieceInWay(Move m, Board b)
 	{
 		int dc = m.cf - m.c0;
 		int dr = m.rf - m.r0; //remember rows are counted from the top
 		int cinc; //1, 0, or -1, depending on which direction the piece is headed
 		int rinc; //1, 0, or -1
-		
+
 		Piece p = b.getPiece(m.r0, m.c0);
 		if (p == null || p instanceof Knight)
 			return false; //vacuously false for no piece, and automatically false for knights 
@@ -347,21 +409,21 @@ public class StandardChessGame extends Game implements Runnable
 		boolean check = inCheck(color, b);
 		return (check && allMoves(color, b).size() == 0);
 	}
-	
+
 	public boolean isStalemate(Definitions.Color color, Board b)
 	{		
 		boolean check = inCheck(color, b);
 		ArrayList<Move> mvs = allMoves(whoseTurn(), b);
 		return (!check && mvs.size() == 0);
 	}
-	
+
 	public Definitions.State getState(Definitions.Color color, Board b)
 	{
 		if (b.getState(color) == Definitions.State.UNCHECKED)
 		{
 			boolean isInCheck = inCheck(color, b);
 			int moves = allMoves(color, b).size();
-			
+
 			if (moves == 0)
 			{
 				if (isInCheck)
@@ -386,12 +448,12 @@ public class StandardChessGame extends Game implements Runnable
 			return b.getState(color);
 		}
 	}
-	
+
 	public void promotePawn(int r, int c, Definitions.Color color)
 	{
 		String[] param = { "Queen", "Rook", "Knight", "Bishop" };
 		String input = (String) JOptionPane.showInputDialog(null, "Which piece do you want to promote to?", "Pawn Promotion", JOptionPane.QUESTION_MESSAGE, null, param, param[0]);
-		
+
 		if (input == "Queen")
 		{
 			m_game_board.placePiece(new Queen(r, c, color), r, c);
@@ -409,25 +471,25 @@ public class StandardChessGame extends Game implements Runnable
 			m_game_board.placePiece(new Bishop(r, c, color), r, c);
 		}
 	}
-	
+
 	private void flipTurn()
 	{
 		setTurn(Definitions.flip(whoseTurn()));
 		Player next = (whoseTurn() == Definitions.Color.WHITE ? p1 : p2);
 		next.promptMove();
 	}
-	
+
 	//TODO
 	public static Move algebraicToMove(Definitions.Color color, String algebraic) //STUB
 	{
 		return new Move(0, 0, 0, 0);
 	}
-	
+
 	public void interpretMoveList(String movelist) //does not work yet
 	{
 		//start with naive format of "1.e4 c5 2.Nc3 Nc6 3.f4 g6 4.Bb5 Nd4", with proper spacing and all
 		String[] moves = movelist.split(" ");
-		
+
 		for (int i = 0; i < moves.length; i++)
 		{
 			String mv = moves[i];
@@ -449,9 +511,7 @@ public class StandardChessGame extends Game implements Runnable
 		int row = newMove.r0;
 		int col = newMove.c0;
 		Piece movedPiece = m_game_board.getPiece(row, col);
-		m_animation.animateMove(getGraphics(), newMove, m_game_board);
-		m_game_board.move(newMove); //has to be down here for time being because en passant needs to know dest sq is empty; fix if you can
-		
+
 		int castlingRow;
 		if (whoseTurn() == Definitions.Color.WHITE)
 		{
@@ -461,7 +521,8 @@ public class StandardChessGame extends Game implements Runnable
 		{
 			castlingRow = 0;
 		}
-		
+
+		Move correspondingRookMove = null; //if we have castling
 		enpassantCol = -1; //default
 		if (movedPiece instanceof Pawn)
 		{
@@ -500,15 +561,11 @@ public class StandardChessGame extends Game implements Runnable
 			{
 				if (kingMoveLength == 2) //kingside
 				{
-					Move correspondingRookMove = new Move(castlingRow, 7, castlingRow, 5);
-					m_animation.animateMove(getGraphics(), correspondingRookMove, m_game_board);
-					m_game_board.move(correspondingRookMove);
+					correspondingRookMove = new Move(castlingRow, 7, castlingRow, 5);
 				}
 				else if (kingMoveLength == -2) //queenside
 				{
-					Move correspondingRookMove = new Move(castlingRow, 0, castlingRow, 3);
-					m_animation.animateMove(getGraphics(), correspondingRookMove, m_game_board);
-					m_game_board.move(correspondingRookMove);
+					correspondingRookMove = new Move(castlingRow, 0, castlingRow, 3);
 				}
 			}
 		}
@@ -538,6 +595,15 @@ public class StandardChessGame extends Game implements Runnable
 			}
 		}
 
+		m_animation.animateMove(getGraphics(), newMove, m_game_board);
+		m_game_board.move(newMove); //has to be down here for time being because en passant needs to know dest sq is empty; fix if you can
+
+		if (correspondingRookMove != null)
+		{
+			m_animation.animateMove(getGraphics(), correspondingRookMove, m_game_board);
+			m_game_board.move(correspondingRookMove);
+		}
+
 		if (movedPiece instanceof Pawn)
 		{
 			if (((whoseTurn() == Definitions.Color.WHITE) && (newMove.rf == 0)) 
@@ -560,7 +626,7 @@ public class StandardChessGame extends Game implements Runnable
 			m_thread.interrupt();
 		}
 	}
-	
+
 	//Useless for now
 	public void mouseReleased(MouseEvent e) {}
 	public void mouseClicked(MouseEvent e) {}

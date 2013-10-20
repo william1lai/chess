@@ -20,6 +20,11 @@ public class Pawn extends Piece
 		
 		ArrayList<Move> legalMoves = new ArrayList<Move>();
 		
+		if (row() == 0 || row() == Definitions.NUMROWS - 1)
+		{
+			return legalMoves; //empty
+		}
+		
 		if (color() == Definitions.Color.WHITE)
 		{
 			if (row() == 6) //if on second rank

@@ -80,7 +80,7 @@ public class ComputerPlayer extends Player
 		double highScore = Double.NEGATIVE_INFINITY;
 		
 		for (Move m : mvs)
-		{
+		{			
 			Board temp = b.clone();
 			temp.move(m);
 			
@@ -128,8 +128,7 @@ public class ComputerPlayer extends Player
 			else if (their_state == Definitions.State.CHECKMATE) //instant win
 			{
 				return Double.POSITIVE_INFINITY;
-			}
-			
+			}			
 		}
 		
 		double score = 0.0;

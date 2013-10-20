@@ -1,5 +1,11 @@
 ChangeLog
 
+Name: William lai
+Date: 10-20-2013
+Description: Several bug fixes, pseudo-FEN parser
+    * src/chess/Pawn.java: Now has no moves if it's on the 1st or 8th row. This is so that the AI doesn't freeze (since it is unable to account for promotions at the moment).
+    * src/chess/StandardChessGame.java: Created pseudo-FEN parser so that you can load a position into the program for testing purposes. Also fixed en passant bug where the captured pawn did not get removed from the board.
+
 Name: William Lai
 Date: 10-20-2013
 Description: Slight efficiency and AI improvement, packaged files

@@ -46,6 +46,27 @@ public class StandardChessGameGraphics
 		//g.fillOval(m_boardOffsetX + m_blockSize * (Definitions.NUMCOLS+1) + 5, m_boardOffsetY + 10 + turnOffset, 10, 10);
 	}
 	
+	public void drawEndMessage(Graphics g, Definitions.Color winner)
+	{
+		g.setColor(Color.BLACK);
+		g.setFont(new Font("Lucida Bright", Font.BOLD, 25));
+		String message;
+		if (winner == null) //stalemate
+		{
+			message = "Stalemate!";
+		}
+		else if (winner == Definitions.Color.WHITE)
+		{
+			message = "White wins!";
+		}
+		else //BLACK
+		{
+			message = "Black wins!";
+		}
+		g.drawString(message, m_boardOffsetX + m_blockSize * (Definitions.NUMCOLS+1) + 15, m_boardOffsetY + m_blockSize * (Definitions.NUMROWS - 4));
+	
+	}
+	
 	public void drawBlock(Graphics g, int row, int col)
 	{
 		g.drawImage(m_gBlocks[(row+col)%2], col * m_blockSize + m_boardOffsetX, row * m_blockSize + m_boardOffsetX, m_blockSize, m_blockSize, null);

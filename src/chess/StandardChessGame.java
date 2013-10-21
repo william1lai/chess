@@ -80,12 +80,13 @@ public class StandardChessGame extends Game implements Runnable
 
 	public void run()
 	{
+		Definitions.State state;
 		while (true) {
 			Player cur = (whoseTurn() == Definitions.Color.WHITE ? p1 : p2);
 			if (cur.isDone()) {
 				processMove(cur.getMove());
 				flipTurn();
-				Definitions.State state = getState(whoseTurn(), m_game_board);				
+				state = getState(whoseTurn(), m_game_board);				
 				if (state != Definitions.State.NORMAL) {
 					break;
 				}
@@ -94,6 +95,12 @@ public class StandardChessGame extends Game implements Runnable
 			catch (InterruptedException e) {}
 			repaint();
 		}
+		Definitions.Color winner = null; //indicating stalemate by default
+		if (state == Definitions.State.CHECKMATE)
+		{
+			winner = Definitions.flip(whoseTurn());
+		}
+		m_graphics.drawEndMessage(getGraphics(), winner);
 		System.out.println("The game has ended.");
 	}
 	

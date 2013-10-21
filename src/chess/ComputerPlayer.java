@@ -89,6 +89,10 @@ public class ComputerPlayer extends Player
 			if (depth > 1)
 			{
 				Move subBest = this.evaluate(g, Definitions.flip(turn), temp, depth - 1);
+				if (subBest == null)
+				{
+					return m;
+				}
 				temp.move(subBest);
 				score = this.staticEval(turn, temp);
 			}

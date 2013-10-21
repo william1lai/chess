@@ -1,6 +1,12 @@
 ChangeLog
 
-Name: William lai
+Name: William Lai
+Date: 10-20-2013
+Description: Another bug fix, improved pseudo-FEN parser
+    * src/chess/StandardChessGame.java: Fixed inability of AI to decide how to promote pawn. Also improved pseudo-FEN parser to allow for deciding whose move it is and whether castling is available or not.
+    * src/chess/ComputerPlayer.java: Improved AI so that it now wants to promote pawns.
+
+Name: William Lai
 Date: 10-20-2013
 Description: Several bug fixes, pseudo-FEN parser
     * src/chess/Pawn.java: Now has no moves if it's on the 1st or 8th row. This is so that the AI doesn't freeze (since it is unable to account for promotions at the moment).

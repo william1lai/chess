@@ -5,7 +5,7 @@ import java.util.*;
 public class ComputerPlayer extends Player
 {
 	private double [][] PawnVals = {
-			{	0,   0,   0,   0,   0,   0,   0,   0, },
+			{ 800, 800, 800, 800, 800, 800, 800, 800, },
 			{	5,  10,  15,  20,  20,  15,  10,   5, },
 			{	4,   8,  12,  16,  16,  12,   8,   4, },
 			{	3,   6,   9,  12,  12,   9,   6,   3, },

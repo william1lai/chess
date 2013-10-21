@@ -37,9 +37,23 @@ public class StandardChessGame extends Game implements Runnable
 		blackCanCastleKingside = true;
 		blackCanCastleQueenside = true;
 
-		//String [] testFEN = { "k-------", "--P----R", "-------K", "--------", "--------", "--------", "--------", "--------"};
+		//String testFEN = "k-------/-------R/-------K/--------/--------/--------/p-------/--------/b";
 		//pseudoFENtoPosition(testFEN);
 
+		setupStandard();
+		
+		p1 = new HumanPlayer("Human WHITE", Definitions.Color.WHITE, this);
+		p2 = new ComputerPlayer("CPU BLACK", Definitions.Color.BLACK, this);
+
+		setTurn(Definitions.Color.WHITE);
+		p1.promptMove();
+
+		m_thread = new Thread(this);
+		m_thread.start();
+	}
+	
+	public void setupStandard()
+	{
 		m_game_board.placePiece(new Rook(0, 0, Definitions.Color.BLACK), 0, 0);
 		m_game_board.placePiece(new Knight(0, 1, Definitions.Color.BLACK), 0, 1);
 		m_game_board.placePiece(new Bishop(0, 2, Definitions.Color.BLACK), 0, 2);
@@ -62,15 +76,6 @@ public class StandardChessGame extends Game implements Runnable
 		for (int c = 0; c < 8; c++) {
 			m_game_board.placePiece(new Pawn(6, c, Definitions.Color.WHITE), 6, c); 
 		}
-
-		p1 = new HumanPlayer("Human WHITE", Definitions.Color.WHITE, this);
-		p2 = new ComputerPlayer("CPU BLACK", Definitions.Color.BLACK, this);
-
-		setTurn(Definitions.Color.WHITE);
-		p1.promptMove();
-
-		m_thread = new Thread(this);
-		m_thread.start();
 	}
 
 	public void run()
@@ -91,9 +96,42 @@ public class StandardChessGame extends Game implements Runnable
 		}
 		System.out.println("The game has ended.");
 	}
-
-	public void pseudoFENtoPosition(String[] FEN)
+	
+	public void pseudoFENtoPosition(String pseudoFEN)
 	{
+		String[] FEN = pseudoFEN.split("/");
+		String details = FEN[8];
+		if (details.charAt(0) == 'w')
+		{
+			setTurn(Definitions.Color.WHITE);
+		}
+		else
+		{
+			setTurn(Definitions.Color.BLACK);
+		}
+		
+		whiteCanCastleQueenside = false;
+		whiteCanCastleKingside = false;
+		blackCanCastleQueenside = false;
+		blackCanCastleKingside = false;
+		
+		if (details.contains("Q"))
+		{
+			whiteCanCastleQueenside = true;
+		}
+		if (details.contains("K"))
+		{
+			whiteCanCastleKingside = true;
+		}
+		if (details.contains("q"))
+		{
+			blackCanCastleQueenside = true;
+		}
+		if (details.contains("k"))
+		{
+			blackCanCastleKingside = true;
+		}		
+		
 		for (int r = 0; r < 8; r++)
 		{
 			String rFEN = FEN[r];
@@ -451,24 +489,33 @@ public class StandardChessGame extends Game implements Runnable
 
 	public void promotePawn(int r, int c, Definitions.Color color)
 	{
-		String[] param = { "Queen", "Rook", "Knight", "Bishop" };
-		String input = (String) JOptionPane.showInputDialog(null, "Which piece do you want to promote to?", "Pawn Promotion", JOptionPane.QUESTION_MESSAGE, null, param, param[0]);
+		Player cur = (whoseTurn() == Definitions.Color.WHITE ? p1 : p2);
 
-		if (input == "Queen")
+		if (cur instanceof HumanPlayer)
+		{
+			String[] param = { "Queen", "Rook", "Knight", "Bishop" };
+			String input = (String) JOptionPane.showInputDialog(null, "Which piece do you want to promote to?", "Pawn Promotion", JOptionPane.QUESTION_MESSAGE, null, param, param[0]);
+
+			if (input == "Queen")
+			{
+				m_game_board.placePiece(new Queen(r, c, color), r, c);
+			}
+			else if (input == "Rook")
+			{
+				m_game_board.placePiece(new Rook(r, c, color), r, c);
+			}
+			else if (input == "Knight")
+			{
+				m_game_board.placePiece(new Knight(r, c, color), r, c);			
+			}
+			else //Bishop
+			{
+				m_game_board.placePiece(new Bishop(r, c, color), r, c);
+			}
+		}
+		else //AI chooses queen for now
 		{
 			m_game_board.placePiece(new Queen(r, c, color), r, c);
-		}
-		else if (input == "Rook")
-		{
-			m_game_board.placePiece(new Rook(r, c, color), r, c);
-		}
-		else if (input == "Knight")
-		{
-			m_game_board.placePiece(new Knight(r, c, color), r, c);			
-		}
-		else //Bishop
-		{
-			m_game_board.placePiece(new Bishop(r, c, color), r, c);
 		}
 	}
 

@@ -94,8 +94,8 @@ public abstract class Piece
 	
 	public String toString()
 	{
-		if (m_color == Definitions.Color.WHITE) return "W" + getName();
-		return "B" + getName();
+		if (m_color == Definitions.Color.WHITE) return getName();
+		return getName().toLowerCase();
 	}
 	
 	public abstract ArrayList<Move> getMoves();

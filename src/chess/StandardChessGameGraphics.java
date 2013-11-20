@@ -46,14 +46,14 @@ public class StandardChessGameGraphics
 		//g.fillOval(m_boardOffsetX + m_blockSize * (Definitions.NUMCOLS+1) + 5, m_boardOffsetY + 10 + turnOffset, 10, 10);
 	}
 	
-	public void drawEndMessage(Graphics g, Definitions.Color winner)
+	public void drawEndMessage(Graphics g, Definitions.Color winner, String reason)
 	{
 		g.setColor(Color.BLACK);
 		g.setFont(new Font("Lucida Bright", Font.BOLD, 25));
 		String message;
 		if (winner == null) //stalemate
 		{
-			message = "Stalemate!";
+			message = "Draw by " + reason + "!";
 		}
 		else if (winner == Definitions.Color.WHITE)
 		{
@@ -74,7 +74,12 @@ public class StandardChessGameGraphics
 	
 	public void drawPiece(Graphics g, Piece p, int x, int y)
 	{
-		g.drawImage(m_gPieces.get(p.toString()), x, y, m_blockSize, m_blockSize, null);
+		String pstr = p.toString();
+		if (p.color() == Definitions.Color.WHITE)
+			pstr = "W" + pstr;
+		else
+			pstr = "B" + pstr.toUpperCase();
+		g.drawImage(m_gPieces.get(pstr), x, y, m_blockSize, m_blockSize, null);
 	}
 	
 	public void drawMarkers(Graphics g)

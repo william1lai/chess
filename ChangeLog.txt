@@ -1,6 +1,17 @@
 ChangeLog
 
 Name: William Lai
+Date: 11-19-2013
+Description: Many AI changes, work in progress
+    * TODO.txt: Many new changes to come soon. Most important is restructuring of Game-Board relationship so that we don't have to pass a Game object along each time we evaluate a new node. So we will be having some game logic within the Board class (like en passant, castling, etc.). Probably will be implemented as a subclass of Board).
+    * src/chess/Board.java: Implemented position-to-FEN function.
+    * src/chess/ComputerPlayer.java: Implemented alpha-beta pruning, with captures being prioritized for optimization in positions with many captures. Also implemented a small opening book hash map.
+    * src/chess/Move.java: Added copy constructor.
+    * src/chess/Piece.java: Changed toString function so that the toString function of Board is more readable.
+    * src/chess/StandardChessGame.java: Upgraded pseudo-FEN parser to a real FEN parser. Also implemented part of position-to-FEN function (another reason why Board should have some game logic, so we don't need this function here).
+    * src/chess/StandardChessGameGraphics.java: Because Piece's toString function was changed, changed had to be made to the image-loading.
+
+Name: William Lai
 Date: 10-20-2013
 Description: Yet another bug fix, added end-of-game message
     * src/chess/ComputerPlayer.java: Fixed AI freezing from checkmate in one moves.

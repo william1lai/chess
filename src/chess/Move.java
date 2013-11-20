@@ -14,6 +14,14 @@ public class Move
 		rf = rrf;
 		cf = ccf;
 	}
+	
+	Move(Move other)
+	{
+		r0 = other.r0;
+		c0 = other.c0;
+		rf = other.rf;
+		cf = other.cf;
+	}
 
 	public String toString()
 	{

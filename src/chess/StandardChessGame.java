@@ -25,6 +25,8 @@ public class StandardChessGame extends Game implements Runnable
 	private boolean whiteCanCastleQueenside; //false if queen's rook or king have moved
 	private boolean blackCanCastleKingside;
 	private boolean blackCanCastleQueenside;
+	private int fiftymoverulecount;
+	private int turncount;
 
 	public void init()
 	{
@@ -36,22 +38,28 @@ public class StandardChessGame extends Game implements Runnable
 		whiteCanCastleQueenside = true;		
 		blackCanCastleKingside = true;
 		blackCanCastleQueenside = true;
-
-		//String testFEN = "k-------/-------R/-------K/--------/--------/--------/p-------/--------/b";
-		//pseudoFENtoPosition(testFEN);
-
-		setupStandard();
+		fiftymoverulecount = 0;
+		enpassantCol = -1;
 		
+		String testFEN = "k7/7Q/K7/8/8/8/8/8 w - - 0 37";
+		//String testFEN = "rnbqkbnr/pp1ppppp/8/2p5/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq - 1 2";
+		FENtoPosition(testFEN);
+
+		//setupStandard();
+
+		//p1 = new HumanPlayer("Human WHITE", Definitions.Color.WHITE, this);
 		p1 = new HumanPlayer("Human WHITE", Definitions.Color.WHITE, this);
 		p2 = new ComputerPlayer("CPU BLACK", Definitions.Color.BLACK, this);
 
-		setTurn(Definitions.Color.WHITE);
-		p1.promptMove();
-
 		m_thread = new Thread(this);
 		m_thread.start();
+		
+		if (whoseTurn() == Definitions.Color.WHITE)
+			p1.promptMove();
+		else
+			p2.promptMove();
 	}
-	
+
 	public void setupStandard()
 	{
 		m_game_board.placePiece(new Rook(0, 0, Definitions.Color.BLACK), 0, 0);
@@ -76,6 +84,9 @@ public class StandardChessGame extends Game implements Runnable
 		for (int c = 0; c < 8; c++) {
 			m_game_board.placePiece(new Pawn(6, c, Definitions.Color.WHITE), 6, c); 
 		}
+		
+		turncount = 0;
+		setTurn(Definitions.Color.WHITE);
 	}
 
 	public void run()
@@ -83,11 +94,14 @@ public class StandardChessGame extends Game implements Runnable
 		Definitions.State state;
 		while (true) {
 			Player cur = (whoseTurn() == Definitions.Color.WHITE ? p1 : p2);
+			if (cur.getColor() == Definitions.Color.WHITE)
+				turncount++;
 			if (cur.isDone()) {
 				processMove(cur.getMove());
 				flipTurn();
 				state = getState(whoseTurn(), m_game_board);				
-				if (state != Definitions.State.NORMAL) {
+				if (state != Definitions.State.NORMAL || fiftymoverulecount >= 100) //50 moves for each side 
+				{
 					break;
 				}
 			}
@@ -95,20 +109,79 @@ public class StandardChessGame extends Game implements Runnable
 			catch (InterruptedException e) {}
 			repaint();
 		}
+		String reason = "";
 		Definitions.Color winner = null; //indicating stalemate by default
 		if (state == Definitions.State.CHECKMATE)
 		{
 			winner = Definitions.flip(whoseTurn());
 		}
-		m_graphics.drawEndMessage(getGraphics(), winner);
+		else if (state == Definitions.State.STALEMATE)
+		{
+			reason = "Stalemate";
+		}
+		else if (fiftymoverulecount >= 100)
+		{
+			reason = "50-move rule";
+		}
+		m_graphics.drawEndMessage(getGraphics(), winner, reason);
 		System.out.println("The game has ended.");
 	}
-	
-	public void pseudoFENtoPosition(String pseudoFEN)
+
+	public String getFEN(boolean complete)
 	{
-		String[] FEN = pseudoFEN.split("/");
-		String details = FEN[8];
-		if (details.charAt(0) == 'w')
+		String FEN = "";
+		String tstr = "w";
+		if (whoseTurn() == Definitions.Color.BLACK)
+			tstr = "b";
+		FEN = FEN + tstr + " ";
+		
+		String cstr = "";
+		if (whiteCanCastleKingside)
+			cstr = cstr + "K";
+		if (whiteCanCastleQueenside)
+			cstr = cstr + "Q";
+		if (blackCanCastleKingside)
+			cstr = cstr + "k";
+		if (blackCanCastleQueenside)
+			cstr = cstr + "q";
+		if (cstr.length() == 0)
+			cstr = "-";
+		FEN = FEN + cstr + " ";
+		
+		String epstr = "";
+		if (enpassantCol >= 0 && enpassantCol < Definitions.NUMCOLS)
+		{
+			epstr = epstr + (char)(enpassantCol + 'a');
+			if (whoseTurn() == Definitions.Color.WHITE)
+				epstr = epstr + "6";
+			else
+				epstr = epstr + "3";
+		}
+		else
+		{
+			epstr = "-";
+		}
+		FEN = FEN + epstr;
+				
+		if (complete)
+			FEN = FEN + " " + Integer.toString(fiftymoverulecount) + " " + Integer.toString(turncount);
+		
+		return FEN;
+	}
+	
+	public void FENtoPosition(String srcFEN)
+	{
+		String[] FEN = srcFEN.split("/");
+		String details = FEN[7].split(" ", 2)[1];
+
+		whiteCanCastleQueenside = false;
+		whiteCanCastleKingside = false;
+		blackCanCastleQueenside = false;
+		blackCanCastleKingside = false;
+
+		String[] detailElems = details.split(" "); //[0]=turn, [1]=castling, [2]=enpassant, [3]=50-move count, [4]=turn num
+		String turn = detailElems[0];
+		if (turn.charAt(0) == 'w')
 		{
 			setTurn(Definitions.Color.WHITE);
 		}
@@ -117,40 +190,50 @@ public class StandardChessGame extends Game implements Runnable
 			setTurn(Definitions.Color.BLACK);
 		}
 		
-		whiteCanCastleQueenside = false;
-		whiteCanCastleKingside = false;
-		blackCanCastleQueenside = false;
-		blackCanCastleKingside = false;
-		
-		if (details.contains("Q"))
+		String castling = detailElems[1];
+		if (castling.contains("Q"))
 		{
 			whiteCanCastleQueenside = true;
 		}
-		if (details.contains("K"))
+		if (castling.contains("K"))
 		{
 			whiteCanCastleKingside = true;
 		}
-		if (details.contains("q"))
+		if (castling.contains("q"))
 		{
 			blackCanCastleQueenside = true;
 		}
-		if (details.contains("k"))
+		if (castling.contains("k"))
 		{
 			blackCanCastleKingside = true;
-		}		
+		}
+		
+		int epcol = detailElems[2].charAt(0) - 'a';
+		if (epcol >= 0 && epcol < 8)
+			enpassantCol = epcol;
+		else
+			enpassantCol = -1;
+		fiftymoverulecount = Integer.parseInt(detailElems[3]);
+		turncount = Integer.parseInt(detailElems[4]);
 		
 		for (int r = 0; r < 8; r++)
 		{
 			String rFEN = FEN[r];
-			for (int c = 0; c < 8; c++)
+			int index = 0;
+			for (int c = 0; c < 8; c++, index++)
 			{
-				char p = rFEN.charAt(c);
+				char p = rFEN.charAt(index);
 				Piece pp = null;
+				
+				int emptysquares = p - '1';
+				if (emptysquares >= 0 && emptysquares <= 8)
+				{
+					c = c + emptysquares; //skip the empty squares, remember that the loop increments c by 1
+					continue;
+				}
 
 				switch (p)
 				{
-				case '-':
-					break;
 				case 'P':
 					pp = new Pawn(r, c, Definitions.Color.WHITE);
 					break;
@@ -194,6 +277,7 @@ public class StandardChessGame extends Game implements Runnable
 				}
 			}
 		}
+		m_game_board.updateKingLocs();
 	}
 
 	public void paint(Graphics g)
@@ -203,8 +287,11 @@ public class StandardChessGame extends Game implements Runnable
 		Graphics backg = backbuffer.getGraphics();
 
 		m_graphics.drawBoard(backg);
-		m_graphics.drawMovable(backg, allMovesPiece(((HumanPlayer)p1).getSelected(), m_game_board));
-		m_graphics.drawSelected(backg, ((HumanPlayer)p1).getSelected());
+		if (p1 instanceof HumanPlayer)
+		{
+			m_graphics.drawMovable(backg, allMovesPiece(((HumanPlayer)p1).getSelected(), m_game_board));
+			m_graphics.drawSelected(backg, ((HumanPlayer)p1).getSelected());
+		}
 		m_graphics.drawBorders(backg);
 		m_graphics.drawMarkers(backg);
 		m_graphics.drawNames(backg, p1, p2, whoseTurn());
@@ -565,6 +652,7 @@ public class StandardChessGame extends Game implements Runnable
 		int row = newMove.r0;
 		int col = newMove.c0;
 		Piece movedPiece = m_game_board.getPiece(row, col);
+		fiftymoverulecount = fiftymoverulecount + 1;
 
 		int castlingRow;
 		if (whoseTurn() == Definitions.Color.WHITE)
@@ -580,6 +668,7 @@ public class StandardChessGame extends Game implements Runnable
 		enpassantCol = -1; //default
 		if (movedPiece instanceof Pawn)
 		{
+			fiftymoverulecount = 0; //pawn was moved
 			if (Math.abs(newMove.rf - newMove.r0) == 2)
 			{
 				enpassantCol = newMove.c0; //enpassant now available on this column
@@ -649,6 +738,11 @@ public class StandardChessGame extends Game implements Runnable
 			}
 		}
 
+		if (m_game_board.getPiece(newMove.rf, newMove.cf) != null) //capture was made
+		{
+			fiftymoverulecount = 0; //reset counter
+		}
+
 		m_animation.animateMove(getGraphics(), newMove, m_game_board);
 		m_game_board.move(newMove); //has to be down here for time being because en passant needs to know dest sq is empty; fix if you can
 
@@ -665,7 +759,7 @@ public class StandardChessGame extends Game implements Runnable
 			{
 				promotePawn(newMove.rf, newMove.cf, whoseTurn());
 			}
-		}
+		}		
 	}
 
 	//Prevents flickering when repainting
@@ -687,5 +781,4 @@ public class StandardChessGame extends Game implements Runnable
 	public void mouseEntered(MouseEvent e) {}
 	public void mouseExited(MouseEvent e) {}
 	public void mousePressed(MouseEvent e) {}
-
 }

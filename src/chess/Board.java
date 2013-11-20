@@ -53,6 +53,28 @@ public class Board
 		return m_blackKingLoc;
 	}
 
+	public void updateKingLocs()
+	{
+		for (int r = 0; r < Definitions.NUMROWS; r++)
+		{
+			for (int c = 0; c < Definitions.NUMCOLS; c++)
+			{
+				Piece p = getPiece(r, c);
+				if (p instanceof King)
+				{
+					if (p.color() == Definitions.Color.WHITE)
+					{
+						m_whiteKingLoc = r*10 + c;
+					}
+					else
+					{
+						m_blackKingLoc = r*10 + c;
+					}
+				}
+			}
+		}
+	}
+	
 	public Definitions.State getState(Definitions.Color color)
 	{
 		if (color == Definitions.Color.WHITE)
@@ -157,6 +179,71 @@ public class Board
 		return diagram;
 	}
 
+	public String toFEN() //note that this only contains partial FEN, only what the board can see
+	{
+		String FEN = "";
+		for (int r = 0; r < Definitions.NUMROWS; r++)
+		{
+			for (int c = 0; c < Definitions.NUMCOLS; c++)
+			{
+				int count = 0; //count up consecutive empty squares
+				Piece p = getPiece(r, c);
+				
+				if (p == null)
+				{
+					count++;
+					c++;
+					p = getPiece(r, c);
+					while (p == null && c < Definitions.NUMCOLS)
+					{
+						count++;
+						c++;
+						p = getPiece(r, c);
+					}
+					c--; //we want to look at this piece in the next iteration
+					FEN = FEN + count;
+				}
+				else
+				{
+					if (p.color() == Definitions.Color.WHITE)
+					{
+						if (p instanceof Pawn)
+							FEN = FEN + "P";
+						else if (p instanceof Knight)
+							FEN = FEN + "N";
+						else if (p instanceof Bishop)
+							FEN = FEN + "B";
+						else if (p instanceof Rook)
+							FEN = FEN + "R";
+						else if (p instanceof Queen)
+							FEN = FEN + "Q";
+						else if (p instanceof King)
+							FEN = FEN + "K";
+					}
+					else
+					{
+						if (p instanceof Pawn)
+							FEN = FEN + "p";
+						else if (p instanceof Knight)
+							FEN = FEN + "n";
+						else if (p instanceof Bishop)
+							FEN = FEN + "b";
+						else if (p instanceof Rook)
+							FEN = FEN + "r";
+						else if (p instanceof Queen)
+							FEN = FEN + "q";
+						else if (p instanceof King)
+							FEN = FEN + "k";
+					}
+				}
+			}
+			if (r != 7) //last row doesn't need slash
+				FEN = FEN + "/";
+		}
+		
+		return FEN;
+	}
+	
 	public static boolean isLegal(int r, int c) //checks if square is within bounds of board
 	{
 		return ((r >= 0) && (r < Definitions.NUMROWS) && (c >= 0) && (c < Definitions.NUMCOLS));

@@ -5,18 +5,17 @@ Game Logic
 Game Architecture
 - Use bitboards for speed considerations (optional)
 - pre-processing move generation
-- Will be changing structure of program so that board contains some game logic
+- Will be changing structure of program so that board contains some game logic [in progress]
 
 AI
-- Opening book
 - Transposition tables (optional)
 - History tables (optional)
 - Improve eval function
+- Move extensions [in progress]
 
 Animation/UI
 - Menu when starting up applet
-- Display something when the game ends
 
 Miscellaneous
 - Move parser for better testing
-- convert position to pseudo-FEN
+- change toString function to print squares instead of coordinates [in progress]

@@ -1,6 +1,16 @@
 ChangeLog
 
 Name: William Lai
+Date: 11-29-2013
+Description: More AI changes, work in progress
+    * TODO.txt: See this file for changes to be made and changes in progress
+    * src/chess/Board.java: Changed to an abstract class
+    * src/chess/ComputerPlayer.java: Fixed alpha-beta pruning, added iterative deepening search, added hash move list (moves remembered from previous shallower searches). Also now reports time taken at each depth.
+    * src/chess/Definitions.java: Changed definition of depth
+    * src/chess/StandardChessGame.java: Bug fix so that game ends when AI returns null move, instead of crashing
+    * src/chess/StandardChessBoard.java: New class derived from Board that will contain game logic. Still in progress of integrating this into other classes.
+
+Name: William Lai
 Date: 11-19-2013
 Description: Many AI changes, work in progress
     * TODO.txt: Many new changes to come soon. Most important is restructuring of Game-Board relationship so that we don't have to pass a Game object along each time we evaluate a new node. So we will be having some game logic within the Board class (like en passant, castling, etc.). Probably will be implemented as a subclass of Board).

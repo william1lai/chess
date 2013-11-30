@@ -16,7 +16,7 @@ import javax.swing.JOptionPane;
 public class StandardChessGame extends Game implements Runnable
 {
 	private Thread m_thread;
-	private Board m_game_board;
+	private StandardChessBoard m_game_board;
 	private StandardChessGameGraphics m_graphics;
 	private StandardChessGameAnimation m_animation;
 
@@ -30,7 +30,7 @@ public class StandardChessGame extends Game implements Runnable
 
 	public void init()
 	{
-		m_game_board = new Board();
+		m_game_board = new StandardChessBoard();
 		m_graphics = new StandardChessGameGraphics();
 		m_animation = new StandardChessGameAnimation(m_graphics);
 
@@ -41,13 +41,13 @@ public class StandardChessGame extends Game implements Runnable
 		fiftymoverulecount = 0;
 		enpassantCol = -1;
 		
-		String testFEN = "k7/7Q/K7/8/8/8/8/8 w - - 0 37";
+		//String testFEN = "1k6/2q2ppr/7p/2p5/3p2K1/2r5/8/8 w - - 0 37";
+		//String testFEN = "1K6/2q6/k7/8/8/8/8/8 w - - 0 37";
 		//String testFEN = "rnbqkbnr/pp1ppppp/8/2p5/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq - 1 2";
-		FENtoPosition(testFEN);
+		//FENtoPosition(testFEN);
 
-		//setupStandard();
+		setupStandard();
 
-		//p1 = new HumanPlayer("Human WHITE", Definitions.Color.WHITE, this);
 		p1 = new HumanPlayer("Human WHITE", Definitions.Color.WHITE, this);
 		p2 = new ComputerPlayer("CPU BLACK", Definitions.Color.BLACK, this);
 
@@ -91,19 +91,21 @@ public class StandardChessGame extends Game implements Runnable
 
 	public void run()
 	{
-		Definitions.State state;
-		while (true) {
+		Definitions.State state = getState(whoseTurn(), m_game_board);
+		while (state == Definitions.State.NORMAL && fiftymoverulecount < 100) //50 moves for each side
+		{
 			Player cur = (whoseTurn() == Definitions.Color.WHITE ? p1 : p2);
 			if (cur.getColor() == Definitions.Color.WHITE)
 				turncount++;
-			if (cur.isDone()) {
-				processMove(cur.getMove());
-				flipTurn();
-				state = getState(whoseTurn(), m_game_board);				
-				if (state != Definitions.State.NORMAL || fiftymoverulecount >= 100) //50 moves for each side 
-				{
+			if (cur.isDone()) 
+			{
+				Move m = cur.getMove();
+				if (m == null)
 					break;
-				}
+				
+				processMove(m);
+				flipTurn();
+				state = getState(whoseTurn(), m_game_board);
 			}
 			try { Thread.sleep(30); }
 			catch (InterruptedException e) {}
@@ -300,7 +302,7 @@ public class StandardChessGame extends Game implements Runnable
 		g.drawImage(backbuffer, 0, 0, this);
 	}
 
-	public Board getBoard()
+	public StandardChessBoard getBoard()
 	{
 		return m_game_board;
 	}
@@ -308,15 +310,16 @@ public class StandardChessGame extends Game implements Runnable
 	public boolean isLegalMove(Move m, Board b, Definitions.Color color)
 	{		
 		//generate moves and use board to determine legality (is there a piece in the way? etc.)
+		StandardChessBoard scb = (StandardChessBoard)b;
 
-		Piece p = b.getPiece(m.r0, m.c0);
+		Piece p = scb.getPiece(m.r0, m.c0);
 
 		if ((p == null) || (p.color() != color))
 		{
 			return false; //source square has no piece, or selected piece is opponent's piece
 		}
 
-		Piece destination = b.getPiece(m.rf, m.cf);
+		Piece destination = scb.getPiece(m.rf, m.cf);
 		boolean occupiedDest = (destination != null);
 		ArrayList<Move> moves = p.getMoves();
 
@@ -327,10 +330,10 @@ public class StandardChessGame extends Game implements Runnable
 
 		if (moves.contains(m))
 		{
-			Board tempBoard = b.clone(); //clone board
+			StandardChessBoard tempBoard = scb.clone(); //clone board
 			tempBoard.move(m);
 
-			if (!(p instanceof Knight) && (hasPieceInWay(m, b))) 
+			if (!(p instanceof Knight) && (hasPieceInWay(m, scb))) 
 				//if it's not a knight, it can't jump
 			{
 				return false;
@@ -364,17 +367,17 @@ public class StandardChessGame extends Game implements Runnable
 
 				if (canCastleKingside && m.cf - m.c0 > 1) //kingside castle attempt
 				{
-					Board temp = new Board(b);
+					StandardChessBoard temp = scb.clone();
 					Move intermediate = new Move(m.r0, m.c0, m.r0, m.c0 + 1);
 					temp.move(intermediate);
-					return (canCastleKingside && !inCheck(color, temp) && !inCheck(color, b)); //can't be in check
+					return (canCastleKingside && !inCheck(color, temp) && !inCheck(color, scb)); //can't be in check
 				}
 				if (canCastleQueenside && m.cf - m.c0 < -1) //queenside castle attempt
 				{
-					Board temp = new Board(b);
+					StandardChessBoard temp = scb.clone();
 					Move intermediate = new Move(m.r0, m.c0, m.r0, m.c0 - 1);
 					temp.move(intermediate);
-					return (canCastleQueenside && !inCheck(color, temp) && !inCheck(color, b)); //can't be in check
+					return (canCastleQueenside && !inCheck(color, temp) && !inCheck(color, scb)); //can't be in check
 				}
 				if (Math.abs(m.cf - m.c0) <= 1)
 				{
@@ -386,7 +389,7 @@ public class StandardChessGame extends Game implements Runnable
 			{
 				if (m.cf != m.c0) //changed columns; must be capture
 				{
-					boolean validCapture = (b.getPiece(m.rf, m.cf) != null); //can't be our own piece because of earlier check
+					boolean validCapture = (scb.getPiece(m.rf, m.cf) != null); //can't be our own piece because of earlier check
 					boolean enpassant;
 					if (color == Definitions.Color.WHITE)
 						enpassant = ((m.cf == enpassantCol) && (m.r0 == 3));
@@ -399,12 +402,12 @@ public class StandardChessGame extends Game implements Runnable
 				{
 					if (m.rf - m.r0 == 2) //push two squares
 					{
-						return (b.getPiece((m.rf + m.r0) / 2, m.cf) == null)
-								&& (b.getPiece(m.rf, m.cf) == null); //both squares empty
+						return (scb.getPiece((m.rf + m.r0) / 2, m.cf) == null)
+								&& (scb.getPiece(m.rf, m.cf) == null); //both squares empty
 					}
 					else //push one square
 					{
-						return (b.getPiece(m.rf, m.cf) == null); //square empty
+						return (scb.getPiece(m.rf, m.cf) == null); //square empty
 					}
 				}
 			}
@@ -413,14 +416,14 @@ public class StandardChessGame extends Game implements Runnable
 		return false; //move is not in our move list
 	}
 
-	public ArrayList<Move> allMovesPiece(Piece p, Board b)
+	public ArrayList<Move> allMovesPiece(Piece p, StandardChessBoard scb)
 	{
 		if (p == null) return null;
 		ArrayList<Move> legalMoves = new ArrayList<Move>();
 		ArrayList<Move> temp = p.getMoves();
 		for (Move m : temp)
 		{
-			if (this.isLegalMove(m, b, p.color()))
+			if (this.isLegalMove(m, scb, p.color()))
 			{
 				legalMoves.add(m);
 			}
@@ -428,7 +431,7 @@ public class StandardChessGame extends Game implements Runnable
 		return legalMoves;
 	}
 
-	public ArrayList<Move> allMoves(Definitions.Color color, Board b)
+	public ArrayList<Move> allMoves(Definitions.Color color, StandardChessBoard scb)
 	{
 		ArrayList<Move> legalMoves = new ArrayList<Move>();
 
@@ -436,24 +439,24 @@ public class StandardChessGame extends Game implements Runnable
 		{
 			for (int c = 0; c < 8; c++)
 			{
-				Piece p = b.getPiece(r, c);
+				Piece p = scb.getPiece(r, c);
 				if (p != null && p.color() == color)
 				{
-					legalMoves.addAll(allMovesPiece(p, b));
+					legalMoves.addAll(allMovesPiece(p, scb));
 				}
 			}
 		}
 		return legalMoves;
 	}
 
-	private boolean hasPieceInWay(Move m, Board b)
+	private boolean hasPieceInWay(Move m, StandardChessBoard scb)
 	{
 		int dc = m.cf - m.c0;
 		int dr = m.rf - m.r0; //remember rows are counted from the top
 		int cinc; //1, 0, or -1, depending on which direction the piece is headed
 		int rinc; //1, 0, or -1
 
-		Piece p = b.getPiece(m.r0, m.c0);
+		Piece p = scb.getPiece(m.r0, m.c0);
 		if (p == null || p instanceof Knight)
 			return false; //vacuously false for no piece, and automatically false for knights 
 
@@ -487,7 +490,7 @@ public class StandardChessGame extends Game implements Runnable
 		int c = m.c0 + cinc;
 		while (!((r == m.rf) && (c == m.cf)))
 		{
-			if (b.getPiece(r, c) != null)
+			if (scb.getPiece(r, c) != null)
 			{
 				//System.out.println("Piece in way. Row: " + r + ", Col: " + c); //debugging pieces
 				return true; //there is a piece in our way
@@ -500,19 +503,19 @@ public class StandardChessGame extends Game implements Runnable
 
 	//moving to Game class from Board class, since the Board doesn't necessarily know rules of game
 	//added Board argument since you might want to check temporary boards too
-	public boolean inCheck(Definitions.Color color, Board b)
+	public boolean inCheck(Definitions.Color color, StandardChessBoard scb)
 	{		
 		int kingR; 
 		int kingC;
 		if (color == Definitions.Color.WHITE)
 		{
-			int temp = b.getWhiteKingLoc();
+			int temp = scb.getWhiteKingLoc();
 			kingR = temp / 10;
 			kingC = temp % 10;
 		}
 		else
 		{
-			int temp = b.getBlackKingLoc();
+			int temp = scb.getBlackKingLoc();
 			kingR = temp / 10;
 			kingC = temp % 10;
 		}
@@ -521,11 +524,14 @@ public class StandardChessGame extends Game implements Runnable
 		{
 			for (int c = 0; c < Definitions.NUMCOLS; c++)
 			{
-				Piece temp = b.getPiece(r, c);
+				Piece temp = scb.getPiece(r, c);
 				Move m = new Move(r, c, kingR, kingC);
-				if ((temp != null) && (temp.color() != color) && (temp.getThreats().contains(m)))
+				ArrayList<Move> alm = new ArrayList<Move>(); //TODO
+				if (temp != null)
+					alm = temp.getThreats();
+				if ((temp != null) && (temp.color() != color) && (alm.contains(m)))
 				{
-					if (temp instanceof Knight || !hasPieceInWay(m, b))
+					if (temp instanceof Knight || !hasPieceInWay(m, scb))
 					{
 						//System.out.println("In check. Row: " + r + ", Column: " + c); //for debugging purposes
 						return true;
@@ -536,48 +542,48 @@ public class StandardChessGame extends Game implements Runnable
 		return false; //no pieces can capture king
 	}
 
-	public boolean isCheckmate(Definitions.Color color, Board b)
+	public boolean isCheckmate(Definitions.Color color, StandardChessBoard scb)
 	{		
-		boolean check = inCheck(color, b);
-		return (check && allMoves(color, b).size() == 0);
+		boolean check = inCheck(color, scb);
+		return (check && allMoves(color, scb).size() == 0);
 	}
 
-	public boolean isStalemate(Definitions.Color color, Board b)
+	public boolean isStalemate(Definitions.Color color, StandardChessBoard scb)
 	{		
-		boolean check = inCheck(color, b);
-		ArrayList<Move> mvs = allMoves(whoseTurn(), b);
+		boolean check = inCheck(color, scb);
+		ArrayList<Move> mvs = allMoves(whoseTurn(), scb);
 		return (!check && mvs.size() == 0);
 	}
 
-	public Definitions.State getState(Definitions.Color color, Board b)
+	public Definitions.State getState(Definitions.Color color, StandardChessBoard scb)
 	{
-		if (b.getState(color) == Definitions.State.UNCHECKED)
+		if (scb.getState(color) == Definitions.State.UNCHECKED)
 		{
-			boolean isInCheck = inCheck(color, b);
-			int moves = allMoves(color, b).size();
+			boolean isInCheck = inCheck(color, scb);
+			int moves = allMoves(color, scb).size();
 
 			if (moves == 0)
 			{
 				if (isInCheck)
 				{
-					b.setState(color, Definitions.State.CHECKMATE);
+					scb.setState(color, Definitions.State.CHECKMATE);
 					return Definitions.State.CHECKMATE;
 				}
 				else
 				{
-					b.setState(color, Definitions.State.STALEMATE);
+					scb.setState(color, Definitions.State.STALEMATE);
 					return Definitions.State.STALEMATE;
 				}
 			}
 			else
 			{
-				b.setState(color, Definitions.State.NORMAL);
+				scb.setState(color, Definitions.State.NORMAL);
 				return Definitions.State.NORMAL;
 			}
 		}
 		else
 		{
-			return b.getState(color);
+			return scb.getState(color);
 		}
 	}
 

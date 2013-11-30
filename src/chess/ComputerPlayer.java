@@ -5,26 +5,38 @@ import java.util.*;
 
 public class ComputerPlayer extends Player
 {
-	final class MoveScore
+	private static final double MATE_SCORE = 9999.9999;
+	
+	final class MovelistScore
 	{
-		private Move m_move;
+		private ArrayList<Move> m_movelist;
 		private double m_score;
 		
-		public MoveScore(Move m, double score)
+		public MovelistScore(ArrayList<Move> mlist, double score)
 		{
-			m_move = m;
+			m_movelist = new ArrayList<Move>();
+			if (mlist != null)
+			{
+				for (Move m : mlist)
+					m_movelist.add(m);
+			}
 			m_score = score;
 		}
 		
-		public MoveScore(MoveScore other)
+		public MovelistScore(MovelistScore other)
 		{
-			m_move = other.m_move;
+			m_movelist = new ArrayList<Move>();
+			if (other.m_movelist != null)
+			{
+				for (Move m : other.m_movelist)
+					m_movelist.add(m);
+			}
 			m_score = other.m_score;
 		}
 		
-		public Move getMove()
+		public ArrayList<Move> getMovelist()
 		{
-			return m_move;
+			return m_movelist;
 		}
 		
 		public double getScore()
@@ -32,9 +44,16 @@ public class ComputerPlayer extends Player
 			return m_score;
 		}
 		
-		public void setMove(Move m)
+		public void replaceMove(Move m)
 		{
-			m_move = m;
+			//m_movelist.remove(m_movelist.size() - 1);
+			m_movelist.remove(0);
+			m_movelist.add(0, m);
+		}
+		
+		public void addMove(Move m)
+		{
+			m_movelist.add(0, m);
 		}
 		
 		public void setScore(double score)
@@ -47,11 +66,13 @@ public class ComputerPlayer extends Player
 			if (m_move == null)
 				return "No move";
 			
-			return ("[" + m_move.toString() + ", " + m_score + "]");
+			return ("[" + m_movelist.toString() + ", " + m_score + "]");
 		}
 	}
 
 	private HashMap<String, Move> m_book;
+	
+	private ArrayList<Move> hashmoves;
 	
 	private double [][] PawnVals = {
 			{ 800, 800, 800, 800, 800, 800, 800, 800, },
@@ -106,7 +127,7 @@ public class ComputerPlayer extends Player
 	}
 
 	public void promptMove()
-	{
+	{		
 		if (getGame() instanceof StandardChessGame)
 		{
 			m_done = false;
@@ -119,7 +140,7 @@ public class ComputerPlayer extends Player
 	{
 		StandardChessGame g = (StandardChessGame)getGame();
 		initOpeningBook();
-		m_move = evaluate(g, g.whoseTurn(), g.getBoard(), Definitions.PLY_DEPTH);
+		m_move = evaluate(g, g.whoseTurn(), g.getBoard(), Definitions.DEPTH);
 		m_done = true;
 	}
 	
@@ -159,105 +180,178 @@ public class ComputerPlayer extends Player
 		m_book.put("", new Move(6, 4, 4, 4));*/
 	}
 	
-	public Move evaluate(StandardChessGame g, Definitions.Color turn, Board b, int depth) //uses brute force
+	public Move evaluate(StandardChessGame g, Definitions.Color turn, StandardChessBoard scb, int depth)
 	{
-		String completeFEN = b.toFEN() + " " + g.getFEN(false);
+		String completeFEN = scb.toFEN() + " " + g.getFEN(false);
 		System.out.println(completeFEN);
 		Move opening = m_book.get(completeFEN);
 		if (opening != null)
 			return opening; //found in book
-
-		Move best;
-		ArrayList<Move> mvlist = g.allMoves(turn, b);
-		if (mvlist.size() > 0)
-			best = mvlist.get(0); //random move is best by default
-		else
-			return null;
 		
-		double highScore = staticEval(turn, b);
+		double highScore = staticEval(turn, scb);
 		System.out.println("Current Score: " + highScore);
+		MovelistScore bms = new MovelistScore(null, 0);
+		hashmoves = new ArrayList<Move>();
 		
-		MoveScore ms = alphabetaMax(g, turn, b, new MoveScore(best, highScore - 5.0), 
-				new MoveScore(best, Double.POSITIVE_INFINITY), depth);
-		highScore = ms.getScore();
-		best = ms.getMove();
-				System.out.println("Best: " + best + ": " + highScore);
+		for (int d = 1; d <= depth; d++)
+		{
+			long starttime = System.nanoTime();			
+			bms = new MovelistScore(alphabetaMax(g, turn, scb, highScore - 5.0, 
+					Double.POSITIVE_INFINITY, 0, 2*d, true));
+			long endtime = System.nanoTime();
+			double duration = ((endtime - starttime) / 100000) / 10000.0;
+			highScore = bms.getScore();
+			System.out.println("Depth " + d + ": " + bms.getMovelist() + ", " + highScore + "; " + duration + " s");
+						
+			hashmoves.clear();
+			for (Move m : bms.getMovelist())
+				hashmoves.add(m);
+			
+			if (highScore == MATE_SCORE)
+				break; //if we found checkmate, don't look deeper
+		}
 		System.out.println();
-		return best;
+		return hashmoves.get(0); //the best next move
 	}
 
-	private MoveScore alphabetaMax(StandardChessGame g, Definitions.Color turn, Board b, MoveScore alpha, MoveScore beta, int depth)
+	private MovelistScore alphabetaMax(StandardChessGame g, Definitions.Color turn, StandardChessBoard scb, 
+			double alpha, double beta, int ply, int maxply, boolean considerHashMoves)
 	{
-		if (depth == 0)
-			return new MoveScore(null, staticEval(turn, b));
+		if (ply == maxply)
+		{
+			if (g.inCheck(turn, scb))
+				maxply++;
+			else
+				return new MovelistScore(null, staticEval(turn, scb));
+		}
 		
 		double score;
-		ArrayList<Move> mvs = g.allMoves(turn, b);
+		Move best = null;
+		MovelistScore bms;
+		ArrayList<Move> movelist = new ArrayList<Move>();
+		ArrayList<Move> mvs = g.allMoves(turn, scb);
 		ArrayList<Move> capts = new ArrayList<Move>();
 		for (int i = 0; i < mvs.size(); i++)
 		{
 			Move m = mvs.get(i);
-			if (b.getPiece(m.rf, m.cf) != null)
+			if (scb.getPiece(m.rf, m.cf) != null)
 			{
 				mvs.remove(m);
 				capts.add(m);
 				i--;
 			}
 		}
+		
+		if (considerHashMoves && hashmoves.size() > ply)
+		{
+			StandardChessBoard temp = scb.clone();
+			temp.move(hashmoves.get(ply));
+			bms = alphabetaMin(g, turn, temp, alpha, beta, ply + 1, maxply, true);
+			score = bms.getScore();
+			
+			if (score >= beta)
+				return new MovelistScore(movelist, beta); //fail hard beta-cutoff
+			if (score > alpha)
+			{
+				alpha = score;
+				best = hashmoves.get(ply);
+				movelist = new ArrayList<Move>(bms.getMovelist());
+				movelist.add(0, best);
+			}
+		}
 		for (Move m : capts) //captures are more forcing, so look at them first to help alpha-beta pruning
 		{
-			Board temp = new Board(b);
+			StandardChessBoard temp = scb.clone();
 			temp.move(m);
-			MoveScore ms = new MoveScore(alphabetaMin(g, turn, temp, alpha, beta, depth - 1));
-			ms.setMove(m);
-			score = ms.getScore();
+			bms = alphabetaMin(g, turn, temp, alpha, beta, ply + 1, maxply, false);
+			score = bms.getScore();
 			
-			if (score >= beta.getScore())
-				return beta; //fail hard beta-cutoff
-			if (score > alpha.getScore())
-				alpha = ms;
+			if (score >= beta)
+				return new MovelistScore(movelist, beta); //fail hard beta-cutoff
+			if (score > alpha)
+			{
+				alpha = score;
+				best = m;
+				movelist = new ArrayList<Move>(bms.getMovelist());
+				movelist.add(0, best);
+			}
 		}
 		for (Move m : mvs)
 		{
-			Board temp = new Board(b);
+			StandardChessBoard temp = scb.clone();
 			temp.move(m);
-			MoveScore ms = new MoveScore(alphabetaMin(g, turn, temp, alpha, beta, depth - 1));
-			ms.setMove(m);
-			score = ms.getScore();
+			bms = new MovelistScore(alphabetaMin(g, turn, temp, alpha, beta, ply + 1, maxply, false));
+			score = bms.getScore();
 			
-			if (score >= beta.getScore())
-				return beta; //fail hard beta-cutoff
-			if (score > alpha.getScore())
-				alpha = ms;
-		}
-		System.out.println("Depth: " + depth + ", Alpha: " + alpha);
-		return alpha;
-	}
-	
-	private MoveScore alphabetaMin(StandardChessGame g, Definitions.Color turn, Board b, MoveScore alpha, MoveScore beta, int depth)
-	{
-		if (depth == 0)
-			return new MoveScore(null, -staticEval(Definitions.flip(turn), b));
-		double score;
-		for (Move m : g.allMoves(Definitions.flip(turn), b))
-		{
-			Board temp = new Board(b);
-			temp.move(m);
-			MoveScore ms = new MoveScore(alphabetaMax(g, turn, temp, alpha, beta, depth - 1));
-			ms.setMove(m);
-			score = ms.getScore();
-			if (score <= alpha.getScore())
+			if (score >= beta)
+				return new MovelistScore(movelist, beta); //fail hard beta-cutoff
+			if (score > alpha)
 			{
-				//System.out.println("Alpha Cutoff: " + alpha);
-				return alpha; //fail hard alpha-cutoff
+				alpha = score;
+				best = m;
+				movelist = new ArrayList<Move>(bms.getMovelist());
+				movelist.add(0, best);
 			}
-			if (score < beta.getScore())
-				beta = ms;
 		}
-		return beta;
+		return new MovelistScore(movelist, alpha);
 	}
 	
-	private double staticEval(Definitions.Color color, Board b)
+	private MovelistScore alphabetaMin(StandardChessGame g, Definitions.Color turn, StandardChessBoard scb, 
+			double alpha, double beta, int ply, int maxply, boolean considerHashMoves)
+	{
+		if (ply == maxply)
+		{
+			if (g.inCheck(turn, scb))
+				maxply++;
+			else
+				return new MovelistScore(null, -staticEval(Definitions.flip(turn), scb));
+		}
+		Move best = null;
+		ArrayList<Move> movelist = new ArrayList<Move>();
+		double score;
+		StandardChessBoard temp;
+		MovelistScore bms = new MovelistScore(null, 0);
+		
+		if (considerHashMoves && hashmoves.size() > ply)
+		{
+			temp = scb.clone();
+			temp.move(hashmoves.get(ply));
+			bms = alphabetaMax(g, turn, temp, alpha, beta, ply + 1, maxply, true);
+			score = bms.getScore();
+			
+			if (score <= alpha)
+				return new MovelistScore(movelist, alpha); //fail hard beta-cutoff
+			if (score < beta)
+			{
+				alpha = score;
+				best = hashmoves.get(ply);
+				movelist = new ArrayList<Move>(bms.getMovelist());
+				movelist.add(0, best);
+			}
+		}
+		
+		for (Move m : g.allMoves(Definitions.flip(turn), scb))
+		{
+			temp = scb.clone();
+			temp.move(m);
+			bms = alphabetaMax(g, turn, temp, alpha, beta, ply + 1, maxply, false);
+			score = bms.getScore();
+			if (score <= alpha)
+			{
+				return new MovelistScore(movelist, alpha); //fail hard alpha-cutoff
+			}
+			if (score < beta)
+			{
+				beta = score;
+				best = m;
+				movelist = new ArrayList<Move>(bms.getMovelist());
+				movelist.add(0, best);				
+			}
+		}
+		return new MovelistScore(movelist, beta);
+	}
+	
+	private double staticEval(Definitions.Color color, StandardChessBoard b)
 	{
 		if (getGame() instanceof StandardChessGame)
 		{
@@ -266,7 +360,7 @@ public class ComputerPlayer extends Player
 			Definitions.State my_state = g.getState(color, b);
 			if (my_state == Definitions.State.CHECKMATE) //instant loss
 			{
-				return Double.NEGATIVE_INFINITY;
+				return -MATE_SCORE;
 			}
 			else if (my_state == Definitions.State.STALEMATE)
 			{
@@ -274,7 +368,7 @@ public class ComputerPlayer extends Player
 			}
 			else if (their_state == Definitions.State.CHECKMATE) //instant win
 			{
-				return Double.POSITIVE_INFINITY;
+				return MATE_SCORE;
 			}			
 		}
 		

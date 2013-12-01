@@ -196,7 +196,7 @@ public class ComputerPlayer extends Player
 		for (int d = 1; d <= depth; d++)
 		{
 			long starttime = System.nanoTime();			
-			bms = new MovelistScore(alphabetaMax(g, turn, scb, highScore - 5.0, 
+			bms = new MovelistScore(alphabetaMax(g, turn, scb, highScore - 5.0,
 					Double.POSITIVE_INFINITY, 0, 2*d, true));
 			long endtime = System.nanoTime();
 			double duration = ((endtime - starttime) / 100000) / 10000.0;
@@ -231,6 +231,10 @@ public class ComputerPlayer extends Player
 		ArrayList<Move> movelist = new ArrayList<Move>();
 		ArrayList<Move> mvs = g.allMoves(turn, scb);
 		ArrayList<Move> capts = new ArrayList<Move>();
+		
+		if (mvs.isEmpty())
+			return new MovelistScore(null, staticEval(turn, scb));
+		
 		for (int i = 0; i < mvs.size(); i++)
 		{
 			Move m = mvs.get(i);
@@ -250,7 +254,9 @@ public class ComputerPlayer extends Player
 			score = bms.getScore();
 			
 			if (score >= beta)
+			{
 				return new MovelistScore(movelist, beta); //fail hard beta-cutoff
+			}
 			if (score > alpha)
 			{
 				alpha = score;
@@ -267,7 +273,9 @@ public class ComputerPlayer extends Player
 			score = bms.getScore();
 			
 			if (score >= beta)
+			{
 				return new MovelistScore(movelist, beta); //fail hard beta-cutoff
+			}
 			if (score > alpha)
 			{
 				alpha = score;
@@ -284,7 +292,9 @@ public class ComputerPlayer extends Player
 			score = bms.getScore();
 			
 			if (score >= beta)
+			{
 				return new MovelistScore(movelist, beta); //fail hard beta-cutoff
+			}
 			if (score > alpha)
 			{
 				alpha = score;
@@ -320,17 +330,25 @@ public class ComputerPlayer extends Player
 			score = bms.getScore();
 			
 			if (score <= alpha)
+			{
 				return new MovelistScore(movelist, alpha); //fail hard beta-cutoff
+			}
 			if (score < beta)
 			{
-				alpha = score;
+				beta = score;
 				best = hashmoves.get(ply);
 				movelist = new ArrayList<Move>(bms.getMovelist());
 				movelist.add(0, best);
 			}
 		}
 		
-		for (Move m : g.allMoves(Definitions.flip(turn), scb))
+		ArrayList<Move> mvs = g.allMoves(Definitions.flip(turn), scb);
+		if (mvs.isEmpty())
+		{
+			return new MovelistScore(null, -staticEval(Definitions.flip(turn), scb));
+		}
+		
+		for (Move m : mvs)
 		{
 			temp = scb.clone();
 			temp.move(m);

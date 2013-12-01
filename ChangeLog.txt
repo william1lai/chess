@@ -1,6 +1,11 @@
 ChangeLog
 
 Name: William Lai
+Date: 12-01-2013
+Description: Bug fix
+    * src/chess/ComputerPlayer.java: Fixed bug that was causing a crash when the AI was seeing a checkmate in its calculation.
+
+Name: William Lai
 Date: 11-29-2013
 Description: More AI changes, work in progress
     * TODO.txt: See this file for changes to be made and changes in progress

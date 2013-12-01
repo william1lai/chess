@@ -11,6 +11,7 @@ AI
 - Transposition tables (optional)
 - History tables (optional)
 - Improve eval function
+- Move ordering [in progress]
 - Move extensions [in progress]
 
 Animation/UI

@@ -41,6 +41,7 @@ public class StandardChessGame extends Game implements Runnable
 		fiftymoverulecount = 0;
 		enpassantCol = -1;
 		
+		//String testFEN = "6k1/8/5r2/7K/8/8/8/5q2 b - - 0 37";
 		//String testFEN = "1k6/2q2ppr/7p/2p5/3p2K1/2r5/8/8 w - - 0 37";
 		//String testFEN = "1K6/2q6/k7/8/8/8/8/8 w - - 0 37";
 		//String testFEN = "rnbqkbnr/pp1ppppp/8/2p5/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq - 1 2";

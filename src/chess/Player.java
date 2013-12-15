@@ -14,14 +14,14 @@ public abstract class Player implements Runnable
 		m_name = name;
 	}
 	
-	public void setGame(Game g)
-	{
-		m_game = g;
-	}
-	
 	public void setColor(Definitions.Color c)
 	{
 		m_color = c;
+	}
+	
+	public void setGame(Game g)
+	{
+		m_game = g;
 	}
 	
 	public String getName()
@@ -29,14 +29,14 @@ public abstract class Player implements Runnable
 		return m_name;
 	}
 	
-	public Game getGame()
-	{
-		return m_game;
-	}
-	
 	public Definitions.Color getColor()
 	{
 		return m_color;
+	}
+	
+	public Game getGame()
+	{
+		return m_game;
 	}
 	
 	public boolean isDone()

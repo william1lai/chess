@@ -25,7 +25,7 @@ public class Move
 
 	public String toString()
 	{
-		return "(" + r0 + ", " + c0 + ")-(" + rf + ", " + cf + ")";
+		return "" + (char)(c0 + 'a') + "" + (8 - r0) + "-" + (char)(cf + 'a') + "" + (8 - rf);
 	}
 
 	public boolean equals(Object obj) //we must have this so that the contains() method works

@@ -17,6 +17,5 @@ AI
 Animation/UI
 - Menu when starting up applet
 
-Miscellaneous
-- Move parser for better testing
-- change toString function to print squares instead of coordinates [in progress]
+
+Branching Factor currently at 8-15 (12/14/13)

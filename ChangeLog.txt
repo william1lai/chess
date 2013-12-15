@@ -1,6 +1,16 @@
 ChangeLog
 
 Name: William Lai
+Date: 12-14-2013
+Description: Overhaul mostly complete
+    * src/chess/Board.java: Turned into abstract class
+    * src/chess/ComputerPlayer.java: Killer moves, iterative deepening, move ordering, depth extension on check
+    * src/chess/Game.java: Removed unnecessary functions
+    * src/chess/Move.java: Now prints long notation
+    * src/chess/StandardChessBoard.java: Finished integrating old Board class into this one
+    * src/chess/StandardChessGame.java: A lot removed and moved into StandardChessBoard
+
+Name: William Lai
 Date: 12-01-2013
 Description: Bug fix
     * src/chess/ComputerPlayer.java: Fixed bug that was causing a crash when the AI was seeing a checkmate in its calculation.

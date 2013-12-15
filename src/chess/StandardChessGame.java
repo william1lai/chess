@@ -1,6 +1,5 @@
 package chess;
 
-import java.util.ArrayList;
 import java.awt.*;
 import java.awt.event.*;
 
@@ -8,9 +7,7 @@ import javax.swing.JOptionPane;
 
 //TODO:
 //Add functionality to make testing more automated. Should be able to interpret move lists, and step forward, maybe even step back
-//Checkmate-checking: Is there any way better than brute-forcing all moves to see if legal or not?
-//
-//Right now, the promptMove part for Players is a bit circular. Need to think about how to restructure program.
+//Checkmate-checking: Is there any way better than brute-forcing all moves to see if legal or not?.
 
 @SuppressWarnings("serial")
 public class StandardChessGame extends Game implements Runnable
@@ -20,42 +17,30 @@ public class StandardChessGame extends Game implements Runnable
 	private StandardChessGameGraphics m_graphics;
 	private StandardChessGameAnimation m_animation;
 
-	private int enpassantCol; //the column (0-7) of the pawn to move two spaces last turn, -1 if no pawn moved two spaces
-	private boolean whiteCanCastleKingside; //false if king's rook or king have moved
-	private boolean whiteCanCastleQueenside; //false if queen's rook or king have moved
-	private boolean blackCanCastleKingside;
-	private boolean blackCanCastleQueenside;
-	private int fiftymoverulecount;
-	private int turncount;
-
 	public void init()
 	{
 		m_game_board = new StandardChessBoard();
 		m_graphics = new StandardChessGameGraphics();
 		m_animation = new StandardChessGameAnimation(m_graphics);
-
-		whiteCanCastleKingside = true;
-		whiteCanCastleQueenside = true;		
-		blackCanCastleKingside = true;
-		blackCanCastleQueenside = true;
-		fiftymoverulecount = 0;
-		enpassantCol = -1;
 		
-		//String testFEN = "6k1/8/5r2/7K/8/8/8/5q2 b - - 0 37";
-		//String testFEN = "1k6/2q2ppr/7p/2p5/3p2K1/2r5/8/8 w - - 0 37";
+		//String testFEN = "8/8/7P/8/8/8/8/k5K1 b - - 0 37";
+		//String testFEN = "6k1/8/5r2/6K1/8/8/8/5q2 w - - 0 37";
+		String testFEN = "1k6/2q2ppr/7p/2p5/3p2K1/2r5/8/8 w - - 0 37";
 		//String testFEN = "1K6/2q6/k7/8/8/8/8/8 w - - 0 37";
 		//String testFEN = "rnbqkbnr/pp1ppppp/8/2p5/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq - 1 2";
-		//FENtoPosition(testFEN);
+		m_game_board.FENtoPosition(testFEN);
 
-		setupStandard();
+		//setupStandard();
 
 		p1 = new HumanPlayer("Human WHITE", Definitions.Color.WHITE, this);
+		//p2 = new HumanPlayer("Human BLACK", Definitions.Color.BLACK, this);
+		//p1 = new ComputerPlayer("CPU WHITE", Definitions.Color.WHITE, this);
 		p2 = new ComputerPlayer("CPU BLACK", Definitions.Color.BLACK, this);
 
 		m_thread = new Thread(this);
 		m_thread.start();
 		
-		if (whoseTurn() == Definitions.Color.WHITE)
+		if (m_game_board.whoseTurn() == Definitions.Color.WHITE)
 			p1.promptMove();
 		else
 			p2.promptMove();
@@ -86,18 +71,17 @@ public class StandardChessGame extends Game implements Runnable
 			m_game_board.placePiece(new Pawn(6, c, Definitions.Color.WHITE), 6, c); 
 		}
 		
-		turncount = 0;
-		setTurn(Definitions.Color.WHITE);
+		m_game_board.setTurn(Definitions.Color.WHITE);
 	}
 
 	public void run()
 	{
-		Definitions.State state = getState(whoseTurn(), m_game_board);
-		while (state == Definitions.State.NORMAL && fiftymoverulecount < 100) //50 moves for each side
+		Definitions.State state = m_game_board.getState();
+		while (state == Definitions.State.NORMAL && m_game_board.getFiftymoverulecount() < 100) //50 moves for each side
 		{
-			Player cur = (whoseTurn() == Definitions.Color.WHITE ? p1 : p2);
+			Player cur = (m_game_board.whoseTurn() == Definitions.Color.WHITE ? p1 : p2);
 			if (cur.getColor() == Definitions.Color.WHITE)
-				turncount++;
+				m_game_board.incrementTurncount();
 			if (cur.isDone()) 
 			{
 				Move m = cur.getMove();
@@ -106,7 +90,7 @@ public class StandardChessGame extends Game implements Runnable
 				
 				processMove(m);
 				flipTurn();
-				state = getState(whoseTurn(), m_game_board);
+				state = m_game_board.getState();
 			}
 			try { Thread.sleep(30); }
 			catch (InterruptedException e) {}
@@ -116,171 +100,18 @@ public class StandardChessGame extends Game implements Runnable
 		Definitions.Color winner = null; //indicating stalemate by default
 		if (state == Definitions.State.CHECKMATE)
 		{
-			winner = Definitions.flip(whoseTurn());
+			winner = Definitions.flip(m_game_board.whoseTurn());
 		}
 		else if (state == Definitions.State.STALEMATE)
 		{
 			reason = "Stalemate";
 		}
-		else if (fiftymoverulecount >= 100)
+		else if (m_game_board.getFiftymoverulecount() >= 100)
 		{
 			reason = "50-move rule";
 		}
 		m_graphics.drawEndMessage(getGraphics(), winner, reason);
 		System.out.println("The game has ended.");
-	}
-
-	public String getFEN(boolean complete)
-	{
-		String FEN = "";
-		String tstr = "w";
-		if (whoseTurn() == Definitions.Color.BLACK)
-			tstr = "b";
-		FEN = FEN + tstr + " ";
-		
-		String cstr = "";
-		if (whiteCanCastleKingside)
-			cstr = cstr + "K";
-		if (whiteCanCastleQueenside)
-			cstr = cstr + "Q";
-		if (blackCanCastleKingside)
-			cstr = cstr + "k";
-		if (blackCanCastleQueenside)
-			cstr = cstr + "q";
-		if (cstr.length() == 0)
-			cstr = "-";
-		FEN = FEN + cstr + " ";
-		
-		String epstr = "";
-		if (enpassantCol >= 0 && enpassantCol < Definitions.NUMCOLS)
-		{
-			epstr = epstr + (char)(enpassantCol + 'a');
-			if (whoseTurn() == Definitions.Color.WHITE)
-				epstr = epstr + "6";
-			else
-				epstr = epstr + "3";
-		}
-		else
-		{
-			epstr = "-";
-		}
-		FEN = FEN + epstr;
-				
-		if (complete)
-			FEN = FEN + " " + Integer.toString(fiftymoverulecount) + " " + Integer.toString(turncount);
-		
-		return FEN;
-	}
-	
-	public void FENtoPosition(String srcFEN)
-	{
-		String[] FEN = srcFEN.split("/");
-		String details = FEN[7].split(" ", 2)[1];
-
-		whiteCanCastleQueenside = false;
-		whiteCanCastleKingside = false;
-		blackCanCastleQueenside = false;
-		blackCanCastleKingside = false;
-
-		String[] detailElems = details.split(" "); //[0]=turn, [1]=castling, [2]=enpassant, [3]=50-move count, [4]=turn num
-		String turn = detailElems[0];
-		if (turn.charAt(0) == 'w')
-		{
-			setTurn(Definitions.Color.WHITE);
-		}
-		else
-		{
-			setTurn(Definitions.Color.BLACK);
-		}
-		
-		String castling = detailElems[1];
-		if (castling.contains("Q"))
-		{
-			whiteCanCastleQueenside = true;
-		}
-		if (castling.contains("K"))
-		{
-			whiteCanCastleKingside = true;
-		}
-		if (castling.contains("q"))
-		{
-			blackCanCastleQueenside = true;
-		}
-		if (castling.contains("k"))
-		{
-			blackCanCastleKingside = true;
-		}
-		
-		int epcol = detailElems[2].charAt(0) - 'a';
-		if (epcol >= 0 && epcol < 8)
-			enpassantCol = epcol;
-		else
-			enpassantCol = -1;
-		fiftymoverulecount = Integer.parseInt(detailElems[3]);
-		turncount = Integer.parseInt(detailElems[4]);
-		
-		for (int r = 0; r < 8; r++)
-		{
-			String rFEN = FEN[r];
-			int index = 0;
-			for (int c = 0; c < 8; c++, index++)
-			{
-				char p = rFEN.charAt(index);
-				Piece pp = null;
-				
-				int emptysquares = p - '1';
-				if (emptysquares >= 0 && emptysquares <= 8)
-				{
-					c = c + emptysquares; //skip the empty squares, remember that the loop increments c by 1
-					continue;
-				}
-
-				switch (p)
-				{
-				case 'P':
-					pp = new Pawn(r, c, Definitions.Color.WHITE);
-					break;
-				case 'p':
-					pp = new Pawn(r, c, Definitions.Color.BLACK);
-					break;
-				case 'B':
-					pp = new Bishop(r, c, Definitions.Color.WHITE);
-					break;
-				case 'b':
-					pp = new Bishop(r, c, Definitions.Color.BLACK);
-					break;
-				case 'N':
-					pp = new Knight(r, c, Definitions.Color.WHITE);
-					break;
-				case 'n':
-					pp = new Knight(r, c, Definitions.Color.BLACK);
-					break;
-				case 'R':
-					pp = new Rook(r, c, Definitions.Color.WHITE);
-					break;
-				case 'r':
-					pp = new Rook(r, c, Definitions.Color.BLACK);
-					break;
-				case 'Q':
-					pp = new Queen(r, c, Definitions.Color.WHITE);
-					break;
-				case 'q':
-					pp = new Queen(r, c, Definitions.Color.BLACK);
-					break;
-				case 'K':
-					pp = new King(r, c, Definitions.Color.WHITE);
-					break;
-				case 'k':
-					pp = new King(r, c, Definitions.Color.BLACK);
-					break;
-				}
-				if (pp != null)
-				{
-					m_game_board.placePiece(pp, r, c);
-				}
-			}
-		}
-		m_game_board.updateKingLocs();
 	}
 
 	public void paint(Graphics g)
@@ -292,12 +123,17 @@ public class StandardChessGame extends Game implements Runnable
 		m_graphics.drawBoard(backg);
 		if (p1 instanceof HumanPlayer)
 		{
-			m_graphics.drawMovable(backg, allMovesPiece(((HumanPlayer)p1).getSelected(), m_game_board));
+			m_graphics.drawMovable(backg, m_game_board.allMovesPiece(((HumanPlayer)p1).getSelected()));
 			m_graphics.drawSelected(backg, ((HumanPlayer)p1).getSelected());
+		}
+		if (p2 instanceof HumanPlayer)
+		{
+			m_graphics.drawMovable(backg, m_game_board.allMovesPiece(((HumanPlayer)p2).getSelected()));
+			m_graphics.drawSelected(backg, ((HumanPlayer)p2).getSelected());
 		}
 		m_graphics.drawBorders(backg);
 		m_graphics.drawMarkers(backg);
-		m_graphics.drawNames(backg, p1, p2, whoseTurn());
+		m_graphics.drawNames(backg, p1, p2, m_game_board.whoseTurn());
 		m_graphics.drawPieces(backg, m_game_board);
 
 		g.drawImage(backbuffer, 0, 0, this);
@@ -308,289 +144,16 @@ public class StandardChessGame extends Game implements Runnable
 		return m_game_board;
 	}
 
-	public boolean isLegalMove(Move m, Board b, Definitions.Color color)
-	{		
-		//generate moves and use board to determine legality (is there a piece in the way? etc.)
-		StandardChessBoard scb = (StandardChessBoard)b;
-
-		Piece p = scb.getPiece(m.r0, m.c0);
-
-		if ((p == null) || (p.color() != color))
-		{
-			return false; //source square has no piece, or selected piece is opponent's piece
-		}
-
-		Piece destination = scb.getPiece(m.rf, m.cf);
-		boolean occupiedDest = (destination != null);
-		ArrayList<Move> moves = p.getMoves();
-
-		if (occupiedDest && (destination.color() == color)) //case of trying to move to source square is handled here
-		{
-			return false; //can't move to square occupied by same color piece
-		}
-
-		if (moves.contains(m))
-		{
-			StandardChessBoard tempBoard = scb.clone(); //clone board
-			tempBoard.move(m);
-
-			if (!(p instanceof Knight) && (hasPieceInWay(m, scb))) 
-				//if it's not a knight, it can't jump
-			{
-				return false;
-			}
-
-			if (inCheck(color, tempBoard))
-			{
-				return false; //illegal move because you will be in check after move
-			}
-
-			if (p instanceof Knight) //Update: king moves no longer automatically legal
-			{
-				return true; //all possible moves are automatically legal because we already checked earlier
-				//that the destination square does not contain a piece of same color
-			}
-			if (p instanceof King)
-			{
-				//Is there a better way to do this? Seems ugly
-				boolean canCastleKingside;
-				boolean canCastleQueenside;
-				if (color == Definitions.Color.WHITE)
-				{
-					canCastleKingside = whiteCanCastleKingside;
-					canCastleQueenside = whiteCanCastleQueenside;
-				}
-				else
-				{
-					canCastleKingside = blackCanCastleKingside;
-					canCastleQueenside = blackCanCastleQueenside;
-				}
-
-				if (canCastleKingside && m.cf - m.c0 > 1) //kingside castle attempt
-				{
-					StandardChessBoard temp = scb.clone();
-					Move intermediate = new Move(m.r0, m.c0, m.r0, m.c0 + 1);
-					temp.move(intermediate);
-					return (canCastleKingside && !inCheck(color, temp) && !inCheck(color, scb)); //can't be in check
-				}
-				if (canCastleQueenside && m.cf - m.c0 < -1) //queenside castle attempt
-				{
-					StandardChessBoard temp = scb.clone();
-					Move intermediate = new Move(m.r0, m.c0, m.r0, m.c0 - 1);
-					temp.move(intermediate);
-					return (canCastleQueenside && !inCheck(color, temp) && !inCheck(color, scb)); //can't be in check
-				}
-				if (Math.abs(m.cf - m.c0) <= 1)
-				{
-					return true; //one square moves are legal
-				}
-				else return false; //can't castle, so >1 square moves illegal
-			}
-			if (p instanceof Pawn) //must split into cases
-			{
-				if (m.cf != m.c0) //changed columns; must be capture
-				{
-					boolean validCapture = (scb.getPiece(m.rf, m.cf) != null); //can't be our own piece because of earlier check
-					boolean enpassant;
-					if (color == Definitions.Color.WHITE)
-						enpassant = ((m.cf == enpassantCol) && (m.r0 == 3));
-					else
-						enpassant = ((m.cf == enpassantCol) && (m.r0 == 4));
-
-					return (validCapture || enpassant);
-				}
-				else
-				{
-					if (m.rf - m.r0 == 2) //push two squares
-					{
-						return (scb.getPiece((m.rf + m.r0) / 2, m.cf) == null)
-								&& (scb.getPiece(m.rf, m.cf) == null); //both squares empty
-					}
-					else //push one square
-					{
-						return (scb.getPiece(m.rf, m.cf) == null); //square empty
-					}
-				}
-			}
-			return true;
-		}
-		return false; //move is not in our move list
-	}
-
-	public ArrayList<Move> allMovesPiece(Piece p, StandardChessBoard scb)
+	private void flipTurn() //not sure who should flip the board: game or board
 	{
-		if (p == null) return null;
-		ArrayList<Move> legalMoves = new ArrayList<Move>();
-		ArrayList<Move> temp = p.getMoves();
-		for (Move m : temp)
-		{
-			if (this.isLegalMove(m, scb, p.color()))
-			{
-				legalMoves.add(m);
-			}
-		}
-		return legalMoves;
+		//m_game_board.setTurn(Definitions.flip(m_game_board.whoseTurn()));
+		Player next = (m_game_board.whoseTurn() == Definitions.Color.WHITE ? p1 : p2);
+		next.promptMove();
 	}
 
-	public ArrayList<Move> allMoves(Definitions.Color color, StandardChessBoard scb)
+	public void promotePawn(int r, int c)
 	{
-		ArrayList<Move> legalMoves = new ArrayList<Move>();
-
-		for (int r = 0; r < 8; r++)
-		{
-			for (int c = 0; c < 8; c++)
-			{
-				Piece p = scb.getPiece(r, c);
-				if (p != null && p.color() == color)
-				{
-					legalMoves.addAll(allMovesPiece(p, scb));
-				}
-			}
-		}
-		return legalMoves;
-	}
-
-	private boolean hasPieceInWay(Move m, StandardChessBoard scb)
-	{
-		int dc = m.cf - m.c0;
-		int dr = m.rf - m.r0; //remember rows are counted from the top
-		int cinc; //1, 0, or -1, depending on which direction the piece is headed
-		int rinc; //1, 0, or -1
-
-		Piece p = scb.getPiece(m.r0, m.c0);
-		if (p == null || p instanceof Knight)
-			return false; //vacuously false for no piece, and automatically false for knights 
-
-		if (dc < 0)
-		{
-			cinc = -1;
-		}
-		else if (dc > 0)
-		{
-			cinc = 1;
-		}
-		else
-		{
-			cinc = 0;
-		}
-
-		if (dr < 0)
-		{
-			rinc = -1;
-		}
-		else if (dr > 0)
-		{
-			rinc = 1;
-		}
-		else
-		{
-			rinc = 0;
-		}
-
-		int r = m.r0 + rinc;
-		int c = m.c0 + cinc;
-		while (!((r == m.rf) && (c == m.cf)))
-		{
-			if (scb.getPiece(r, c) != null)
-			{
-				//System.out.println("Piece in way. Row: " + r + ", Col: " + c); //debugging pieces
-				return true; //there is a piece in our way
-			}
-			r = r + rinc;
-			c = c + cinc;
-		}
-		return false; //no pieces in way
-	}
-
-	//moving to Game class from Board class, since the Board doesn't necessarily know rules of game
-	//added Board argument since you might want to check temporary boards too
-	public boolean inCheck(Definitions.Color color, StandardChessBoard scb)
-	{		
-		int kingR; 
-		int kingC;
-		if (color == Definitions.Color.WHITE)
-		{
-			int temp = scb.getWhiteKingLoc();
-			kingR = temp / 10;
-			kingC = temp % 10;
-		}
-		else
-		{
-			int temp = scb.getBlackKingLoc();
-			kingR = temp / 10;
-			kingC = temp % 10;
-		}
-
-		for (int r = 0; r < Definitions.NUMROWS; r++)
-		{
-			for (int c = 0; c < Definitions.NUMCOLS; c++)
-			{
-				Piece temp = scb.getPiece(r, c);
-				Move m = new Move(r, c, kingR, kingC);
-				ArrayList<Move> alm = new ArrayList<Move>(); //TODO
-				if (temp != null)
-					alm = temp.getThreats();
-				if ((temp != null) && (temp.color() != color) && (alm.contains(m)))
-				{
-					if (temp instanceof Knight || !hasPieceInWay(m, scb))
-					{
-						//System.out.println("In check. Row: " + r + ", Column: " + c); //for debugging purposes
-						return true;
-					}
-				}
-			}
-		}
-		return false; //no pieces can capture king
-	}
-
-	public boolean isCheckmate(Definitions.Color color, StandardChessBoard scb)
-	{		
-		boolean check = inCheck(color, scb);
-		return (check && allMoves(color, scb).size() == 0);
-	}
-
-	public boolean isStalemate(Definitions.Color color, StandardChessBoard scb)
-	{		
-		boolean check = inCheck(color, scb);
-		ArrayList<Move> mvs = allMoves(whoseTurn(), scb);
-		return (!check && mvs.size() == 0);
-	}
-
-	public Definitions.State getState(Definitions.Color color, StandardChessBoard scb)
-	{
-		if (scb.getState(color) == Definitions.State.UNCHECKED)
-		{
-			boolean isInCheck = inCheck(color, scb);
-			int moves = allMoves(color, scb).size();
-
-			if (moves == 0)
-			{
-				if (isInCheck)
-				{
-					scb.setState(color, Definitions.State.CHECKMATE);
-					return Definitions.State.CHECKMATE;
-				}
-				else
-				{
-					scb.setState(color, Definitions.State.STALEMATE);
-					return Definitions.State.STALEMATE;
-				}
-			}
-			else
-			{
-				scb.setState(color, Definitions.State.NORMAL);
-				return Definitions.State.NORMAL;
-			}
-		}
-		else
-		{
-			return scb.getState(color);
-		}
-	}
-
-	public void promotePawn(int r, int c, Definitions.Color color)
-	{
-		Player cur = (whoseTurn() == Definitions.Color.WHITE ? p1 : p2);
+		Player cur = (m_game_board.whoseTurn() == Definitions.Color.WHITE ? p1 : p2);
 
 		if (cur instanceof HumanPlayer)
 		{
@@ -599,34 +162,27 @@ public class StandardChessGame extends Game implements Runnable
 
 			if (input == "Queen")
 			{
-				m_game_board.placePiece(new Queen(r, c, color), r, c);
+				m_game_board.placePiece(new Queen(r, c, m_game_board.whoseTurn()), r, c);
 			}
 			else if (input == "Rook")
 			{
-				m_game_board.placePiece(new Rook(r, c, color), r, c);
+				m_game_board.placePiece(new Rook(r, c, m_game_board.whoseTurn()), r, c);
 			}
 			else if (input == "Knight")
 			{
-				m_game_board.placePiece(new Knight(r, c, color), r, c);			
+				m_game_board.placePiece(new Knight(r, c, m_game_board.whoseTurn()), r, c);			
 			}
 			else //Bishop
 			{
-				m_game_board.placePiece(new Bishop(r, c, color), r, c);
+				m_game_board.placePiece(new Bishop(r, c, m_game_board.whoseTurn()), r, c);
 			}
 		}
 		else //AI chooses queen for now
 		{
-			m_game_board.placePiece(new Queen(r, c, color), r, c);
+			m_game_board.placePiece(new Queen(r, c, m_game_board.whoseTurn()), r, c);
 		}
 	}
-
-	private void flipTurn()
-	{
-		setTurn(Definitions.flip(whoseTurn()));
-		Player next = (whoseTurn() == Definitions.Color.WHITE ? p1 : p2);
-		next.promptMove();
-	}
-
+	
 	//TODO
 	public static Move algebraicToMove(Definitions.Color color, String algebraic) //STUB
 	{
@@ -656,100 +212,7 @@ public class StandardChessGame extends Game implements Runnable
 
 	public void processMove(Move newMove)
 	{
-		int row = newMove.r0;
-		int col = newMove.c0;
-		Piece movedPiece = m_game_board.getPiece(row, col);
-		fiftymoverulecount = fiftymoverulecount + 1;
-
-		int castlingRow;
-		if (whoseTurn() == Definitions.Color.WHITE)
-		{
-			castlingRow = 7;
-		}
-		else //Black
-		{
-			castlingRow = 0;
-		}
-
-		Move correspondingRookMove = null; //if we have castling
-		enpassantCol = -1; //default
-		if (movedPiece instanceof Pawn)
-		{
-			fiftymoverulecount = 0; //pawn was moved
-			if (Math.abs(newMove.rf - newMove.r0) == 2)
-			{
-				enpassantCol = newMove.c0; //enpassant now available on this column
-			}
-			else if ((Math.abs(newMove.cf - newMove.c0) == 1) && (m_game_board.getPiece(newMove.rf, newMove.cf) == null))
-				//en passant
-			{
-				if (whoseTurn() == Definitions.Color.WHITE)
-				{
-					m_game_board.removePiece(3, newMove.cf); //not sure if this is best way, but "move" call will not erase piece
-				}
-				else
-				{
-					m_game_board.removePiece(4, newMove.cf);
-				}
-			}
-		}
-		else if (movedPiece instanceof King)
-		{			
-			if (whoseTurn() == Definitions.Color.WHITE)
-			{
-				whiteCanCastleKingside = false;
-				whiteCanCastleQueenside = false;
-			}
-			else
-			{
-				blackCanCastleKingside = false;
-				blackCanCastleQueenside = false;
-			}
-
-			int kingMoveLength = newMove.cf - col; //should be 2 or -2, if the move was a castling move
-			if (row == castlingRow)
-			{
-				if (kingMoveLength == 2) //kingside
-				{
-					correspondingRookMove = new Move(castlingRow, 7, castlingRow, 5);
-				}
-				else if (kingMoveLength == -2) //queenside
-				{
-					correspondingRookMove = new Move(castlingRow, 0, castlingRow, 3);
-				}
-			}
-		}
-		else if (row == castlingRow)
-		{
-			if (col == 0) //queen's rook
-			{
-				if (whoseTurn() == Definitions.Color.WHITE)
-				{
-					whiteCanCastleQueenside = false;
-				}
-				else
-				{
-					blackCanCastleQueenside = false;
-				}
-			}
-			else if (col == 7) //king's rook
-			{			
-				if (whoseTurn() == Definitions.Color.WHITE)
-				{
-					whiteCanCastleKingside = false;
-				}
-				else
-				{
-					blackCanCastleKingside = false;
-				}
-			}
-		}
-
-		if (m_game_board.getPiece(newMove.rf, newMove.cf) != null) //capture was made
-		{
-			fiftymoverulecount = 0; //reset counter
-		}
-
+		Move correspondingRookMove = m_game_board.processMove(newMove);
 		m_animation.animateMove(getGraphics(), newMove, m_game_board);
 		m_game_board.move(newMove); //has to be down here for time being because en passant needs to know dest sq is empty; fix if you can
 
@@ -757,16 +220,18 @@ public class StandardChessGame extends Game implements Runnable
 		{
 			m_animation.animateMove(getGraphics(), correspondingRookMove, m_game_board);
 			m_game_board.move(correspondingRookMove);
+			m_game_board.setTurn(Definitions.flip(m_game_board.whoseTurn())); //to undo double flipping of moving king and then rook
 		}
 
+		Piece movedPiece = m_game_board.getPiece(newMove.r0, newMove.c0);
 		if (movedPiece instanceof Pawn)
 		{
-			if (((whoseTurn() == Definitions.Color.WHITE) && (newMove.rf == 0)) 
-					|| ((whoseTurn() == Definitions.Color.BLACK) && (newMove.rf == 7)))
+			if (((m_game_board.whoseTurn() == Definitions.Color.WHITE) && (newMove.rf == 0)) 
+					|| ((m_game_board.whoseTurn() == Definitions.Color.BLACK) && (newMove.rf == 7)))
 			{
-				promotePawn(newMove.rf, newMove.cf, whoseTurn());
+				promotePawn(newMove.rf, newMove.cf);
 			}
-		}		
+		}
 	}
 
 	//Prevents flickering when repainting

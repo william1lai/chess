@@ -1,6 +1,15 @@
 ChangeLog
 
 Name: William Lai
+Date: 12-20-2013
+Description: Bitboards, code still messy
+    * src/chess/Definitions.java: Added many bitboard related static functions and constants; implemented "exploding" bitboards
+    * src/chess/HumanPlayer.java: Changed to accommodate bitboards
+    * src/chess/StandardChessBoard.java: Bitboard overhaul
+    * src/chess/StandardChessGame.java: Changed to accommodate bitboards
+    * src/chess/StandardChessGameGraphics.java: Changed to accommodate bitboards
+
+Name: William Lai
 Date: 12-14-2013
 Description: Overhaul mostly complete
     * src/chess/Board.java: Turned into abstract class

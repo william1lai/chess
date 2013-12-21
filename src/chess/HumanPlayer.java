@@ -5,11 +5,12 @@ import java.awt.event.MouseListener;
 
 public class HumanPlayer extends Player implements MouseListener
 {	
-	private Piece m_selected;
+	private int m_selected;
 	
 	public HumanPlayer(String name)
 	{
 		setName(name);
+		m_selected = -1;
 	}
 	
 	public HumanPlayer(String name, Definitions.Color c, Game g)
@@ -17,19 +18,20 @@ public class HumanPlayer extends Player implements MouseListener
 		setName(name);
 		setGame(g);
 		setColor(c);
+		m_selected = -1;
 	}
 	
-	private void select(Piece p)
+	private void select(int sq)
 	{
-		m_selected = p;
+		m_selected = sq;
 	}
 	
 	private void deselect()
 	{
-		m_selected = null;
+		m_selected = -1;
 	}
 	
-	public Piece getSelected()
+	public int getSelected()
 	{
 		return m_selected;
 	}
@@ -58,14 +60,18 @@ public class HumanPlayer extends Player implements MouseListener
 			//Left-click to select
 			else if (e.getButton() == MouseEvent.BUTTON1 && row >= 0 && col >= 0) {
 				StandardChessGame g = ((StandardChessGame)getGame());
-				Piece p = g.getBoard().getPiece(row, col);
-				if (p != null && p.color() == getColor()) {
-					select(p);
+				int sq = (7-row)*8 + (7-col);
+				StandardChessBoard scb = g.getBoard();
+				Piece p = scb.getPiece(row, col);
+				if (p != null && p.color() == scb.whoseTurn()) 
+				{
+					select(sq);
 				}
-				else if (m_selected != null) {
-					m_move = new Move(m_selected.row(), m_selected.col(), row, col);
+				else if (m_selected != -1) 
+				{
+					m_move = new Move(7 - (m_selected / 8), 7 - (m_selected % 8), row, col);
 					if (g.getBoard().isLegalMove(m_move)) {
-						m_selected = null;
+						m_selected = -1;
 						m_done = true;
 						g.removeMouseListener(this);
 					}

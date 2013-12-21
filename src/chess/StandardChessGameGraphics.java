@@ -126,11 +126,11 @@ public class StandardChessGameGraphics
 		}
 	}
 	
-	public void drawSelected(Graphics g, Piece p)
+	public void drawSelected(Graphics g, int sq)
 	{
-		if (p == null) return;
-		int x = getX(p.col());
-		int y = getY(p.row());
+		if (sq == -1) return;
+		int x = getX(7 - (sq % 8));
+		int y = getY(7 - (sq / 8));
 		g.drawImage(m_gSelected, x, y, m_blockSize, m_blockSize, null);
 	}
 	

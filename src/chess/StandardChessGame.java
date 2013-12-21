@@ -22,24 +22,30 @@ public class StandardChessGame extends Game implements Runnable
 		m_game_board = new StandardChessBoard();
 		m_graphics = new StandardChessGameGraphics();
 		m_animation = new StandardChessGameAnimation(m_graphics);
-		
+
+		Definitions.makeInitB();
+		Definitions.makeMaskB();
+		Definitions.makeInitR();
+		Definitions.makeMaskR();
+		Definitions.makeRankR();
+
 		//String testFEN = "8/8/7P/8/8/8/8/k5K1 b - - 0 37";
 		//String testFEN = "6k1/8/5r2/6K1/8/8/8/5q2 w - - 0 37";
-		String testFEN = "1k6/2q2ppr/7p/2p5/3p2K1/2r5/8/8 w - - 0 37";
+		//String testFEN = "1k6/2q2ppr/7p/2p5/3p2K1/2r5/8/8 w - - 0 37";
 		//String testFEN = "1K6/2q6/k7/8/8/8/8/8 w - - 0 37";
 		//String testFEN = "rnbqkbnr/pp1ppppp/8/2p5/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq - 1 2";
-		m_game_board.FENtoPosition(testFEN);
+		//m_game_board.FENtoPosition(testFEN);
 
-		//setupStandard();
+		setupStandard();
 
-		p1 = new HumanPlayer("Human WHITE", Definitions.Color.WHITE, this);
+		//p1 = new HumanPlayer("Human WHITE", Definitions.Color.WHITE, this);
 		//p2 = new HumanPlayer("Human BLACK", Definitions.Color.BLACK, this);
-		//p1 = new ComputerPlayer("CPU WHITE", Definitions.Color.WHITE, this);
+		p1 = new ComputerPlayer("CPU WHITE", Definitions.Color.WHITE, this);
 		p2 = new ComputerPlayer("CPU BLACK", Definitions.Color.BLACK, this);
 
 		m_thread = new Thread(this);
 		m_thread.start();
-		
+
 		if (m_game_board.whoseTurn() == Definitions.Color.WHITE)
 			p1.promptMove();
 		else
@@ -70,7 +76,7 @@ public class StandardChessGame extends Game implements Runnable
 		for (int c = 0; c < 8; c++) {
 			m_game_board.placePiece(new Pawn(6, c, Definitions.Color.WHITE), 6, c); 
 		}
-		
+
 		m_game_board.setTurn(Definitions.Color.WHITE);
 	}
 
@@ -87,10 +93,20 @@ public class StandardChessGame extends Game implements Runnable
 				Move m = cur.getMove();
 				if (m == null)
 					break;
-				
+
 				processMove(m);
 				flipTurn();
 				state = m_game_board.getState();
+				/*
+				System.out.println(Long.toHexString(m_game_board.m_white));
+				System.out.println(Long.toHexString(m_game_board.m_black));
+				System.out.println(Long.toHexString(m_game_board.m_pawns));
+				System.out.println(Long.toHexString(m_game_board.m_knights));
+				System.out.println(Long.toHexString(m_game_board.m_bishops));
+				System.out.println(Long.toHexString(m_game_board.m_rooks));
+				System.out.println(Long.toHexString(m_game_board.m_queens));
+				System.out.println(Long.toHexString(m_game_board.m_kings));
+				System.out.println();*/
 			}
 			try { Thread.sleep(30); }
 			catch (InterruptedException e) {}
@@ -123,12 +139,14 @@ public class StandardChessGame extends Game implements Runnable
 		m_graphics.drawBoard(backg);
 		if (p1 instanceof HumanPlayer)
 		{
-			m_graphics.drawMovable(backg, m_game_board.allMovesPiece(((HumanPlayer)p1).getSelected()));
+			int sq = ((HumanPlayer)p1).getSelected();
+			m_graphics.drawMovable(backg, m_game_board.allMovesPiece(7 - (sq / 8), 7 - (sq % 8)));
 			m_graphics.drawSelected(backg, ((HumanPlayer)p1).getSelected());
 		}
 		if (p2 instanceof HumanPlayer)
 		{
-			m_graphics.drawMovable(backg, m_game_board.allMovesPiece(((HumanPlayer)p2).getSelected()));
+			int sq = ((HumanPlayer)p2).getSelected();
+			m_graphics.drawMovable(backg, m_game_board.allMovesPiece(7 - (sq / 8), 7 - (sq % 8)));
 			m_graphics.drawSelected(backg, ((HumanPlayer)p2).getSelected());
 		}
 		m_graphics.drawBorders(backg);
@@ -160,29 +178,33 @@ public class StandardChessGame extends Game implements Runnable
 			String[] param = { "Queen", "Rook", "Knight", "Bishop" };
 			String input = (String) JOptionPane.showInputDialog(null, "Which piece do you want to promote to?", "Pawn Promotion", JOptionPane.QUESTION_MESSAGE, null, param, param[0]);
 
+			int sq = (7-r)*8 + (7-c);
+			m_game_board.m_pawns &= ~(1L << sq);
 			if (input == "Queen")
 			{
-				m_game_board.placePiece(new Queen(r, c, m_game_board.whoseTurn()), r, c);
+				m_game_board.m_queens |= (1L << sq);
 			}
 			else if (input == "Rook")
 			{
-				m_game_board.placePiece(new Rook(r, c, m_game_board.whoseTurn()), r, c);
+				m_game_board.m_rooks |= (1L << sq);
 			}
 			else if (input == "Knight")
 			{
-				m_game_board.placePiece(new Knight(r, c, m_game_board.whoseTurn()), r, c);			
+				m_game_board.m_knights |= (1L << sq);		
 			}
 			else //Bishop
 			{
-				m_game_board.placePiece(new Bishop(r, c, m_game_board.whoseTurn()), r, c);
+				m_game_board.m_bishops |= (1L << sq);
 			}
 		}
 		else //AI chooses queen for now
 		{
-			m_game_board.placePiece(new Queen(r, c, m_game_board.whoseTurn()), r, c);
+			int sq = (7-r)*8 + (7-c);
+			m_game_board.m_pawns &= ~(1L << sq);
+			m_game_board.m_queens |= (1L << sq);
 		}
 	}
-	
+
 	//TODO
 	public static Move algebraicToMove(Definitions.Color color, String algebraic) //STUB
 	{
@@ -210,7 +232,7 @@ public class StandardChessGame extends Game implements Runnable
 		}
 	}
 
-	public void processMove(Move newMove)
+	public void processMove(Move newMove) //don't like the ugly structure of this code
 	{
 		Move correspondingRookMove = m_game_board.processMove(newMove);
 		m_animation.animateMove(getGraphics(), newMove, m_game_board);
@@ -219,15 +241,15 @@ public class StandardChessGame extends Game implements Runnable
 		if (correspondingRookMove != null)
 		{
 			m_animation.animateMove(getGraphics(), correspondingRookMove, m_game_board);
-			m_game_board.move(correspondingRookMove);
 			m_game_board.setTurn(Definitions.flip(m_game_board.whoseTurn())); //to undo double flipping of moving king and then rook
+			m_game_board.move(correspondingRookMove);
 		}
 
-		Piece movedPiece = m_game_board.getPiece(newMove.r0, newMove.c0);
+		Piece movedPiece = m_game_board.getPiece(newMove.rf, newMove.cf);
 		if (movedPiece instanceof Pawn)
 		{
-			if (((m_game_board.whoseTurn() == Definitions.Color.WHITE) && (newMove.rf == 0)) 
-					|| ((m_game_board.whoseTurn() == Definitions.Color.BLACK) && (newMove.rf == 7)))
+			if (((m_game_board.whoseTurn() == Definitions.Color.BLACK) && (newMove.rf == 0)) 
+					|| ((m_game_board.whoseTurn() == Definitions.Color.WHITE) && (newMove.rf == 7))) //flipped by earlier move
 			{
 				promotePawn(newMove.rf, newMove.cf);
 			}

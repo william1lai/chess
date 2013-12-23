@@ -3,8 +3,7 @@ Game Logic
 - 50 move rule and threefold repetition (hash table of FEN's)
 
 Game Architecture
-- Use bitboards for speed considerations [in progress]
-- pre-processing move generation
+- Use bitboards for speed considerations [mostly done]
 - Will be changing structure of program so that board contains some game logic [in progress]
 
 AI

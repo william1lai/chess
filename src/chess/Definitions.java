@@ -1,5 +1,10 @@
 package chess;
 
+/* 
+ * "Exploding bitboards" implementation was adapted from the C++ implementation
+ *   found at http://chessprogramming.wikispaces.com/Exploding+Bitboards
+ */
+
 public class Definitions
 {
 	public static final int HEIGHT = 480;
@@ -12,7 +17,8 @@ public class Definitions
 	public static final String PIECENAMES[] = {"BK","BQ","BN","BB","BR","BP","WK","WQ","WN","WB","WR","WP"};
 	public static final String RMARKERS[] = {"8","7","6","5","4","3","2","1"};
 	public static final String CMARKERS[] = {"a","b","c","d","e","f","g","h"};
-	public static final int DEPTH = 2; //PLY = 2 * DEPTH
+	public static final int MAXDEPTH = 5; //PLY = 2 * DEPTH
+	public static final double MAXTHINKINGTIME = 5; //in seconds
 
 	public static final int repsB[] =
 		{

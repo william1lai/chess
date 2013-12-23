@@ -62,10 +62,13 @@ public class HumanPlayer extends Player implements MouseListener
 				StandardChessGame g = ((StandardChessGame)getGame());
 				int sq = (7-row)*8 + (7-col);
 				StandardChessBoard scb = g.getBoard();
-				Piece p = scb.getPiece(row, col);
-				if (p != null && p.color() == scb.whoseTurn()) 
+				char p = scb.getPiece(row, col);
+				if (p != 0) 
 				{
-					select(sq);
+					if ((Character.isUpperCase(p)) ^ (scb.whoseTurn() == Definitions.Color.BLACK)) //if the colors match
+					{
+						select(sq);
+					}
 				}
 				else if (m_selected != -1) 
 				{

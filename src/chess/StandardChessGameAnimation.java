@@ -48,7 +48,7 @@ public class StandardChessGameAnimation implements Runnable
 	public void run()
 	{
 		if (m_moveContext != null) {
-			Piece traveler = m_moveContext.board.getPiece(m_moveContext.move.r0, m_moveContext.move.c0);
+			char traveler = m_moveContext.board.getPiece(m_moveContext.move.r0, m_moveContext.move.c0);
 			double curY = StandardChessGameGraphics.getY(m_moveContext.move.r0);
 			double curX = StandardChessGameGraphics.getX(m_moveContext.move.c0);
 			double dY = ((double)StandardChessGameGraphics.getY(m_moveContext.move.rf) - curY) / m_moveContext.fTick;

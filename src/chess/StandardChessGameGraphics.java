@@ -72,13 +72,13 @@ public class StandardChessGameGraphics
 		g.drawImage(m_gBlocks[(row+col)%2], col * m_blockSize + m_boardOffsetX, row * m_blockSize + m_boardOffsetX, m_blockSize, m_blockSize, null);
 	}
 	
-	public void drawPiece(Graphics g, Piece p, int x, int y)
+	public void drawPiece(Graphics g, char p, int x, int y)
 	{
-		String pstr = p.toString();
-		if (p.color() == Definitions.Color.WHITE)
-			pstr = "W" + pstr;
+		String pstr;
+		if (Character.isUpperCase(p)) //White
+			pstr = "W" + p;
 		else
-			pstr = "B" + pstr.toUpperCase();
+			pstr = "B" + Character.toUpperCase(p);
 		g.drawImage(m_gPieces.get(pstr), x, y, m_blockSize, m_blockSize, null);
 	}
 	
@@ -110,7 +110,7 @@ public class StandardChessGameGraphics
 	{
 		for (int r = 0, y = m_boardOffsetY; r < Definitions.NUMROWS; r++, y += m_blockSize) {
 			for (int c = 0, x = m_boardOffsetX; c < Definitions.NUMCOLS; c++, x += m_blockSize) {
-				if (b.getPiece(r, c) != null) {
+				if (b.getPiece(r, c) != 0) {
 					drawPiece(g, b.getPiece(r, c), x, y);
 				}
 			}

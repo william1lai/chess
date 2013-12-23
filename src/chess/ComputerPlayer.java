@@ -5,7 +5,9 @@ import java.util.*;
 public class ComputerPlayer extends Player
 {
 	private static final double MATE_SCORE = 9999.9999;
-	private int branches; 
+	private int branches;
+	private long m_starttime;
+	private boolean stop;
 	
 	final class MovelistScore
 	{
@@ -25,6 +27,9 @@ public class ComputerPlayer extends Player
 		
 		public MovelistScore(MovelistScore other)
 		{
+			if (other == null)
+				return;
+			
 			m_movelist = new ArrayList<Move>();
 			if (other.m_movelist != null)
 			{
@@ -147,7 +152,7 @@ public class ComputerPlayer extends Player
 		
 		if (g instanceof StandardChessGame)
 		{
-			m_move = evaluate(g.getBoard(), Definitions.DEPTH);
+			m_move = evaluate(g.getBoard(), Definitions.MAXDEPTH);
 		}
 		m_done = true;
 	}
@@ -188,7 +193,12 @@ public class ComputerPlayer extends Player
 		m_book.put("", new Move(6, 4, 4, 4));*/
 	}
 	
-	public Move evaluate(StandardChessBoard scb, int depth)
+	private double getDuration(long starttime, long endtime)
+	{
+		return ((endtime - starttime) / 100000) / 10000.0;
+	}
+	
+	public Move evaluate(StandardChessBoard scb, int maxdepth)
 	{
 		String completeFEN = scb.toFEN(false);
 		System.out.println(completeFEN);
@@ -201,8 +211,9 @@ public class ComputerPlayer extends Player
 		MovelistScore bms = new MovelistScore(null, 0);
 		hashmoves = new ArrayList<Move>();
 		
-		double totalElapsed = 0.0;
-		for (int d = 1; d <= depth; d++)
+		m_starttime = System.nanoTime();
+		stop = false;
+		for (int d = 1; d <= maxdepth; d++)
 		{
 			long starttime = System.nanoTime();
 			branches = 0;
@@ -211,17 +222,19 @@ public class ComputerPlayer extends Player
 			StandardChessBoard temp = scb.clone();
 			bms = new MovelistScore(alphabetaMax(temp, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY, 0, 2*d, true));
 			long endtime = System.nanoTime();
-			double duration = ((endtime - starttime) / 100000) / 10000.0;
-			totalElapsed = totalElapsed + duration;
+			double duration = getDuration(starttime, endtime);
 			highScore = bms.getScore();
 			System.out.println("Depth " + d + ": " + bms.getMovelist() + ", " + highScore + "; " + duration + " s, B-Factor: " + Math.pow(branches, 0.5/d));
+			
+			if (stop)
+				break;
 			
 			hashmoves.clear();
 			for (Move m : bms.getMovelist())
 				hashmoves.add(m);
 			
-			if (highScore > MATE_SCORE || totalElapsed > 15.0)
-				break; //if we found checkmate or time ran out, don't look deeper
+			if (highScore > MATE_SCORE)
+				break; //if we found checkmate, don't look deeper
 		}
 		System.out.println();
 		return hashmoves.get(0); //the best next move
@@ -230,11 +243,17 @@ public class ComputerPlayer extends Player
 	private MovelistScore alphabetaMax(StandardChessBoard scb, double alpha, double beta, 
 			int ply, int maxply, boolean considerHashMoves)
 	{
+		if (stop) //time's up
+			return null;
+		if (getDuration(m_starttime, System.nanoTime()) > Definitions.MAXTHINKINGTIME)
+		{
+			stop = true;
+			return null;
+		}
+		
 		ArrayList<Move> mvs = orderMoves(scb, scb.allMoves());
 		if (ply == maxply)
 		{
-			//if (!mvs.isEmpty() && scb.getPiece(mvs.get(0).rf, mvs.get(0).cf) != null)
-				//maxply++;
 			if (scb.inCheck())
 				maxply++;
 			else
@@ -251,7 +270,7 @@ public class ComputerPlayer extends Player
 		
 		if (mvs.isEmpty())
 		{
-			if (scb.isCheckmate())
+			if (scb.inCheckmate())
 				return new MovelistScore(null, -MATE_SCORE);
 			else
 				return new MovelistScore(null, 0);
@@ -262,6 +281,8 @@ public class ComputerPlayer extends Player
 			StandardChessBoard temp = scb.clone();
 			temp.move(hashmoves.get(ply));
 			bms = alphabetaMin(temp, alpha, beta, ply + 1, maxply, true);
+			if (stop) //time's up
+				return null;
 			score = bms.getScore();
 			
 			if (score >= beta)
@@ -286,6 +307,8 @@ public class ComputerPlayer extends Player
 			StandardChessBoard temp = scb.clone();
 			temp.move(m);
 			bms = new MovelistScore(alphabetaMin(temp, alpha, beta, ply + 1, maxply, false));
+			if (stop) //time's up
+				return null;
 			score = bms.getScore();
 			
 			if (score >= beta)
@@ -305,17 +328,25 @@ public class ComputerPlayer extends Player
 				movelist.add(0, best);
 			}
 		}
+		if (stop) //time's up
+			return null;
 		return new MovelistScore(movelist, alpha);
 	}
 	
 	private MovelistScore alphabetaMin(StandardChessBoard scb, double alpha, double beta, 
 			int ply, int maxply, boolean considerHashMoves)
 	{
+		if (stop) //time's up
+			return null;
+		if (getDuration(m_starttime, System.nanoTime()) > Definitions.MAXTHINKINGTIME)
+		{
+			stop = true;
+			return null;
+		}
+		
 		ArrayList<Move> mvs = orderMoves(scb, scb.allMoves());
 		if (ply == maxply)
 		{
-			//if (!mvs.isEmpty() && scb.getPiece(mvs.get(0).rf, mvs.get(0).cf) != null)
-				//maxply++;
 			if (scb.inCheck())
 				maxply++;
 			else
@@ -335,6 +366,8 @@ public class ComputerPlayer extends Player
 			temp = scb.clone();
 			temp.move(hashmoves.get(ply));
 			bms = alphabetaMax(temp, alpha, beta, ply + 1, maxply, true);
+			if (stop) //time's up
+				return null;
 			score = bms.getScore();
 			
 			if (score <= alpha)
@@ -352,7 +385,7 @@ public class ComputerPlayer extends Player
 		
 		if (mvs.isEmpty())
 		{
-			if (scb.isCheckmate())
+			if (scb.inCheckmate())
 				return new MovelistScore(null, MATE_SCORE);
 			else
 				return new MovelistScore(null, 0);
@@ -363,6 +396,8 @@ public class ComputerPlayer extends Player
 			temp = scb.clone();
 			temp.move(m);
 			bms = alphabetaMax(temp, alpha, beta, ply + 1, maxply, false);
+			if (stop) //time's up
+				return null;
 			score = bms.getScore();
 			if (score <= alpha)
 			{
@@ -376,6 +411,8 @@ public class ComputerPlayer extends Player
 				movelist.add(0, best);				
 			}
 		}
+		if (stop) //time's up
+			return null;
 		return new MovelistScore(movelist, beta);
 	}
 	
@@ -400,8 +437,8 @@ public class ComputerPlayer extends Player
 		{
 			for (int c = 0; c < 8; c++)
 			{
-				Piece p = scb.getPiece(r, c);
-				if (p != null)
+				char p = scb.getPiece(r, c);
+				if (p != 0)
 				{
 					int rr;
 					if (scb.whoseTurn() == Definitions.Color.WHITE)
@@ -413,25 +450,25 @@ public class ComputerPlayer extends Player
 						rr = 7 - r;
 					}
 					
-					if (p.color() == scb.whoseTurn())
+					if (Character.isUpperCase(p) ^ (scb.whoseTurn() == Definitions.Color.BLACK)) //turn matches piece color
 					{
-						if (p instanceof Pawn)
+						if (Character.toLowerCase(p) == 'p')
 						{
 							score = score + 100 + PawnVals[rr][c];
 						}
-						else if (p instanceof Knight)
+						else if (Character.toLowerCase(p) == 'n')
 						{
 							score = score + 325 + KnightVals[rr][c];
 						}
-						else if (p instanceof Bishop)
+						else if (Character.toLowerCase(p) == 'b')
 						{
 							score = score + 325 + BishopVals[rr][c];
 						}
-						else if (p instanceof Rook)
+						else if (Character.toLowerCase(p) == 'r')
 						{
 							score = score + 500;
 						}
-						else if (p instanceof Queen)
+						else if (Character.toLowerCase(p) == 'q')
 						{
 							score = score + 975;
 						}
@@ -442,23 +479,23 @@ public class ComputerPlayer extends Player
 					}
 					else
 					{
-						if (p instanceof Pawn)
+						if (Character.toLowerCase(p) == 'p')
 						{
 							score = score - 100 - PawnVals[7-rr][c];
 						}
-						else if (p instanceof Knight)
+						else if (Character.toLowerCase(p) == 'n')
 						{
 							score = score - 325 - KnightVals[7-rr][c];
 						}
-						else if (p instanceof Bishop)
+						else if (Character.toLowerCase(p) == 'b')
 						{
 							score = score - 325 - BishopVals[7-rr][c];
 						}
-						else if (p instanceof Rook)
+						else if (Character.toLowerCase(p) == 'r')
 						{
 							score = score - 500;
 						}
-						else if (p instanceof Queen)
+						else if (Character.toLowerCase(p) == 'q')
 						{
 							score = score - 975;
 						}
@@ -491,8 +528,8 @@ public class ComputerPlayer extends Player
 		}
 		for (Move m : mvs)
 		{
-			Piece p = scb.getPiece(m.r0, m.c0);
-			if (scb.getPiece(m.rf, m.cf) != null || (p instanceof Pawn && (m.rf == 8 || m.rf == 0))) //capture or pawn promotion
+			char p = scb.getPiece(m.r0, m.c0);
+			if (scb.getPiece(m.rf, m.cf) != 0 || (Character.toLowerCase(p) == 'p' && (m.rf == 8 || m.rf == 0))) //capture or pawn promotion
 			{
 				order.add(numkillers + numchecks, m);
 			}

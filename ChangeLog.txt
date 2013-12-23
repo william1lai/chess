@@ -1,6 +1,19 @@
 ChangeLog
 
 Name: William Lai
+Date: 12-23-2013
+Description: Cleaned up code, removed Piece class and subclasses, AI now much faster (on the order of 10x)
+    * REMOVED Bishop.java, King.java, Knight.java, Pawn.java, Piece.java, Queen.java, Rook.java
+    * src/chess/Board.java: Stripped down to bare bones. May add some more functionality back when variants are made
+    * src/chess/ComputerPlayer.java: Adapted functions to use char representation of pieces (instead of old Piece class), and now use timer to make the AI think for a roughly fixed amount of time
+    * src/chess/Definitions.java: Added constant for max thinking time
+    * src/chess/HumanPlayer.java: Adapted functions to use char representation of pieces
+    * src/chess/StandardChessBoard.java: Adapted functions to use char representation of pieces; removed unnecessary code
+    * src/chess/StandardChessGame.java: Adapted functions to use char representation of pieces
+    * src/chess/StandardChessGameAnimation.java: Adapted functions to use char representation of pieces
+    * src/chess/StandardChessGameGraphics.java: Adapted functions to use char representation of pieces
+
+Name: William Lai
 Date: 12-20-2013
 Description: Bitboards, code still messy
     * src/chess/Definitions.java: Added many bitboard related static functions and constants; implemented "exploding" bitboards

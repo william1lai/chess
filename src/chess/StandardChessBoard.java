@@ -5,11 +5,8 @@ import java.util.ArrayList;
 
 public class StandardChessBoard extends Board 
 {
-	private Definitions.State m_state;	
 	private Definitions.Color m_turn;
-	private int m_whiteKingLoc;
-	private int m_blackKingLoc;
-	
+
 	public long m_white;
 	public long m_black;
 	public long m_pawns;
@@ -18,7 +15,7 @@ public class StandardChessBoard extends Board
 	public long m_rooks;
 	public long m_queens;
 	public long m_kings;
-	
+
 	private class GameData
 	{
 		public int m_enpassantCol; //the column (0-7) of the pawn to move two spaces last turn, -1 if no pawn moved two spaces
@@ -29,7 +26,7 @@ public class StandardChessBoard extends Board
 		public int m_fiftymoverulecount;
 		public int m_turncount;
 		//public HashMap<String, Integer> positionTable;
-		
+
 		public GameData()
 		{
 			m_enpassantCol = -1;
@@ -40,7 +37,7 @@ public class StandardChessBoard extends Board
 			m_fiftymoverulecount = 0;
 			m_turncount = 0;
 		}
-		
+
 		public GameData(GameData other)
 		{
 			m_enpassantCol = other.m_enpassantCol;
@@ -52,18 +49,14 @@ public class StandardChessBoard extends Board
 			m_turncount = other.m_turncount;
 		}
 	};
-	
+
 	private GameData m_data;
-	
-	public StandardChessBoard()
+
+	public StandardChessBoard() //standard setup
 	{
-		super.init();
-		m_state = Definitions.State.UNCHECKED;
-		m_whiteKingLoc = 74; //default locations
-		m_blackKingLoc = 4;
 		m_turn = Definitions.Color.WHITE;
 		m_data = new GameData();
-		
+
 		m_white = 	0x000000000000FFFFL;
 		m_black = 	0xFFFF000000000000L;
 		m_pawns = 	0x00FF00000000FF00L;
@@ -73,17 +66,12 @@ public class StandardChessBoard extends Board
 		m_queens = 	0x1000000000000010L;
 		m_kings = 	0x0800000000000008L;
 	}
-	
+
 	public StandardChessBoard(StandardChessBoard other)
 	{
-		super.init();
-		super.copyPieces(other);
-		m_state = other.m_state;
-		m_whiteKingLoc = other.m_whiteKingLoc;
-		m_blackKingLoc = other.m_blackKingLoc;
 		m_turn = other.m_turn;
 		m_data = new GameData(other.m_data);
-		
+
 		m_white = other.m_white;
 		m_black = other.m_black;
 		m_pawns = other.m_pawns;
@@ -93,80 +81,147 @@ public class StandardChessBoard extends Board
 		m_queens = other.m_queens;
 		m_kings = other.m_kings;
 	}
-	
-	public Piece getPiece(int r, int c)
+
+	public char getPiece(int r, int c) //returns 0 if no piece exists
 	{
 		long bit = 1L << ((7-r)*8 + (7-c));
-		Definitions.Color color = Definitions.Color.BLACK;
+		boolean isWhite = false;
 		if ((bit & m_white) != 0)
 		{
-			color = Definitions.Color.WHITE;
+			isWhite = true;
 		}
 		if ((bit & m_pawns) != 0)
 		{
-			return new Pawn(r, c, color);
+			if (isWhite)
+				return 'P';
+			else
+				return 'p';
 		}
 		if ((bit & m_knights) != 0)
 		{
-			return new Knight(r, c, color);
+			if (isWhite)
+				return 'N';
+			else
+				return 'n';
 		}
 		if ((bit & m_bishops) != 0)
 		{
-			return new Bishop(r, c, color);
+			if (isWhite)
+				return 'B';
+			else
+				return 'b';
 		}
 		if ((bit & m_rooks) != 0)
 		{
-			return new Rook(r, c, color);
+			if (isWhite)
+				return 'R';
+			else
+				return 'r';
 		}
 		if ((bit & m_queens) != 0)
 		{
-			return new Queen(r, c, color);
+			if (isWhite)
+				return 'Q';
+			else
+				return 'q';
 		}
 		if ((bit & m_kings) != 0)
 		{
-			return new King(r, c, color);
+			if (isWhite)
+				return 'K';
+			else
+				return 'k';
+		}
+
+		return 0;
+	}
+
+	//trying to place an invalid piece on an occupied square will remove the piece and do nothing more
+	public void placePiece(char piece, Definitions.Color color, int r, int c)
+	{
+		int sq = (7-r)*8 + (7-c);
+		long s = (1L << sq);
+		long mask = ~s;
+		
+		m_white &= mask;
+		m_black &= mask;
+		m_pawns &= mask;
+		m_knights &= mask;
+		m_bishops &= mask;
+		m_rooks &= mask;
+		m_queens &= mask;
+		m_kings &= mask;
+
+		if (color == Definitions.Color.WHITE)
+		{
+			m_white |= s;
+		}
+		else
+		{
+			m_black |= s;
 		}
 		
-		return null;
+		switch (piece)
+		{
+		case 'p':
+		case 'P':
+			m_pawns |= s;
+			break;
+		case 'n':
+		case 'N':
+			m_knights |= s;
+			break;
+		case 'b':
+		case 'B':
+			m_bishops |= s;
+			break;
+		case 'r':
+		case 'R':
+			m_rooks |= s;
+			break;
+		case 'q':
+		case 'Q':
+			m_queens |= s;
+			break;
+		case 'k':
+		case 'K':
+			m_kings |= s;
+			break;
+		}
 	}
 	
-	public int getWhiteKingLoc()
+	public void removePiece(int r, int c)
 	{
-		return m_whiteKingLoc;
-	}
+		int sq = (7-r)*8 + (7-c);
+		long mask = ~(1L << sq);
 
-	public int getBlackKingLoc()
-	{
-		return m_blackKingLoc;
+		m_white = m_white & mask;
+		m_black = m_black & mask;
+		m_pawns = m_pawns & mask;
+		m_knights = m_knights & mask;
+		m_bishops = m_bishops & mask;
+		m_rooks = m_rooks & mask;
+		m_queens = m_queens & mask;
+		m_kings = m_kings & mask;
 	}
-
-	public void updateKingLocs()
+	
+	public void clearBoard()
 	{
-		for (int r = 0; r < Definitions.NUMROWS; r++)
-		{
-			for (int c = 0; c < Definitions.NUMCOLS; c++)
-			{
-				Piece p = getPiece(r, c);
-				if (p instanceof King)
-				{
-					if (p.color() == Definitions.Color.WHITE)
-					{
-						m_whiteKingLoc = r*10 + c;
-					}
-					else
-					{
-						m_blackKingLoc = r*10 + c;
-					}
-				}
-			}
-		}
+		m_white = 0;
+		m_black = 0;
+		m_pawns = 0;
+		m_knights = 0;
+		m_bishops = 0;
+		m_rooks = 0;
+		m_queens = 0;
+		m_kings = 0;
 	}
 	
 	public void incrementFiftymoverulecount()
 	{
 		m_data.m_fiftymoverulecount++;
 	}
-	
+
 	public int getFiftymoverulecount()
 	{
 		return m_data.m_fiftymoverulecount;
@@ -176,57 +231,42 @@ public class StandardChessBoard extends Board
 	{
 		m_data.m_turncount++;
 	}
-	
+
 	public int getTurnCount()
 	{
 		return m_data.m_turncount;
 	}
-	
+
 	public Definitions.Color whoseTurn()
 	{
 		return m_turn;
 	}
-	
+
 	public void setTurn(Definitions.Color color)
 	{
 		m_turn = color;
 	}
-	
+
 	public Definitions.State getState()
 	{
-		if (m_state == Definitions.State.UNCHECKED)
-		{
-			boolean isInCheck = inCheck();
-			int moves = allMoves().size();
+		boolean isInCheck = inCheck();
+		int moves = allMoves().size();
 
-			if (moves == 0)
+		if (moves == 0)
+		{
+			if (isInCheck)
 			{
-				if (isInCheck)
-				{
-					setState(Definitions.State.CHECKMATE);
-					return Definitions.State.CHECKMATE;
-				}
-				else
-				{
-					setState(Definitions.State.STALEMATE);
-					return Definitions.State.STALEMATE;
-				}
+				return Definitions.State.CHECKMATE;
 			}
 			else
 			{
-				setState(Definitions.State.NORMAL);
-				return Definitions.State.NORMAL;
+				return Definitions.State.STALEMATE;
 			}
 		}
 		else
 		{
-			return m_state;
+			return Definitions.State.NORMAL;
 		}
-	}
-	
-	public void setState(Definitions.State state)
-	{
-		m_state = state;
 	}
 
 	public void move(Move m)
@@ -235,7 +275,7 @@ public class StandardChessBoard extends Board
 		long origMask = ~(1L << orig);
 		int dest = (7-m.rf)*8 + (7-m.cf);
 		long destMask = ~(1L << dest);
-		
+
 		if ((m_pawns & (1L << orig)) != 0)
 		{
 			m_pawns = m_pawns & origMask;
@@ -298,7 +338,7 @@ public class StandardChessBoard extends Board
 		}
 		else
 			return; //not a valid move (no piece selected)
-		
+
 		if (m_turn == Definitions.Color.WHITE)
 		{
 			m_white = m_white & origMask;
@@ -313,12 +353,12 @@ public class StandardChessBoard extends Board
 		}		
 		m_turn = Definitions.flip(m_turn);
 	}
-	
+
 	public boolean isLegalMove(Move m)
 	{
 		return allMoves().contains(m);
 	}
-		
+
 	public ArrayList<Move> allMovesPiece(int r, int c)
 	{
 		ArrayList<Move> all = allMoves();
@@ -330,13 +370,13 @@ public class StandardChessBoard extends Board
 		}
 		return pmoves;
 	}
-	
+
 	public ArrayList<Move> allMoves()
 	{
 		ArrayList<Move> legalMoves = new ArrayList<Move>();
 		long turnpieces, pawns, knights, bishops, rooks, queens, kings;
 		int kingsq;
-		
+
 		if (m_turn == Definitions.Color.WHITE)
 		{
 			turnpieces = m_white;
@@ -358,13 +398,13 @@ public class StandardChessBoard extends Board
 			kings = m_black & m_kings;
 		}
 		kingsq = (int)((Math.log(kings)/Math.log(2)) + 0.5);
-		
+
 		for (int r = 0; r < 8; r++)
 		{
 			for (int c = 0; c < 8; c++)
 			{
 				int sq = (7-r)*8 + (7-c);
-				
+
 				if (((turnpieces >>> sq) & 1) == 1) //white piece
 				{
 					if (((pawns >>> sq) & 1) == 1) //pawn
@@ -372,7 +412,7 @@ public class StandardChessBoard extends Board
 						long moves;
 						long bitsq = 1L << sq;
 						int epcol = m_data.m_enpassantCol;
-						
+
 						if (m_turn == Definitions.Color.WHITE)
 						{							
 							moves = Definitions.wpawnAttacks(pawns) | Definitions.wpawnMoves(pawns, ~(m_white | m_black));
@@ -383,7 +423,7 @@ public class StandardChessBoard extends Board
 								int dsq = sq + 7;
 								StandardChessBoard temp = this.clone();
 								temp.move(new Move(r, c, 7 - (dsq / 8), 7 - (dsq % 8)));
-								
+
 								if (!Definitions.isAttacked(temp, kingsq, Definitions.flip(m_turn)))
 								{
 									legalMoves.add(new Move(r, c, 7 - (dsq / 8), 7 - (dsq % 8)));
@@ -395,7 +435,7 @@ public class StandardChessBoard extends Board
 								int dsq = sq + 9;
 								StandardChessBoard temp = this.clone();
 								temp.move(new Move(r, c, 7 - (dsq / 8), 7 - (dsq % 8)));
-								
+
 								if (!Definitions.isAttacked(temp, kingsq, Definitions.flip(m_turn)))
 								{
 									legalMoves.add(new Move(r, c, 7 - (dsq / 8), 7 - (dsq % 8)));
@@ -406,7 +446,7 @@ public class StandardChessBoard extends Board
 								int dsq = sq + 8;
 								StandardChessBoard temp = this.clone();
 								temp.move(new Move(r, c, 7 - (dsq / 8), 7 - (dsq % 8)));
-								
+
 								if (!Definitions.isAttacked(temp, kingsq, Definitions.flip(m_turn)))
 								{
 									legalMoves.add(new Move(r, c, 7 - (dsq / 8), 7 - (dsq % 8)));
@@ -419,7 +459,7 @@ public class StandardChessBoard extends Board
 								int dsq = sq + 16;
 								StandardChessBoard temp = this.clone();
 								temp.move(new Move(r, c, 7 - (dsq / 8), 7 - (dsq % 8)));
-								
+
 								if (!Definitions.isAttacked(temp, kingsq, Definitions.flip(m_turn)))
 								{
 									legalMoves.add(new Move(r, c, 7 - (dsq / 8), 7 - (dsq % 8)));
@@ -429,14 +469,14 @@ public class StandardChessBoard extends Board
 						else
 						{
 							moves = Definitions.bpawnAttacks(pawns) | Definitions.bpawnMoves(pawns, ~(m_white | m_black));
-							
+
 							if (((bitsq >>> 7) & moves & ~Definitions.allH) != 0 && 
 									((bitsq >>> 7) & m_white) != 0 || (epcol >= 0 && epcol == c-1 && r == 4))
 							{
 								int dsq = sq - 7;
 								StandardChessBoard temp = this.clone();
 								temp.move(new Move(r, c, 7 - (dsq / 8), 7 - (dsq % 8)));
-								
+
 								if (!Definitions.isAttacked(temp, kingsq, Definitions.flip(m_turn)))
 								{
 									legalMoves.add(new Move(r, c, 7 - (dsq / 8), 7 - (dsq % 8)));
@@ -448,7 +488,7 @@ public class StandardChessBoard extends Board
 								int dsq = sq - 9;
 								StandardChessBoard temp = this.clone();
 								temp.move(new Move(r, c, 7 - (dsq / 8), 7 - (dsq % 8)));
-								
+
 								if (!Definitions.isAttacked(temp, kingsq, Definitions.flip(m_turn)))
 								{
 									legalMoves.add(new Move(r, c, 7 - (dsq / 8), 7 - (dsq % 8)));
@@ -459,7 +499,7 @@ public class StandardChessBoard extends Board
 								int dsq = sq - 8;
 								StandardChessBoard temp = this.clone();
 								temp.move(new Move(r, c, 7 - (dsq / 8), 7 - (dsq % 8)));
-								
+
 								if (!Definitions.isAttacked(temp, kingsq, Definitions.flip(m_turn)))
 								{
 									legalMoves.add(new Move(r, c, 7 - (dsq / 8), 7 - (dsq % 8)));
@@ -472,7 +512,7 @@ public class StandardChessBoard extends Board
 								int dsq = sq - 16;
 								StandardChessBoard temp = this.clone();
 								temp.move(new Move(r, c, 7 - (dsq / 8), 7 - (dsq % 8)));
-								
+
 								if (!Definitions.isAttacked(temp, kingsq, Definitions.flip(m_turn)))
 								{
 									legalMoves.add(new Move(r, c, 7 - (dsq / 8), 7 - (dsq % 8)));
@@ -489,7 +529,7 @@ public class StandardChessBoard extends Board
 							{
 								StandardChessBoard temp = this.clone();
 								temp.move(new Move(r, c, 7 - (i / 8), 7 - (i % 8)));
-								
+
 								if (!Definitions.isAttacked(temp, kingsq, Definitions.flip(m_turn)))
 								{
 									legalMoves.add(new Move(r, c, 7 - (i / 8), 7 - (i % 8)));
@@ -506,7 +546,7 @@ public class StandardChessBoard extends Board
 							{
 								StandardChessBoard temp = this.clone();
 								temp.move(new Move(r, c, 7 - (i / 8), 7 - (i % 8)));
-								
+
 								if (!Definitions.isAttacked(temp, kingsq, Definitions.flip(m_turn)))
 								{
 									legalMoves.add(new Move(r, c, 7 - (i / 8), 7 - (i % 8)));
@@ -523,7 +563,7 @@ public class StandardChessBoard extends Board
 							{
 								StandardChessBoard temp = this.clone();
 								temp.move(new Move(r, c, 7 - (i / 8), 7 - (i % 8)));
-								
+
 								if (!Definitions.isAttacked(temp, kingsq, Definitions.flip(m_turn)))
 								{
 									legalMoves.add(new Move(r, c, 7 - (i / 8), 7 - (i % 8)));
@@ -540,7 +580,7 @@ public class StandardChessBoard extends Board
 							{
 								StandardChessBoard temp = this.clone();
 								temp.move(new Move(r, c, 7 - (i / 8), 7 - (i % 8)));
-								
+
 								if (!Definitions.isAttacked(temp, kingsq, Definitions.flip(m_turn)))
 								{
 									legalMoves.add(new Move(r, c, 7 - (i / 8), 7 - (i % 8)));
@@ -557,14 +597,14 @@ public class StandardChessBoard extends Board
 							{
 								StandardChessBoard temp = this.clone();
 								temp.move(new Move(r, c, 7 - (i / 8), 7 - (i % 8)));
-								
+
 								if (!Definitions.isAttacked(temp, i, Definitions.flip(m_turn)))
 								{
 									legalMoves.add(new Move(r, c, 7 - (i / 8), 7 - (i % 8)));
 								}
 							}
 						}
-						
+
 						boolean canCastleKingside;
 						boolean canCastleQueenside;
 						if (whoseTurn() == Definitions.Color.WHITE)
@@ -587,7 +627,7 @@ public class StandardChessBoard extends Board
 									Definitions.isAttacked(this, kingsq - 2, Definitions.flip(whoseTurn()))))
 							{
 								if ((((king >>> 1) & (~(m_white | m_black))) != 0) &&
-									(((king >>> 2) & (~(m_white | m_black))) != 0))
+										(((king >>> 2) & (~(m_white | m_black))) != 0))
 								{
 									legalMoves.add(new Move(r, c, r, c + 2));
 								}
@@ -601,7 +641,7 @@ public class StandardChessBoard extends Board
 									Definitions.isAttacked(this, kingsq + 2, Definitions.flip(whoseTurn()))))
 							{
 								if ((((king << 1) & (~(m_white | m_black))) != 0) &&
-									(((king << 2) & (~(m_white | m_black))) != 0))
+										(((king << 2) & (~(m_white | m_black))) != 0))
 								{
 									legalMoves.add(new Move(r, c, r, c - 2));
 								}	
@@ -613,7 +653,7 @@ public class StandardChessBoard extends Board
 		}
 		return legalMoves;
 	}
-	
+
 	public boolean inCheck()
 	{
 		long king;
@@ -625,39 +665,24 @@ public class StandardChessBoard extends Board
 		return Definitions.isAttacked(this, kingsq, Definitions.flip(whoseTurn()));
 	}
 
-	public boolean isCheckmate()
+	public boolean inCheckmate()
 	{		
 		boolean check = inCheck();
 		return (check && allMoves().size() == 0);
 	}
 
-	public boolean isStalemate()
+	public boolean inStalemate()
 	{		
 		boolean check = inCheck();
 		ArrayList<Move> mvs = allMoves();
 		return (!check && mvs.size() == 0);
 	}
 
-	public void removePiece(int r, int c)
-	{
-		int sq = (7-r)*8 + (7-c);
-		long mask = ~(1L << sq);
-		
-		m_white = m_white & mask;
-		m_black = m_black & mask;
-		m_pawns = m_pawns & mask;
-		m_knights = m_knights & mask;
-		m_bishops = m_bishops & mask;
-		m_rooks = m_rooks & mask;
-		m_queens = m_queens & mask;
-		m_kings = m_kings & mask;
-	}
-	
 	public Move processMove(Move newMove)
 	{
 		int row = newMove.r0;
 		int col = newMove.c0;
-		Piece movedPiece = getPiece(row, col);
+		char movedPiece = getPiece(row, col);
 		m_data.m_fiftymoverulecount++;
 
 		int castlingRow;
@@ -672,14 +697,14 @@ public class StandardChessBoard extends Board
 
 		Move correspondingRookMove = null; //if we have castling
 		m_data.m_enpassantCol = -1; //default
-		if (movedPiece instanceof Pawn)
+		if (Character.toLowerCase(movedPiece) == 'p')
 		{
 			m_data.m_fiftymoverulecount = 0; //pawn was moved
 			if (Math.abs(newMove.rf - newMove.r0) == 2)
 			{
 				m_data.m_enpassantCol = newMove.c0; //enpassant now available on this column
 			}
-			else if ((Math.abs(newMove.cf - newMove.c0) == 1) && (getPiece(newMove.rf, newMove.cf) == null))
+			else if ((Math.abs(newMove.cf - newMove.c0) == 1) && (getPiece(newMove.rf, newMove.cf) == 0))
 				//en passant
 			{
 				if (whoseTurn() == Definitions.Color.WHITE)
@@ -692,7 +717,7 @@ public class StandardChessBoard extends Board
 				}
 			}
 		}
-		else if (movedPiece instanceof King)
+		else if (Character.toLowerCase(movedPiece) == 'k')
 		{			
 			if (whoseTurn() == Definitions.Color.WHITE)
 			{
@@ -744,14 +769,14 @@ public class StandardChessBoard extends Board
 			}
 		}
 
-		if (getPiece(newMove.rf, newMove.cf) != null) //capture was made
+		if (getPiece(newMove.rf, newMove.cf) != 0) //capture was made
 		{
 			m_data.m_fiftymoverulecount = 0; //reset counter
 		}
 
 		return correspondingRookMove; //so we know to animate rook	
 	}
-	
+
 	public StandardChessBoard clone()
 	{
 		return new StandardChessBoard(this);
@@ -765,14 +790,14 @@ public class StandardChessBoard extends Board
 			for (int c = 0; c < Definitions.NUMCOLS; c++)
 			{
 				int count = 0; //count up consecutive empty squares
-				Piece p = getPiece(r, c);
-				
-				if (p == null)
+				char p = getPiece(r, c);
+
+				if (p == 0)
 				{
 					count++;
 					c++;
 					p = getPiece(r, c);
-					while (p == null && c < Definitions.NUMCOLS)
+					while (p == 0 && c < Definitions.NUMCOLS)
 					{
 						count++;
 						c++;
@@ -783,34 +808,34 @@ public class StandardChessBoard extends Board
 				}
 				else
 				{
-					if (p.color() == Definitions.Color.WHITE)
+					if (Character.isUpperCase(p)) //White
 					{
-						if (p instanceof Pawn)
+						if (Character.toLowerCase(p) == 'p')
 							FEN = FEN + "P";
-						else if (p instanceof Knight)
+						else if (Character.toLowerCase(p) == 'n')
 							FEN = FEN + "N";
-						else if (p instanceof Bishop)
+						else if (Character.toLowerCase(p) == 'b')
 							FEN = FEN + "B";
-						else if (p instanceof Rook)
+						else if (Character.toLowerCase(p) == 'r')
 							FEN = FEN + "R";
-						else if (p instanceof Queen)
+						else if (Character.toLowerCase(p) == 'q')
 							FEN = FEN + "Q";
-						else if (p instanceof King)
+						else if (Character.toLowerCase(p) == 'k')
 							FEN = FEN + "K";
 					}
 					else
 					{
-						if (p instanceof Pawn)
+						if (Character.toLowerCase(p) == 'p')
 							FEN = FEN + "p";
-						else if (p instanceof Knight)
+						else if (Character.toLowerCase(p) == 'n')
 							FEN = FEN + "n";
-						else if (p instanceof Bishop)
+						else if (Character.toLowerCase(p) == 'b')
 							FEN = FEN + "b";
-						else if (p instanceof Rook)
+						else if (Character.toLowerCase(p) == 'r')
 							FEN = FEN + "r";
-						else if (p instanceof Queen)
+						else if (Character.toLowerCase(p) == 'q')
 							FEN = FEN + "q";
-						else if (p instanceof King)
+						else if (Character.toLowerCase(p) == 'k')
 							FEN = FEN + "k";
 					}
 				}
@@ -818,12 +843,12 @@ public class StandardChessBoard extends Board
 			if (r != 7) //last row doesn't need slash
 				FEN = FEN + "/";
 		}
-		
+
 		String tstr = "w";
 		if (whoseTurn() == Definitions.Color.BLACK)
 			tstr = "b";
 		FEN = FEN + " " + tstr + " ";
-		
+
 		String cstr = "";
 		if (m_data.m_whiteCanCastleKingside)
 			cstr = cstr + "K";
@@ -836,7 +861,7 @@ public class StandardChessBoard extends Board
 		if (cstr.length() == 0)
 			cstr = "-";
 		FEN = FEN + cstr + " ";
-		
+
 		String epstr = "";
 		if (m_data.m_enpassantCol >= 0 && m_data.m_enpassantCol < Definitions.NUMCOLS)
 		{
@@ -851,13 +876,13 @@ public class StandardChessBoard extends Board
 			epstr = "-";
 		}
 		FEN = FEN + epstr;
-				
+
 		if (complete)
 			FEN = FEN + " " + Integer.toString(m_data.m_fiftymoverulecount) + " " + Integer.toString(m_data.m_turncount);
-		
+
 		return FEN;
 	}
-	
+
 	public void FENtoPosition(String srcFEN)
 	{
 		String[] FEN = srcFEN.split("/");
@@ -878,7 +903,7 @@ public class StandardChessBoard extends Board
 		{
 			m_turn = Definitions.Color.BLACK;
 		}
-		
+
 		String castling = detailElems[1];
 		if (castling.contains("Q"))
 		{
@@ -896,7 +921,7 @@ public class StandardChessBoard extends Board
 		{
 			m_data.m_blackCanCastleKingside = true;
 		}
-		
+
 		int epcol = detailElems[2].charAt(0) - 'a';
 		if (epcol >= 0 && epcol < 8)
 			m_data.m_enpassantCol = epcol;
@@ -905,6 +930,7 @@ public class StandardChessBoard extends Board
 		m_data.m_fiftymoverulecount = Integer.parseInt(detailElems[3]);
 		m_data.m_turncount = Integer.parseInt(detailElems[4]);
 		
+		clearBoard();
 		for (int r = 0; r < 8; r++)
 		{
 			String rFEN = FEN[r];
@@ -912,8 +938,7 @@ public class StandardChessBoard extends Board
 			for (int c = 0; c < 8; c++, index++)
 			{
 				char p = rFEN.charAt(index);
-				Piece pp = null;
-				
+
 				int emptysquares = p - '1';
 				if (emptysquares >= 0 && emptysquares <= 8)
 				{
@@ -921,51 +946,14 @@ public class StandardChessBoard extends Board
 					continue;
 				}
 
-				switch (p)
+				Definitions.Color color = Definitions.Color.WHITE;
+				if (Character.isLowerCase(p))
 				{
-				case 'P':
-					pp = new Pawn(r, c, Definitions.Color.WHITE);
-					break;
-				case 'p':
-					pp = new Pawn(r, c, Definitions.Color.BLACK);
-					break;
-				case 'B':
-					pp = new Bishop(r, c, Definitions.Color.WHITE);
-					break;
-				case 'b':
-					pp = new Bishop(r, c, Definitions.Color.BLACK);
-					break;
-				case 'N':
-					pp = new Knight(r, c, Definitions.Color.WHITE);
-					break;
-				case 'n':
-					pp = new Knight(r, c, Definitions.Color.BLACK);
-					break;
-				case 'R':
-					pp = new Rook(r, c, Definitions.Color.WHITE);
-					break;
-				case 'r':
-					pp = new Rook(r, c, Definitions.Color.BLACK);
-					break;
-				case 'Q':
-					pp = new Queen(r, c, Definitions.Color.WHITE);
-					break;
-				case 'q':
-					pp = new Queen(r, c, Definitions.Color.BLACK);
-					break;
-				case 'K':
-					pp = new King(r, c, Definitions.Color.WHITE);
-					break;
-				case 'k':
-					pp = new King(r, c, Definitions.Color.BLACK);
-					break;
-				}
-				if (pp != null)
-				{
-					placePiece(pp, r, c);
-				}
+					color = Definitions.Color.BLACK;
+				}				
+				
+				placePiece(p, color, r, c);
 			}
 		}
-		updateKingLocs();
 	}
 }

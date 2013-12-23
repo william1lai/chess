@@ -54,29 +54,7 @@ public class StandardChessGame extends Game implements Runnable
 
 	public void setupStandard()
 	{
-		m_game_board.placePiece(new Rook(0, 0, Definitions.Color.BLACK), 0, 0);
-		m_game_board.placePiece(new Knight(0, 1, Definitions.Color.BLACK), 0, 1);
-		m_game_board.placePiece(new Bishop(0, 2, Definitions.Color.BLACK), 0, 2);
-		m_game_board.placePiece(new Queen(0, 3, Definitions.Color.BLACK), 0, 3);
-		m_game_board.placePiece(new King(0, 4, Definitions.Color.BLACK), 0, 4);
-		m_game_board.placePiece(new Bishop(0, 5, Definitions.Color.BLACK), 0, 5);
-		m_game_board.placePiece(new Knight(0, 6, Definitions.Color.BLACK), 0, 6);
-		m_game_board.placePiece(new Rook(0, 7, Definitions.Color.BLACK), 0, 7);
-		for (int c = 0; c < 8; c++) {
-			m_game_board.placePiece(new Pawn(1, c, Definitions.Color.BLACK), 1, c); 
-		}
-		m_game_board.placePiece(new Rook(7, 0, Definitions.Color.WHITE), 7, 0);
-		m_game_board.placePiece(new Knight(7, 1, Definitions.Color.WHITE), 7, 1);
-		m_game_board.placePiece(new Bishop(7, 2, Definitions.Color.WHITE), 7, 2);
-		m_game_board.placePiece(new Queen(7, 3, Definitions.Color.WHITE), 7, 3);
-		m_game_board.placePiece(new King(7, 4, Definitions.Color.WHITE), 7, 4);
-		m_game_board.placePiece(new Bishop(7, 5, Definitions.Color.WHITE), 7, 5);
-		m_game_board.placePiece(new Knight(7, 6, Definitions.Color.WHITE), 7, 6);
-		m_game_board.placePiece(new Rook(7, 7, Definitions.Color.WHITE), 7, 7);
-		for (int c = 0; c < 8; c++) {
-			m_game_board.placePiece(new Pawn(6, c, Definitions.Color.WHITE), 6, c); 
-		}
-
+		//by default, the board is set up in the standard fashion
 		m_game_board.setTurn(Definitions.Color.WHITE);
 	}
 
@@ -245,8 +223,8 @@ public class StandardChessGame extends Game implements Runnable
 			m_game_board.move(correspondingRookMove);
 		}
 
-		Piece movedPiece = m_game_board.getPiece(newMove.rf, newMove.cf);
-		if (movedPiece instanceof Pawn)
+		char movedPiece = m_game_board.getPiece(newMove.rf, newMove.cf);
+		if (Character.toLowerCase(movedPiece) == 'p')
 		{
 			if (((m_game_board.whoseTurn() == Definitions.Color.BLACK) && (newMove.rf == 0)) 
 					|| ((m_game_board.whoseTurn() == Definitions.Color.WHITE) && (newMove.rf == 7))) //flipped by earlier move

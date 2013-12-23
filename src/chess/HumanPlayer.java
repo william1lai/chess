@@ -6,13 +6,13 @@ import java.awt.event.MouseListener;
 public class HumanPlayer extends Player implements MouseListener
 {	
 	private int m_selected;
-	
+
 	public HumanPlayer(String name)
 	{
 		setName(name);
 		m_selected = -1;
 	}
-	
+
 	public HumanPlayer(String name, Definitions.Color c, Game g)
 	{
 		setName(name);
@@ -20,17 +20,17 @@ public class HumanPlayer extends Player implements MouseListener
 		setColor(c);
 		m_selected = -1;
 	}
-	
+
 	private void select(int sq)
 	{
 		m_selected = sq;
 	}
-	
+
 	private void deselect()
 	{
 		m_selected = -1;
 	}
-	
+
 	public int getSelected()
 	{
 		return m_selected;
@@ -47,7 +47,7 @@ public class HumanPlayer extends Player implements MouseListener
 	}
 
 	public void run() {}
-	
+
 	public void mousePressed(MouseEvent e)
 	{
 		if (getGame() instanceof StandardChessGame)
@@ -63,14 +63,11 @@ public class HumanPlayer extends Player implements MouseListener
 				int sq = (7-row)*8 + (7-col);
 				StandardChessBoard scb = g.getBoard();
 				char p = scb.getPiece(row, col);
-				if (p != 0) 
+				if (p != 0 && ((Character.isUpperCase(p)) ^ (scb.whoseTurn() == Definitions.Color.BLACK))) //colors match
 				{
-					if ((Character.isUpperCase(p)) ^ (scb.whoseTurn() == Definitions.Color.BLACK)) //if the colors match
-					{
-						select(sq);
-					}
+					select(sq);
 				}
-				else if (m_selected != -1) 
+				else if (m_selected != -1)
 				{
 					m_move = new Move(7 - (m_selected / 8), 7 - (m_selected % 8), row, col);
 					if (g.getBoard().isLegalMove(m_move)) {
@@ -81,7 +78,7 @@ public class HumanPlayer extends Player implements MouseListener
 					else {
 						m_move = null;
 					}
-				}					
+				}
 			}
 		}
 	}

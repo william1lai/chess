@@ -410,14 +410,16 @@ public class StandardChessBoard extends Board
 					if (((pawns >>> sq) & 1) == 1) //pawn
 					{
 						long moves;
+						long attacks;
 						long bitsq = 1L << sq;
 						int epcol = m_data.m_enpassantCol;
 
 						if (m_turn == Definitions.Color.WHITE)
 						{							
-							moves = Definitions.wpawnAttacks(pawns) | Definitions.wpawnMoves(pawns, ~(m_white | m_black));
+							attacks = Definitions.wpawnAttacks(pawns);
+							moves = Definitions.wpawnMoves(pawns, ~(m_white | m_black));
 
-							if (((bitsq << 7) & moves & ~Definitions.allA) != 0 && 
+							if (((bitsq << 7) & attacks & ~Definitions.allA) != 0 && 
 									(((bitsq << 7) & m_black) != 0 || (epcol >= 0 && epcol == c+1 && r == 3)))
 							{
 								int dsq = sq + 7;
@@ -429,7 +431,7 @@ public class StandardChessBoard extends Board
 									legalMoves.add(new Move(r, c, 7 - (dsq / 8), 7 - (dsq % 8)));
 								}
 							}
-							if (((bitsq << 9) & moves & ~Definitions.allH) != 0 && 
+							if (((bitsq << 9) & attacks & ~Definitions.allH) != 0 && 
 									((bitsq << 9) & m_black) != 0 || (epcol >= 0 && epcol == c-1 && r == 3))
 							{
 								int dsq = sq + 9;
@@ -468,9 +470,10 @@ public class StandardChessBoard extends Board
 						}
 						else
 						{
-							moves = Definitions.bpawnAttacks(pawns) | Definitions.bpawnMoves(pawns, ~(m_white | m_black));
-
-							if (((bitsq >>> 7) & moves & ~Definitions.allH) != 0 && 
+							attacks = Definitions.bpawnAttacks(pawns);
+							moves = Definitions.bpawnMoves(pawns, ~(m_white | m_black));
+									
+							if (((bitsq >>> 7) & attacks & ~Definitions.allH) != 0 && 
 									((bitsq >>> 7) & m_white) != 0 || (epcol >= 0 && epcol == c-1 && r == 4))
 							{
 								int dsq = sq - 7;
@@ -482,7 +485,7 @@ public class StandardChessBoard extends Board
 									legalMoves.add(new Move(r, c, 7 - (dsq / 8), 7 - (dsq % 8)));
 								}
 							}
-							if (((bitsq >>> 9) & moves & ~Definitions.allA) != 0 && 
+							if (((bitsq >>> 9) & attacks & ~Definitions.allA) != 0 && 
 									((bitsq >>> 9) & m_white) != 0 || (epcol >= 0 && epcol == c+1 && r == 4))
 							{
 								int dsq = sq - 9;

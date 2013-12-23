@@ -38,9 +38,9 @@ public class StandardChessGame extends Game implements Runnable
 
 		setupStandard();
 
-		//p1 = new HumanPlayer("Human WHITE", Definitions.Color.WHITE, this);
+		p1 = new HumanPlayer("Human WHITE", Definitions.Color.WHITE, this);
 		//p2 = new HumanPlayer("Human BLACK", Definitions.Color.BLACK, this);
-		p1 = new ComputerPlayer("CPU WHITE", Definitions.Color.WHITE, this);
+		//p1 = new ComputerPlayer("CPU WHITE", Definitions.Color.WHITE, this);
 		p2 = new ComputerPlayer("CPU BLACK", Definitions.Color.BLACK, this);
 
 		m_thread = new Thread(this);

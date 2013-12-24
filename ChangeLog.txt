@@ -1,5 +1,10 @@
 ChangeLog
 
+ame: William Lai
+Date: 12-23-2013
+Description: Slight improvement to Check Extension
+     * src/chess/ComputerPlayer.java: Slight improvement to check extension by only counting check escapes after the first one
+
 Name: William Lai
 Date: 12-23-2013
 Description: AI extensions, pop-up message at end of game

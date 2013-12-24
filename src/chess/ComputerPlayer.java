@@ -223,7 +223,7 @@ public class ComputerPlayer extends Player
 			killer = null;
 			killer2 = null;
 			StandardChessBoard temp = scb.clone();
-			bms = new MovelistScore(alphabetaMax(temp, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY, 0, 2*d, true, false));
+			bms = new MovelistScore(alphabetaMax(temp, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY, 0, 2*d, true, false, 0));
 			long endtime = System.nanoTime();
 			double duration = getDuration(starttime, endtime);
 			highScore = bms.getScore();
@@ -244,8 +244,8 @@ public class ComputerPlayer extends Player
 	}
 
 	private MovelistScore alphabetaMax(StandardChessBoard scb, double alpha, double beta, 
-			int ply, int maxply, boolean considerHashMoves, boolean extended)
-	{		
+			int ply, int maxply, boolean considerHashMoves, boolean extended, int checkcount)
+	{
 		if (stop) //time's up
 			return null;
 		if (getDuration(m_starttime, System.nanoTime()) > Definitions.MAXTHINKINGTIME)
@@ -267,16 +267,13 @@ public class ComputerPlayer extends Player
 			}
 			extended = true;
 		}
-		
-		if (scb.inCheck()) //extend when we move out of check
-			maxply++;
 
 		ArrayList<Move> mvs = orderMoves(scb, scb.allMoves(), extended);
 		double score;
 		Move best = null;
 		MovelistScore bms;
 		ArrayList<Move> movelist = new ArrayList<Move>();
-
+		
 		if (mvs.isEmpty())
 		{
 			if (scb.inCheckmate())
@@ -294,7 +291,17 @@ public class ComputerPlayer extends Player
 		{
 			StandardChessBoard temp = scb.clone();
 			temp.move(hashmoves.get(ply));
-			bms = alphabetaMin(temp, alpha, beta, ply + 1, maxply, true, extended);
+			
+			if (scb.inCheck() && Character.toLowerCase(scb.getPiece(hashmoves.get(ply).r0, hashmoves.get(ply).c0)) == 'k') //extend when we move king out of check
+			{	
+				if (checkcount > 0)
+					bms = alphabetaMin(temp, alpha, beta, ply + 1, maxply + 1, true, extended, checkcount + 1);
+				else
+					bms = alphabetaMin(temp, alpha, beta, ply + 1, maxply, true, extended, checkcount + 1);
+			}
+			else
+				bms = alphabetaMin(temp, alpha, beta, ply + 1, maxply, true, extended, checkcount);
+			
 			if (stop) //time's up
 				return null;
 			score = bms.getScore();
@@ -320,8 +327,17 @@ public class ComputerPlayer extends Player
 		{			
 			StandardChessBoard temp = scb.clone();
 			temp.move(m);
-
-			bms = new MovelistScore(alphabetaMin(temp, alpha, beta, ply + 1, maxply, false, extended));
+			
+			if (scb.inCheck() && Character.toLowerCase(scb.getPiece(m.r0, m.c0)) == 'k') //extend when we move king out of check
+			{	
+				if (checkcount > 0)
+					bms = alphabetaMin(temp, alpha, beta, ply + 1, maxply + 1, true, extended, checkcount + 1);
+				else
+					bms = alphabetaMin(temp, alpha, beta, ply + 1, maxply, true, extended, checkcount + 1);
+			}
+			else
+				bms = alphabetaMin(temp, alpha, beta, ply + 1, maxply, true, extended, checkcount);
+			
 			if (stop) //time's up
 				return null;
 			score = bms.getScore();
@@ -356,8 +372,8 @@ public class ComputerPlayer extends Player
 	}
 
 	private MovelistScore alphabetaMin(StandardChessBoard scb, double alpha, double beta, 
-			int ply, int maxply, boolean considerHashMoves, boolean extended)
-	{	
+			int ply, int maxply, boolean considerHashMoves, boolean extended, int checkcount)
+	{
 		if (stop) //time's up
 			return null;
 		if (getDuration(m_starttime, System.nanoTime()) > Definitions.MAXTHINKINGTIME)
@@ -377,9 +393,6 @@ public class ComputerPlayer extends Player
 			}
 			extended = true;
 		}
-
-		if (scb.inCheck()) //extend when we move out of check
-			maxply++;
 		
 		ArrayList<Move> mvs = orderMoves(scb, scb.allMoves(), extended);
 		Move best = null;
@@ -392,7 +405,17 @@ public class ComputerPlayer extends Player
 		{
 			temp = scb.clone();
 			temp.move(hashmoves.get(ply));
-			bms = alphabetaMax(temp, alpha, beta, ply + 1, maxply, true, extended);
+
+			if (scb.inCheck() && Character.toLowerCase(scb.getPiece(hashmoves.get(ply).r0, hashmoves.get(ply).c0)) == 'k') //extend when we move king out of check
+			{				
+				if (checkcount > 0)
+					bms = alphabetaMax(temp, alpha, beta, ply + 1, maxply + 1, true, extended, checkcount + 1);
+				else
+					bms = alphabetaMax(temp, alpha, beta, ply + 1, maxply, true, extended, checkcount + 1);
+			}
+			else
+				bms = alphabetaMax(temp, alpha, beta, ply + 1, maxply, true, extended, checkcount);
+			
 			if (stop) //time's up
 				return null;
 			score = bms.getScore();
@@ -427,8 +450,17 @@ public class ComputerPlayer extends Player
 		{
 			temp = scb.clone();
 			temp.move(m);
-
-			bms = alphabetaMax(temp, alpha, beta, ply + 1, maxply, false, extended);
+			
+			if (scb.inCheck() && Character.toLowerCase(scb.getPiece(m.r0, m.c0)) == 'k') //extend when we move king out of check
+			{				
+				if (checkcount > 0)
+					bms = alphabetaMax(temp, alpha, beta, ply + 1, maxply + 1, true, extended, checkcount + 1);
+				else
+					bms = alphabetaMax(temp, alpha, beta, ply + 1, maxply, true, extended, checkcount + 1);
+			}
+			else
+				bms = alphabetaMax(temp, alpha, beta, ply + 1, maxply, true, extended, checkcount);
+			
 			if (stop) //time's up
 				return null;
 			score = bms.getScore();
@@ -488,8 +520,8 @@ public class ComputerPlayer extends Player
 		}
 
 		//knight and bishop threats
-		if ((Definitions.knightAttacks(scb.m_knights & otherpieces) | 
-				Definitions.bishopAttacks(scb.m_bishops & otherpieces, ~(turnpieces | otherpieces)) & 
+		if (((Definitions.knightAttacks(scb.m_knights & otherpieces) | 
+				Definitions.bishopAttacks(scb.m_bishops & otherpieces, ~(turnpieces | otherpieces))) & 
 				(turnpieces & ~scb.m_pawns)) != 0)
 		{
 			return true;
@@ -647,7 +679,7 @@ public class ComputerPlayer extends Player
 			{
 				StandardChessBoard temp = scb.clone();
 				temp.move(m);
-				if (temp.inCheck()) //move that gives check
+				if (!partial && temp.inCheck()) //move that gives check
 				{
 					order.add(numkillers, m);
 					numchecks++;

@@ -18,7 +18,7 @@ public class Definitions
 	public static final String RMARKERS[] = {"8","7","6","5","4","3","2","1"};
 	public static final String CMARKERS[] = {"a","b","c","d","e","f","g","h"};
 	public static final int MAXDEPTH = 3; //PLY = 2 * DEPTH
-	public static final double MAXTHINKINGTIME = 30; //in seconds
+	public static final double MAXTHINKINGTIME = 10; //in seconds
 
 	public static final int repsB[] =
 		{

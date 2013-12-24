@@ -205,8 +205,8 @@ public class ComputerPlayer extends Player
 		Move opening = m_book.get(completeFEN);
 		if (opening != null)
 			return opening; //found in book
-		
-		if (scb.inStalemate() || scb.inCheck())
+
+		if (scb.inStalemate() || scb.inCheckmate())
 			return null;
 
 		double highScore = staticEval(scb);
@@ -273,7 +273,7 @@ public class ComputerPlayer extends Player
 		Move best = null;
 		MovelistScore bms;
 		ArrayList<Move> movelist = new ArrayList<Move>();
-		
+
 		if (mvs.isEmpty())
 		{
 			if (scb.inCheckmate())
@@ -290,44 +290,52 @@ public class ComputerPlayer extends Player
 		if (considerHashMoves && hashmoves.size() > ply)
 		{
 			StandardChessBoard temp = scb.clone();
-			temp.move(hashmoves.get(ply));
-			
-			if (scb.inCheck() && Character.toLowerCase(scb.getPiece(hashmoves.get(ply).r0, hashmoves.get(ply).c0)) == 'k') //extend when we move king out of check
-			{	
-				if (checkcount > 0)
-					bms = alphabetaMin(temp, alpha, beta, ply + 1, maxply + 1, true, extended, checkcount + 1);
-				else
-					bms = alphabetaMin(temp, alpha, beta, ply + 1, maxply, true, extended, checkcount + 1);
+
+			if (!scb.isLegalMove(hashmoves.get(ply)))
+			{
+				considerHashMoves = false;
 			}
 			else
-				bms = alphabetaMin(temp, alpha, beta, ply + 1, maxply, true, extended, checkcount);
-			
-			if (stop) //time's up
-				return null;
-			score = bms.getScore();
+			{
+				temp.move(hashmoves.get(ply));
 
-			if (score >= beta)
-			{
-				ArrayList<Move> response = bms.getMovelist();
-				if (killer == null && !response.isEmpty())
-					killer = response.get(bms.getMovelist().size() - 1);
-				else if (!response.isEmpty())
-					killer2 = response.get(bms.getMovelist().size() - 1);
-				return new MovelistScore(movelist, beta); //fail hard beta-cutoff
-			}
-			if (score > alpha)
-			{
-				alpha = score;
-				best = hashmoves.get(ply);
-				movelist = new ArrayList<Move>(bms.getMovelist());
-				movelist.add(0, best);
+				if (scb.inCheck() && Character.toLowerCase(scb.getPiece(hashmoves.get(ply).r0, hashmoves.get(ply).c0)) == 'k') //extend when we move king out of check
+				{	
+					if (checkcount > 0)
+						bms = alphabetaMin(temp, alpha, beta, ply + 1, maxply + 1, true, extended, checkcount + 1);
+					else
+						bms = alphabetaMin(temp, alpha, beta, ply + 1, maxply, true, extended, checkcount + 1);
+				}
+				else
+					bms = alphabetaMin(temp, alpha, beta, ply + 1, maxply, true, extended, checkcount);
+
+				if (stop) //time's up
+					return null;
+				score = bms.getScore();
+
+				if (score >= beta)
+				{
+					ArrayList<Move> response = bms.getMovelist();
+					if (killer == null && !response.isEmpty())
+						killer = response.get(bms.getMovelist().size() - 1);
+					else if (!response.isEmpty())
+						killer2 = response.get(bms.getMovelist().size() - 1);
+					return new MovelistScore(movelist, beta); //fail hard beta-cutoff
+				}
+				if (score > alpha)
+				{
+					alpha = score;
+					best = hashmoves.get(ply);
+					movelist = new ArrayList<Move>(bms.getMovelist());
+					movelist.add(0, best);
+				}
 			}
 		}
 		for (Move m : mvs)
 		{			
 			StandardChessBoard temp = scb.clone();
 			temp.move(m);
-			
+
 			if (scb.inCheck() && Character.toLowerCase(scb.getPiece(m.r0, m.c0)) == 'k') //extend when we move king out of check
 			{	
 				if (checkcount > 0)
@@ -337,7 +345,7 @@ public class ComputerPlayer extends Player
 			}
 			else
 				bms = alphabetaMin(temp, alpha, beta, ply + 1, maxply, true, extended, checkcount);
-			
+
 			if (stop) //time's up
 				return null;
 			score = bms.getScore();
@@ -393,7 +401,7 @@ public class ComputerPlayer extends Player
 			}
 			extended = true;
 		}
-		
+
 		ArrayList<Move> mvs = orderMoves(scb, scb.allMoves(), extended);
 		Move best = null;
 		ArrayList<Move> movelist = new ArrayList<Move>();
@@ -404,32 +412,40 @@ public class ComputerPlayer extends Player
 		if (considerHashMoves && hashmoves.size() > ply)
 		{
 			temp = scb.clone();
-			temp.move(hashmoves.get(ply));
 
-			if (scb.inCheck() && Character.toLowerCase(scb.getPiece(hashmoves.get(ply).r0, hashmoves.get(ply).c0)) == 'k') //extend when we move king out of check
-			{				
-				if (checkcount > 0)
-					bms = alphabetaMax(temp, alpha, beta, ply + 1, maxply + 1, true, extended, checkcount + 1);
-				else
-					bms = alphabetaMax(temp, alpha, beta, ply + 1, maxply, true, extended, checkcount + 1);
+			if (!scb.isLegalMove(hashmoves.get(ply)))
+			{
+				considerHashMoves = false;
 			}
 			else
-				bms = alphabetaMax(temp, alpha, beta, ply + 1, maxply, true, extended, checkcount);
-			
-			if (stop) //time's up
-				return null;
-			score = bms.getScore();
+			{			
+				temp.move(hashmoves.get(ply));
 
-			if (score <= alpha)
-			{
-				return new MovelistScore(movelist, alpha); //fail hard beta-cutoff
-			}
-			if (score < beta)
-			{
-				beta = score;
-				best = hashmoves.get(ply);
-				movelist = new ArrayList<Move>(bms.getMovelist());
-				movelist.add(0, best);
+				if (scb.inCheck() && Character.toLowerCase(scb.getPiece(hashmoves.get(ply).r0, hashmoves.get(ply).c0)) == 'k') //extend when we move king out of check
+				{				
+					if (checkcount > 0)
+						bms = alphabetaMax(temp, alpha, beta, ply + 1, maxply + 1, true, extended, checkcount + 1);
+					else
+						bms = alphabetaMax(temp, alpha, beta, ply + 1, maxply, true, extended, checkcount + 1);
+				}
+				else
+					bms = alphabetaMax(temp, alpha, beta, ply + 1, maxply, true, extended, checkcount);
+
+				if (stop) //time's up
+					return null;
+				score = bms.getScore();
+
+				if (score <= alpha)
+				{
+					return new MovelistScore(movelist, alpha); //fail hard beta-cutoff
+				}
+				if (score < beta)
+				{
+					beta = score;
+					best = hashmoves.get(ply);
+					movelist = new ArrayList<Move>(bms.getMovelist());
+					movelist.add(0, best);
+				}
 			}
 		}
 
@@ -450,7 +466,7 @@ public class ComputerPlayer extends Player
 		{
 			temp = scb.clone();
 			temp.move(m);
-			
+
 			if (scb.inCheck() && Character.toLowerCase(scb.getPiece(m.r0, m.c0)) == 'k') //extend when we move king out of check
 			{				
 				if (checkcount > 0)
@@ -460,7 +476,7 @@ public class ComputerPlayer extends Player
 			}
 			else
 				bms = alphabetaMax(temp, alpha, beta, ply + 1, maxply, true, extended, checkcount);
-			
+
 			if (stop) //time's up
 				return null;
 			score = bms.getScore();

@@ -1,6 +1,12 @@
 ChangeLog
 
-ame: William Lai
+Name: William Lai
+Date: 12-24-2013
+Description: Bug fixes
+    * src/chess/ComputerPlayer.java: Rolled back check extensions (for speed considerations) and fixed bug that made illegal moves in the AI evaluation (using hash moves that weren't legal).
+    * src/chess/StandardChessGame.java: Fixed bug that would end game if the first player gave check (credit to Eric (edu5) for finding bug).
+
+Name: William Lai
 Date: 12-23-2013
 Description: Slight improvement to Check Extension
      * src/chess/ComputerPlayer.java: Slight improvement to check extension by only counting check escapes after the first one

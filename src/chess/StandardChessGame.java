@@ -3,6 +3,7 @@ package chess;
 import java.awt.*;
 import java.awt.event.*;
 
+import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 
 //TODO:
@@ -244,4 +245,18 @@ public class StandardChessGame extends Game implements Runnable
 	public void mouseEntered(MouseEvent e) {}
 	public void mouseExited(MouseEvent e) {}
 	public void mousePressed(MouseEvent e) {}
+
+	public static void main(String[] args)
+	{		
+		StandardChessGame scg = new StandardChessGame();
+		scg.init();
+		scg.start();
+		JFrame jf = new JFrame();
+		Container c = jf.getContentPane();
+		c.add(scg);
+		jf.setBounds(10, 10, 660, 520);
+		jf.setTitle("Chess Applet");
+		jf.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		jf.setVisible(true);
+	}
 }

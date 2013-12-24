@@ -562,7 +562,6 @@ public class ComputerPlayer extends Player
 
 	private double staticEval(StandardChessBoard scb)
 	{
-		/*
 		if (getGame() instanceof StandardChessGame)
 		{
 			Definitions.State state = scb.getState();
@@ -574,7 +573,7 @@ public class ComputerPlayer extends Player
 			{
 				return 0.0;
 			}
-		}*/
+		}
 
 		double score = 0.0;
 		for (int r = 0; r < 8; r++)

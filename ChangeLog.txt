@@ -2,6 +2,12 @@ ChangeLog
 
 Name: William Lai
 Date: 12-24-2013
+Description: Bug fix
+    * src/chess/ComputerPlayer.java: In static evaluation, check for game-ending conditions again (since bitboards make those operations faster), which prevents a bug that allows AI to make moves that leave the king in check.
+    * src/chess/StandardChessGame.java: Added main method so that project can be run as an application and exported as a runnable JAR file (in addition to being able to be run as an applet).
+
+Name: William Lai
+Date: 12-24-2013
 Description: Bug fixes
     * src/chess/ComputerPlayer.java: Rolled back check extensions (for speed considerations) and fixed bug that made illegal moves in the AI evaluation (using hash moves that weren't legal).
     * src/chess/StandardChessGame.java: Fixed bug that would end game if the first player gave check (credit to Eric (edu5) for finding bug).

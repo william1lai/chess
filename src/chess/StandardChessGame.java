@@ -29,11 +29,9 @@ public class StandardChessGame extends Game implements Runnable
 		Definitions.makeMaskR();
 		Definitions.makeRankR();
 
-		//String testFEN = "8/8/7P/8/8/8/8/k5K1 b - - 0 37";
-		//String testFEN = "6k1/8/5r2/6K1/8/8/8/5q2 w - - 0 37";
-		//String testFEN = "1k6/2q2ppr/7p/2p5/3p2K1/2r5/8/8 w - - 0 37";
-		//String testFEN = "1K6/2q6/k7/8/8/8/8/8 w - - 0 37";
-		//String testFEN = "rnbqkbnr/pp1ppppp/8/2p5/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq - 1 2";
+		//String testFEN = "8/8/7P/8/8/8/8/k5K1 w - - 0 37"; //white to promote soon; tests promotion
+		//String testFEN = "6k1/8/5r2/6K1/8/8/8/5q2 w - - 0 37"; //losing badly, tests player 2 checkmate power
+		//String testFEN = "k7/7Q/K7/8/8/8/8/8 w - - 0 37"; //winning badly, can use to test checkmate/stalemate
 		//m_game_board.FENtoPosition(testFEN);
 
 		setupStandard();
@@ -75,16 +73,6 @@ public class StandardChessGame extends Game implements Runnable
 				processMove(m);
 				flipTurn();
 				state = m_game_board.getState();
-				/*
-				System.out.println(Long.toHexString(m_game_board.m_white));
-				System.out.println(Long.toHexString(m_game_board.m_black));
-				System.out.println(Long.toHexString(m_game_board.m_pawns));
-				System.out.println(Long.toHexString(m_game_board.m_knights));
-				System.out.println(Long.toHexString(m_game_board.m_bishops));
-				System.out.println(Long.toHexString(m_game_board.m_rooks));
-				System.out.println(Long.toHexString(m_game_board.m_queens));
-				System.out.println(Long.toHexString(m_game_board.m_kings));
-				System.out.println();*/
 			}
 			try { Thread.sleep(30); }
 			catch (InterruptedException e) {}
@@ -95,16 +83,18 @@ public class StandardChessGame extends Game implements Runnable
 		if (state == Definitions.State.CHECKMATE)
 		{
 			winner = Definitions.flip(m_game_board.whoseTurn());
+			reason = winner.toString() + " won by Checkmate!";
 		}
 		else if (state == Definitions.State.STALEMATE)
 		{
-			reason = "Stalemate";
+			reason = "Drawn by Stalemate!";
 		}
 		else if (m_game_board.getFiftymoverulecount() >= 100)
 		{
-			reason = "50-move rule";
+			reason = "Drawn by 50-move rule!";
 		}
-		m_graphics.drawEndMessage(getGraphics(), winner, reason);
+		
+		JOptionPane.showMessageDialog(null, reason, "Game has ended", JOptionPane.PLAIN_MESSAGE);
 		System.out.println("The game has ended.");
 	}
 

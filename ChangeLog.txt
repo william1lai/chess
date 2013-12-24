@@ -2,6 +2,14 @@ ChangeLog
 
 Name: William Lai
 Date: 12-23-2013
+Description: AI extensions, pop-up message at end of game
+     * src/chess/ComputerPlayer.java: Now properly implements extensions when a player moves out of check, and when an equal or better capture is made
+     * src/chess/Definitions.java: Added more helper functions for move generation
+     * src/StandardChessBoard.java: Implemented toString function
+     * src/StandardChessGame.java: Now pops up message at end of game instead of trying to write to window
+
+Name: William Lai
+Date: 12-23-2013
 Description: Bug fixes
     * src/chess/HumanPlayer.java: Fixed bug that made it impossible for player to make a capture.
     * src/chess/StandardChessBoard.java: Fixed bug that made it possible for a pawn to move two squares if a friendly pawn is threatening the same square (credit to Eric (edu5) for finding bug).

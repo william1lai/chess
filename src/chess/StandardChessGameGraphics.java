@@ -46,6 +46,7 @@ public class StandardChessGameGraphics
 		//g.fillOval(m_boardOffsetX + m_blockSize * (Definitions.NUMCOLS+1) + 5, m_boardOffsetY + 10 + turnOffset, 10, 10);
 	}
 	
+	//possibly remove because it is not reliable
 	public void drawEndMessage(Graphics g, Definitions.Color winner, String reason)
 	{
 		g.setColor(Color.BLACK);
@@ -63,7 +64,7 @@ public class StandardChessGameGraphics
 		{
 			message = "Black wins!";
 		}
-		g.drawString(message, m_boardOffsetX + m_blockSize * (Definitions.NUMCOLS+1) + 15, m_boardOffsetY + m_blockSize * (Definitions.NUMROWS - 4));
+		g.drawString(message, m_boardOffsetX + m_blockSize * (Definitions.NUMCOLS+1) + 15, m_boardOffsetY + m_blockSize * (Definitions.NUMROWS-4));
 	
 	}
 	

@@ -17,8 +17,8 @@ public class Definitions
 	public static final String PIECENAMES[] = {"BK","BQ","BN","BB","BR","BP","WK","WQ","WN","WB","WR","WP"};
 	public static final String RMARKERS[] = {"8","7","6","5","4","3","2","1"};
 	public static final String CMARKERS[] = {"a","b","c","d","e","f","g","h"};
-	public static final int MAXDEPTH = 5; //PLY = 2 * DEPTH
-	public static final double MAXTHINKINGTIME = 5; //in seconds
+	public static final int MAXDEPTH = 3; //PLY = 2 * DEPTH
+	public static final double MAXTHINKINGTIME = 30; //in seconds
 
 	public static final int repsB[] =
 		{
@@ -50,7 +50,6 @@ public class Definitions
 	public static final long[] initR = new long[64];
 	public static final long[] maskR = new long[64];
 	public static final int[][] rankR = new int[8][128];
-
 
 	public static void makeInitB()
 	{
@@ -104,6 +103,19 @@ public class Definitions
 		return at;
 	}
 
+	public static long bishopAttacks(long bishops, long free)
+	{
+		long att = 0;
+		for (int i = 0; i < 64; i++)
+		{
+			if (((bishops >>> i) & 1) != 0)
+			{
+				att |= bishopAttacks(i, free);
+			}
+		}
+		return att;
+	}
+	
 	public static void makeInitR()
 	{
 		for (int sq = 0; sq < 64; ++sq)
@@ -250,11 +262,37 @@ public class Definitions
 		return at;
 	}
 
+	public static long rookAttacks(long rooks, long free)
+	{
+		long att = 0;
+		for (int i = 0; i < 64; i++)
+		{
+			if (((rooks >>> i) & 1) != 0)
+			{
+				att |= rookAttacks(i, free);
+			}
+		}
+		return att;
+	}
+	
 	public static long queenAttacks(int sq, long free)
 	{
 		return rookAttacks(sq, free) | bishopAttacks(sq, free);
 	}
 
+	public static long queenAttacks(long queens, long free)
+	{
+		long att = 0;
+		for (int i = 0; i < 64; i++)
+		{
+			if (((queens >>> i) & 1) != 0)
+			{
+				att |= queenAttacks(i, free);
+			}
+		}
+		return att;	
+	}
+	
 	public static long knightAttacks(long knights) {
 		long l1 = (knights >>> 1) & 0x7f7f7f7f7f7f7f7fL;
 		long l2 = (knights >>> 2) & 0x3f3f3f3f3f3f3f3fL;

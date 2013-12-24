@@ -785,6 +785,52 @@ public class StandardChessBoard extends Board
 		return new StandardChessBoard(this);
 	}
 
+	public String toString()
+	{
+		String str = "";
+		for (int i = 63; i >= 0; i--)
+		{
+			long s = (1L << i);
+			if ((s & m_white) != 0)
+			{
+				if ((s & m_pawns) != 0)
+					str = str + "P";
+				else if ((s & m_knights) != 0)
+					str = str + "N";
+				else if ((s & m_bishops) != 0)
+					str = str + "B";
+				else if ((s & m_rooks) != 0)
+					str = str + "R";
+				else if ((s & m_queens) != 0)
+					str = str + "Q";
+				else if ((s & m_kings) != 0)
+					str = str + "K";
+			}
+			else if ((s & m_black) != 0)
+			{
+				if ((s & m_pawns) != 0)
+					str = str + "p";
+				else if ((s & m_knights) != 0)
+					str = str + "n";
+				else if ((s & m_bishops) != 0)
+					str = str + "b";
+				else if ((s & m_rooks) != 0)
+					str = str + "r";
+				else if ((s & m_queens) != 0)
+					str = str + "q";
+				else if ((s & m_kings) != 0)
+					str = str + "k";
+			}
+			else
+				str = str + "-";
+			
+			if (i % 8 == 0)
+				str = str + '\n';
+		}
+		
+		return str;
+	}
+	
 	public String toFEN(boolean complete) //note that this only contains partial FEN, only what the board can see
 	{
 		String FEN = "";

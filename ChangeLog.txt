@@ -2,6 +2,11 @@ ChangeLog
 
 Name: William Lai
 Date: 12-24-2013
+Description: New option to choose color
+    * src/chess/StandardChessGame.java: Added new option to allow player to choose color
+
+Name: William Lai
+Date: 12-24-2013
 Description: Bug fix
     * src/chess/ComputerPlayer.java: In static evaluation, check for game-ending conditions again (since bitboards make those operations faster), which prevents a bug that allows AI to make moves that leave the king in check.
     * src/chess/StandardChessGame.java: Added main method so that project can be run as an application and exported as a runnable JAR file (in addition to being able to be run as an applet).

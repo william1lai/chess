@@ -38,10 +38,23 @@ public class StandardChessGame extends Game implements Runnable
 
 		setupStandard();
 
-		p1 = new HumanPlayer("Human WHITE", Definitions.Color.WHITE, this);
-		//p2 = new HumanPlayer("Human BLACK", Definitions.Color.BLACK, this);
-		//p1 = new ComputerPlayer("CPU WHITE", Definitions.Color.WHITE, this);
-		p2 = new ComputerPlayer("CPU BLACK", Definitions.Color.BLACK, this);
+		String[] param = { "White", "Black" };
+		String input = (String) JOptionPane.showInputDialog(null, "Which color?", "Choose your color", JOptionPane.QUESTION_MESSAGE, null, param, param[0]);
+
+		if (input == "White")
+		{
+			p1 = new HumanPlayer("Human WHITE", Definitions.Color.WHITE, this);
+			//p2 = new HumanPlayer("Human BLACK", Definitions.Color.BLACK, this);
+			//p1 = new ComputerPlayer("CPU WHITE", Definitions.Color.WHITE, this);
+			p2 = new ComputerPlayer("CPU BLACK", Definitions.Color.BLACK, this);
+		}
+		else
+		{
+			//p1 = new HumanPlayer("Human WHITE", Definitions.Color.WHITE, this);
+			p2 = new HumanPlayer("Human BLACK", Definitions.Color.BLACK, this);
+			p1 = new ComputerPlayer("CPU WHITE", Definitions.Color.WHITE, this);
+			//p2 = new ComputerPlayer("CPU BLACK", Definitions.Color.BLACK, this);
+		}
 
 		m_thread = new Thread(this);
 		m_thread.start();
@@ -95,7 +108,7 @@ public class StandardChessGame extends Game implements Runnable
 		{
 			reason = "Drawn by 50-move rule!";
 		}
-		
+
 		JOptionPane.showMessageDialog(null, reason, "Game has ended", JOptionPane.PLAIN_MESSAGE);
 		System.out.println("The game has ended.");
 	}

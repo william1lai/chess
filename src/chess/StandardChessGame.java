@@ -2,9 +2,7 @@ package chess;
 
 import java.awt.*;
 import java.awt.event.*;
-
-import javax.swing.JFrame;
-import javax.swing.JOptionPane;
+import javax.swing.*;
 
 //TODO:
 //Add functionality to make testing more automated. Should be able to interpret move lists, and step forward, maybe even step back
@@ -17,11 +15,13 @@ public class StandardChessGame extends Game implements Runnable
 	private StandardChessBoard m_game_board;
 	private StandardChessGameGraphics m_graphics;
 	private StandardChessGameAnimation m_animation;
+	private StandardChessGameGUI m_gui;
 
 	public void init()
 	{
 		m_game_board = new StandardChessBoard();
-		m_graphics = new StandardChessGameGraphics();
+		m_gui = new StandardChessGameGUI();
+		m_graphics = new StandardChessGameGraphics(m_gui);
 		m_animation = new StandardChessGameAnimation(m_graphics);
 
 		Definitions.makeInitB();
@@ -56,6 +56,7 @@ public class StandardChessGame extends Game implements Runnable
 			//p2 = new ComputerPlayer("CPU BLACK", Definitions.Color.BLACK, this);
 		}
 
+		addMouseListener(m_gui);
 		m_thread = new Thread(this);
 		m_thread.start();
 
@@ -63,6 +64,18 @@ public class StandardChessGame extends Game implements Runnable
 			p1.promptMove();
 		else
 			p2.promptMove();
+		
+		// Example productive usage of GUI and EasyButton
+		try {
+			EasyButton b = new EasyButton("/Images/buttonFace.png", 470, 220, 150, 50, new EasyButtonAction() {
+				public void on_press()
+				{
+					System.out.println("fart");
+				}
+			});
+			m_gui.addButton(b);
+			}
+		catch (Exception ex) {}
 	}
 
 	public void setupStandard()
@@ -136,6 +149,7 @@ public class StandardChessGame extends Game implements Runnable
 		m_graphics.drawMarkers(backg);
 		m_graphics.drawNames(backg, p1, p2, m_game_board.whoseTurn());
 		m_graphics.drawPieces(backg, m_game_board);
+		m_graphics.drawGUI(backg);
 
 		g.drawImage(backbuffer, 0, 0, this);
 	}

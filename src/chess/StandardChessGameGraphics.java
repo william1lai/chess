@@ -1,9 +1,8 @@
 package chess;
+
 import java.util.*;
 import java.awt.*;
 import javax.imageio.*;
-
-
 import java.awt.image.*;
 
 public class StandardChessGameGraphics
@@ -12,9 +11,11 @@ public class StandardChessGameGraphics
 	private Map<String, BufferedImage> m_gPieces;
 	private BufferedImage m_gMovable, m_gSelected;
 	private BufferedImage[] m_gBlocks = new BufferedImage[2];
+	private StandardChessGameGUI m_gui;
 	
-	public StandardChessGameGraphics()
+	public StandardChessGameGraphics(StandardChessGameGUI gui)
 	{
+		m_gui = gui;
 		m_boardOffsetY = Definitions.HEIGHT/8;
 		m_boardOffsetX = Definitions.HEIGHT/8;
 		m_blockSize = Definitions.HEIGHT*3/4 / Definitions.NUMROWS;
@@ -32,6 +33,17 @@ public class StandardChessGameGraphics
 		catch (Exception ex) {
 			System.out.println("Error loading images!");
 		}
+		
+		try {
+		    GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+		    ge.registerFont(Font.createFont(Font.TRUETYPE_FONT, getClass().getResourceAsStream("/Fonts/LBRITE.TTF")));
+		    ge.registerFont(Font.createFont(Font.TRUETYPE_FONT, getClass().getResourceAsStream("/Fonts/LBRITED.TTF")));
+		    ge.registerFont(Font.createFont(Font.TRUETYPE_FONT, getClass().getResourceAsStream("/Fonts/LBRITEDI.TTF")));
+		    ge.registerFont(Font.createFont(Font.TRUETYPE_FONT, getClass().getResourceAsStream("/Fonts/LBRITEI.TTF")));
+		}
+		catch (Exception ex) {
+			System.out.println("Error loading fonts!");
+		}
 	}
 	
 	public void drawNames(Graphics g, Player p1, Player p2, Definitions.Color turn)
@@ -41,9 +53,6 @@ public class StandardChessGameGraphics
 		g.drawString(p1.getName(), m_boardOffsetX + m_blockSize * (Definitions.NUMCOLS+1) + 15, m_boardOffsetY + m_blockSize * Definitions.NUMROWS);
 		g.setFont(new Font("Lucida Bright", (turn == p2.getColor()? Font.BOLD : Font.PLAIN), 15));
 		g.drawString(p2.getName(), m_boardOffsetX + m_blockSize * (Definitions.NUMCOLS+1) + 15, m_boardOffsetY + 20);
-		//int turnOffset = (turn == Definitions.Color.BLACK? 20 : 0);
-		//g.setColor(new Color(0x006600));
-		//g.fillOval(m_boardOffsetX + m_blockSize * (Definitions.NUMCOLS+1) + 5, m_boardOffsetY + 10 + turnOffset, 10, 10);
 	}
 	
 	//possibly remove because it is not reliable
@@ -142,6 +151,13 @@ public class StandardChessGameGraphics
 			int x = getX(m.cf);
 			int y = getY(m.rf);
 			g.drawImage(m_gMovable, x, y, m_blockSize, m_blockSize, null);
+		}
+	}
+	
+	public void drawGUI(Graphics g)
+	{
+		for (EasyButton b : m_gui.getButtons()) {
+			g.drawImage(b.getImg(), b.getX(), b.getY(), b.getW(), b.getH(), null);
 		}
 	}
 	

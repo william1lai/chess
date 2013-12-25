@@ -1,5 +1,15 @@
 ChangeLog
 
+Name: Vincent Wong
+Date: 12-24-2013
+Description: Hacked together a button class, bundled Lucida Bright fonts
+    * src/Fonts/*: Added the Lucida Bright family
+    * src/chess/StandardChessGameGraphics.java: Added code that loads Lucida Bright fonts to ensure their availability. Also, added a drawGUI function
+    * src/chess/StandardChessGame.java: Added GUI object
+    * src/chess/StandardChessGameGUI.java: New class that will manage graphical user interfacing, including buttons and menu in the future
+    * src/chess/EasyButton.java: Quick implementation of a simple button that has an associated position, size, image, and callback action
+    * README.md: Switched readme for markdown
+
 Name: William Lai
 Date: 12-24-2013
 Description: New option to choose color

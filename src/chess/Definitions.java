@@ -396,11 +396,11 @@ public class Definitions
 
 	public static boolean isAttacked(StandardChessBoard scb, int square, Color color)
 	{
-		long colorpieces = scb.m_white;
+		long colorpieces = scb.getWhite();
 		if (color == Color.BLACK)
-			colorpieces = scb.m_black;
-		return isAttacked(square, color, scb.m_white | scb.m_black, colorpieces & scb.m_pawns, colorpieces & scb.m_knights,
-				colorpieces & scb.m_bishops, colorpieces & scb.m_rooks, colorpieces & scb.m_queens, colorpieces & scb.m_kings);
+			colorpieces = scb.getBlack();
+		return isAttacked(square, color, scb.getWhite() | scb.getBlack(), colorpieces & scb.getPawns(), colorpieces & scb.getKnights(),
+				colorpieces & scb.getBishops(), colorpieces & scb.getRooks(), colorpieces & scb.getQueens(), colorpieces & scb.getKings());
 	}
 
 	public static Color flip(Color c)

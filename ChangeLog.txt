@@ -1,5 +1,13 @@
 ChangeLog
 
+Name: William Lai
+Date: 12-28-2013
+Description: Made bitboard member variables private
+    * src/chess/Board.java: Moved bitboard member variables (long) from StandardChessBoard and made them private, creating accessor and mutator functions necessary in the process
+    * src/chess/ComputerPlayer.java: Updated to use new functions from Board
+    * src/chess/Definitions.java: Updated to use new functions from Board
+    * src/chess/StandardChessGame.java: Removed bitboard member variables (long) and moved to Board class; also updated to use new functions from Board
+
 Name: Vincent Wong
 Date: 12-24-2013
 Description: Hacked together a button class, bundled Lucida Bright fonts

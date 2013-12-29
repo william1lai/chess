@@ -1,6 +1,7 @@
 package chess;
 
-import java.awt.event.*;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.util.ArrayList;
 
 public class StandardChessGameGUI implements MouseListener

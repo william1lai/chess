@@ -1,20 +1,16 @@
-Game Logic
-- Make isLegalMove more efficient
-- 50 move rule and threefold repetition (hash table of FEN's)
-
-Game Architecture
-- Use bitboards for speed considerations [mostly done]
-- Will be changing structure of program so that board contains some game logic [in progress]
-
-AI
-- Transposition tables (optional)
-- History tables (optional)
-- Improve eval function
-- Move ordering [in progress]
-- Move extensions [in progress]
-
-Animation/UI
+UI
 - Menu when starting up applet
+- Undo button
 
+Standard Chess
+- 50 move rule and threefold repetition (hash table of FEN's)
+- Different level AI's
+- Algebraic to Move function
 
-Branching Factor currently at 8-15 (12/14/13)
+Program Structure
+- Move some logic from StandardChessBoard back into Board, so that other variants can more logically inherit; let the board's dimensions be decided on construction
+- Implement Alice Chess with BoardPair class?
+- ProcessMove structure needs work
+
+Miscellaneous
+- Implement new variants: Loser's Chess, Alice Chess, Maharajah, Fischer Random

@@ -1,9 +1,15 @@
 package chess;
 
-import java.util.*;
-import java.awt.*;
-import javax.imageio.*;
-import java.awt.image.*;
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.Graphics;
+import java.awt.GraphicsEnvironment;
+import java.awt.image.BufferedImage;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.imageio.ImageIO;
 
 public class StandardChessGameGraphics
 {

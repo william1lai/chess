@@ -1,12 +1,12 @@
 package chess;
 
-import java.awt.*;
-import java.awt.event.*;
-import javax.swing.*;
+import java.awt.Container;
+import java.awt.Graphics;
+import java.awt.Image;
+import java.awt.event.MouseEvent;
 
-//TODO:
-//Add functionality to make testing more automated. Should be able to interpret move lists, and step forward, maybe even step back
-//Checkmate-checking: Is there any way better than brute-forcing all moves to see if legal or not?.
+import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 
 @SuppressWarnings("serial")
 public class StandardChessGame extends Game implements Runnable
@@ -176,29 +176,29 @@ public class StandardChessGame extends Game implements Runnable
 			String input = (String) JOptionPane.showInputDialog(null, "Which piece do you want to promote to?", "Pawn Promotion", JOptionPane.QUESTION_MESSAGE, null, param, param[0]);
 
 			int sq = (7-r)*8 + (7-c);
-			m_game_board.m_pawns &= ~(1L << sq);
+			m_game_board.setPawns(m_game_board.getPawns() & ~(1L << sq));
 			if (input == "Queen")
 			{
-				m_game_board.m_queens |= (1L << sq);
+				m_game_board.setQueens(m_game_board.getQueens() | (1L << sq));
 			}
 			else if (input == "Rook")
 			{
-				m_game_board.m_rooks |= (1L << sq);
+				m_game_board.setRooks(m_game_board.getRooks() | (1L << sq));
 			}
 			else if (input == "Knight")
 			{
-				m_game_board.m_knights |= (1L << sq);		
+				m_game_board.setKnights(m_game_board.getKnights() | (1L << sq));		
 			}
 			else //Bishop
 			{
-				m_game_board.m_bishops |= (1L << sq);
+				m_game_board.setBishops(m_game_board.getBishops() | (1L << sq));
 			}
 		}
 		else //AI chooses queen for now
 		{
 			int sq = (7-r)*8 + (7-c);
-			m_game_board.m_pawns &= ~(1L << sq);
-			m_game_board.m_queens |= (1L << sq);
+			m_game_board.setPawns(m_game_board.getPawns() & ~(1L << sq));
+			m_game_board.setQueens(m_game_board.getQueens() | (1L << sq));
 		}
 	}
 

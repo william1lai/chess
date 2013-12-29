@@ -1,6 +1,7 @@
 package chess;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 public class ComputerPlayer extends Player
 {
@@ -509,50 +510,50 @@ public class ComputerPlayer extends Player
 		long otherpieces;
 		if (scb.whoseTurn() == Definitions.Color.BLACK)
 		{
-			turnpieces = scb.m_white;
-			otherpieces = scb.m_black;
+			turnpieces = scb.getWhite();
+			otherpieces = scb.getBlack();
 		}
 		else
 		{
-			turnpieces = scb.m_black;
-			otherpieces = scb.m_white;
+			turnpieces = scb.getBlack();
+			otherpieces = scb.getWhite();
 		}
 
 		//pawn threats
 		if (scb.whoseTurn() == Definitions.Color.WHITE)
 		{
 			//if opposing pawn threatens one of our nonpawns
-			if ((Definitions.bpawnAttacks(otherpieces & scb.m_pawns) & turnpieces) != 0)
+			if ((Definitions.bpawnAttacks(otherpieces & scb.getPawns()) & turnpieces) != 0)
 			{
 				return true;
 			}
 		}
 		else
 		{
-			if ((Definitions.wpawnAttacks(otherpieces & scb.m_pawns) & turnpieces) != 0)
+			if ((Definitions.wpawnAttacks(otherpieces & scb.getPawns()) & turnpieces) != 0)
 			{
 				return true;
 			}
 		}
 
 		//knight and bishop threats
-		if (((Definitions.knightAttacks(scb.m_knights & otherpieces) | 
-				Definitions.bishopAttacks(scb.m_bishops & otherpieces, ~(turnpieces | otherpieces))) & 
-				(turnpieces & ~scb.m_pawns)) != 0)
+		if (((Definitions.knightAttacks(scb.getKnights() & otherpieces) | 
+				Definitions.bishopAttacks(scb.getBishops() & otherpieces, ~(turnpieces | otherpieces))) & 
+				(turnpieces & ~scb.getPawns())) != 0)
 		{
 			return true;
 		}
 
 		//rook threats
-		if ((Definitions.rookAttacks(scb.m_rooks & otherpieces, ~(turnpieces | otherpieces)) & 
-				(turnpieces & ~(scb.m_pawns | scb.m_knights | scb.m_bishops))) != 0)
+		if ((Definitions.rookAttacks(scb.getRooks() & otherpieces, ~(turnpieces | otherpieces)) & 
+				(turnpieces & ~(scb.getPawns() | scb.getKnights() | scb.getBishops()))) != 0)
 		{
 			return true;
 		}
 
 		//queen threats
-		if ((Definitions.queenAttacks(scb.m_queens & otherpieces, ~(turnpieces | otherpieces)) &
-				(turnpieces & scb.m_queens)) != 0)
+		if ((Definitions.queenAttacks(scb.getQueens() & otherpieces, ~(turnpieces | otherpieces)) &
+				(turnpieces & scb.getQueens())) != 0)
 		{
 			return true;
 		}

@@ -1,6 +1,7 @@
 package chess;
 
 import java.awt.image.BufferedImage;
+
 import javax.imageio.ImageIO;
 
 interface EasyButtonAction

@@ -1,7 +1,7 @@
 package chess;
 
-import java.applet.*;
-import java.awt.event.*;
+import java.applet.Applet;
+import java.awt.event.MouseListener;
 
 @SuppressWarnings("serial")
 public abstract class Game extends Applet implements Runnable, MouseListener

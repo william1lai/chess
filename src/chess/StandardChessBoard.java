@@ -7,15 +7,6 @@ public class StandardChessBoard extends Board
 {
 	private Definitions.Color m_turn;
 
-	public long m_white;
-	public long m_black;
-	public long m_pawns;
-	public long m_knights;
-	public long m_bishops;
-	public long m_rooks;
-	public long m_queens;
-	public long m_kings;
-
 	private class GameData
 	{
 		public int m_enpassantCol; //the column (0-7) of the pawn to move two spaces last turn, -1 if no pawn moved two spaces
@@ -57,14 +48,14 @@ public class StandardChessBoard extends Board
 		m_turn = Definitions.Color.WHITE;
 		m_data = new GameData();
 
-		m_white = 	0x000000000000FFFFL;
-		m_black = 	0xFFFF000000000000L;
-		m_pawns = 	0x00FF00000000FF00L;
-		m_knights = 0x4200000000000042L;
-		m_bishops = 0x2400000000000024L;
-		m_rooks = 	0x8100000000000081L;
-		m_queens = 	0x1000000000000010L;
-		m_kings = 	0x0800000000000008L;
+		setWhite(0x000000000000FFFFL);
+		setBlack(0xFFFF000000000000L);
+		setPawns(0x00FF00000000FF00L);
+		setKnights(0x4200000000000042L);
+		setBishops(0x2400000000000024L);
+		setRooks(0x8100000000000081L);
+		setQueens(0x1000000000000010L);
+		setKings(0x0800000000000008L);
 	}
 
 	public StandardChessBoard(StandardChessBoard other)
@@ -72,60 +63,60 @@ public class StandardChessBoard extends Board
 		m_turn = other.m_turn;
 		m_data = new GameData(other.m_data);
 
-		m_white = other.m_white;
-		m_black = other.m_black;
-		m_pawns = other.m_pawns;
-		m_knights = other.m_knights;
-		m_bishops = other.m_bishops;
-		m_rooks = other.m_rooks;
-		m_queens = other.m_queens;
-		m_kings = other.m_kings;
+		setWhite(other.getWhite());
+		setBlack(other.getBlack());
+		setPawns(other.getPawns());
+		setKnights(other.getKnights());
+		setBishops(other.getBishops());
+		setRooks(other.getRooks());
+		setQueens(other.getQueens());
+		setKings(other.getKings());
 	}
 
 	public char getPiece(int r, int c) //returns 0 if no piece exists
 	{
 		long bit = 1L << ((7-r)*8 + (7-c));
 		boolean isWhite = false;
-		if ((bit & m_white) != 0)
+		if ((bit & getWhite()) != 0)
 		{
 			isWhite = true;
 		}
-		if ((bit & m_pawns) != 0)
+		if ((bit & getPawns()) != 0)
 		{
 			if (isWhite)
 				return 'P';
 			else
 				return 'p';
 		}
-		if ((bit & m_knights) != 0)
+		if ((bit & getKnights()) != 0)
 		{
 			if (isWhite)
 				return 'N';
 			else
 				return 'n';
 		}
-		if ((bit & m_bishops) != 0)
+		if ((bit & getBishops()) != 0)
 		{
 			if (isWhite)
 				return 'B';
 			else
 				return 'b';
 		}
-		if ((bit & m_rooks) != 0)
+		if ((bit & getRooks()) != 0)
 		{
 			if (isWhite)
 				return 'R';
 			else
 				return 'r';
 		}
-		if ((bit & m_queens) != 0)
+		if ((bit & getQueens()) != 0)
 		{
 			if (isWhite)
 				return 'Q';
 			else
 				return 'q';
 		}
-		if ((bit & m_kings) != 0)
+		if ((bit & getKings()) != 0)
 		{
 			if (isWhite)
 				return 'K';
@@ -143,49 +134,49 @@ public class StandardChessBoard extends Board
 		long s = (1L << sq);
 		long mask = ~s;
 		
-		m_white &= mask;
-		m_black &= mask;
-		m_pawns &= mask;
-		m_knights &= mask;
-		m_bishops &= mask;
-		m_rooks &= mask;
-		m_queens &= mask;
-		m_kings &= mask;
-
+		setWhite(getWhite() & mask);
+		setBlack(getBlack() & mask);
+		setPawns(getPawns() & mask);
+		setKnights(getKnights() & mask);
+		setBishops(getBishops() & mask);
+		setRooks(getRooks() & mask);
+		setQueens(getQueens() & mask);
+		setKings(getKings() & mask);
+		
 		if (color == Definitions.Color.WHITE)
 		{
-			m_white |= s;
+			setWhite(getWhite() | s);
 		}
 		else
 		{
-			m_black |= s;
+			setBlack(getBlack() | s);
 		}
 		
 		switch (piece)
 		{
 		case 'p':
 		case 'P':
-			m_pawns |= s;
+			setPawns(getPawns() | s);
 			break;
 		case 'n':
 		case 'N':
-			m_knights |= s;
+			setKnights(getKnights() | s);
 			break;
 		case 'b':
 		case 'B':
-			m_bishops |= s;
+			setBishops(getBishops() | s);
 			break;
 		case 'r':
 		case 'R':
-			m_rooks |= s;
+			setRooks(getRooks() | s);
 			break;
 		case 'q':
 		case 'Q':
-			m_queens |= s;
+			setQueens(getQueens() | s);
 			break;
 		case 'k':
 		case 'K':
-			m_kings |= s;
+			setKings(getKings() | s);
 			break;
 		}
 	}
@@ -195,26 +186,26 @@ public class StandardChessBoard extends Board
 		int sq = (7-r)*8 + (7-c);
 		long mask = ~(1L << sq);
 
-		m_white = m_white & mask;
-		m_black = m_black & mask;
-		m_pawns = m_pawns & mask;
-		m_knights = m_knights & mask;
-		m_bishops = m_bishops & mask;
-		m_rooks = m_rooks & mask;
-		m_queens = m_queens & mask;
-		m_kings = m_kings & mask;
+		setWhite(getWhite() & mask);
+		setBlack(getBlack() & mask);
+		setPawns(getPawns() & mask);
+		setKnights(getKnights() & mask);
+		setBishops(getBishops() & mask);
+		setRooks(getRooks() & mask);
+		setQueens(getQueens() & mask);
+		setKings(getKings() & mask);
 	}
 	
 	public void clearBoard()
 	{
-		m_white = 0;
-		m_black = 0;
-		m_pawns = 0;
-		m_knights = 0;
-		m_bishops = 0;
-		m_rooks = 0;
-		m_queens = 0;
-		m_kings = 0;
+		setWhite(0);
+		setBlack(0);
+		setPawns(0);
+		setKnights(0);
+		setBishops(0);
+		setRooks(0);
+		setQueens(0);
+		setKings(0);
 	}
 	
 	public void incrementFiftymoverulecount()
@@ -276,80 +267,80 @@ public class StandardChessBoard extends Board
 		int dest = (7-m.rf)*8 + (7-m.cf);
 		long destMask = ~(1L << dest);
 
-		if ((m_pawns & (1L << orig)) != 0)
+		if ((getPawns() & (1L << orig)) != 0)
 		{
-			m_pawns = m_pawns & origMask;
-			m_pawns = m_pawns | (1L << dest);
-			m_knights = m_knights & ~(1L << dest);
-			m_bishops = m_bishops & ~(1L << dest);
-			m_rooks = m_rooks & ~(1L << dest);
-			m_queens = m_queens & ~(1L << dest);
+			setPawns(getPawns() & origMask);
+			setPawns(getPawns() | (1L << dest));
+			setKnights(getKnights() & ~(1L << dest));
+			setBishops(getBishops() & ~(1L << dest));
+			setRooks(getRooks() & ~(1L << dest));
+			setQueens(getQueens() & ~(1L << dest));
 			//no king because it shouldn't be able to be captured
 		}
-		else if ((m_knights & (1L << orig)) != 0)
+		else if ((getKnights() & (1L << orig)) != 0)
 		{
-			m_knights = m_knights & origMask;
-			m_knights = m_knights | (1L << dest);
-			m_pawns = m_pawns & ~(1L << dest);
-			m_bishops = m_bishops & ~(1L << dest);
-			m_rooks = m_rooks & ~(1L << dest);
-			m_queens = m_queens & ~(1L << dest);
+			setKnights(getKnights() & origMask);
+			setKnights(getKnights() | (1L << dest));
+			setPawns(getPawns() & ~(1L << dest));
+			setBishops(getBishops() & ~(1L << dest));
+			setRooks(getRooks() & ~(1L << dest));
+			setQueens(getQueens() & ~(1L << dest));
 			//no king because it shouldn't be able to be captured
 		}
-		else if ((m_bishops & (1L << orig)) != 0)
+		else if ((getBishops() & (1L << orig)) != 0)
 		{
-			m_bishops = m_bishops & origMask;
-			m_bishops = m_bishops | (1L << dest);
-			m_pawns = m_pawns & ~(1L << dest);
-			m_knights = m_knights & ~(1L << dest);
-			m_rooks = m_rooks & ~(1L << dest);
-			m_queens = m_queens & ~(1L << dest);
+			setBishops(getBishops() & origMask);
+			setBishops(getBishops() | (1L << dest));
+			setPawns(getPawns() & ~(1L << dest));
+			setKnights(getKnights() & ~(1L << dest));
+			setRooks(getRooks() & ~(1L << dest));
+			setQueens(getQueens() & ~(1L << dest));
 			//no king because it shouldn't be able to be captured
 		}
-		else if ((m_rooks & (1L << orig)) != 0)
+		else if ((getRooks() & (1L << orig)) != 0)
 		{
-			m_rooks = m_rooks & origMask;
-			m_rooks = m_rooks | (1L << dest);
-			m_pawns = m_pawns & ~(1L << dest);
-			m_knights = m_knights & ~(1L << dest);
-			m_bishops = m_bishops & ~(1L << dest);
-			m_queens = m_queens & ~(1L << dest);
+			setRooks(getRooks() & origMask);
+			setRooks(getRooks() | (1L << dest));
+			setPawns(getPawns() & ~(1L << dest));
+			setKnights(getKnights() & ~(1L << dest));
+			setBishops(getBishops() & ~(1L << dest));
+			setQueens(getQueens() & ~(1L << dest));
 			//no king because it shouldn't be able to be captured
 		}
-		else if ((m_queens & (1L << orig)) != 0)
+		else if ((getQueens() & (1L << orig)) != 0)
 		{
-			m_queens = m_queens & origMask;
-			m_queens = m_queens | (1L << dest);
-			m_pawns = m_pawns & ~(1L << dest);
-			m_knights = m_knights & ~(1L << dest);
-			m_bishops = m_bishops & ~(1L << dest);
-			m_rooks = m_rooks & ~(1L << dest);
+			setQueens(getQueens() & origMask);
+			setQueens(getQueens() | (1L << dest));
+			setPawns(getPawns() & ~(1L << dest));
+			setKnights(getKnights() & ~(1L << dest));
+			setBishops(getBishops() & ~(1L << dest));
+			setRooks(getRooks() & ~(1L << dest));
 			//no king because it shouldn't be able to be captured
 		}
-		else if ((m_kings & (1L << orig)) != 0)
+		else if ((getKings() & (1L << orig)) != 0)
 		{
-			m_kings = m_kings & origMask;
-			m_kings = m_kings | (1L << dest);
-			m_pawns = m_pawns & ~(1L << dest);
-			m_knights = m_knights & ~(1L << dest);
-			m_bishops = m_bishops & ~(1L << dest);
-			m_rooks = m_rooks & ~(1L << dest);
-			m_queens = m_queens & ~(1L << dest);
+			setKings(getKings() & origMask);
+			setKings(getKings() | (1L << dest));
+			setPawns(getPawns() & ~(1L << dest));
+			setKnights(getKnights() & ~(1L << dest));
+			setBishops(getBishops() & ~(1L << dest));
+			setRooks(getRooks() & ~(1L << dest));
+			setQueens(getQueens() & ~(1L << dest));
 		}
 		else
 			return; //not a valid move (no piece selected)
 
 		if (m_turn == Definitions.Color.WHITE)
 		{
-			m_white = m_white & origMask;
-			m_black = m_black & destMask;
-			m_white = m_white | (1L << dest);
+			setWhite(getWhite() & origMask);
+			setBlack(getBlack() & destMask);
+			setWhite(getWhite() | (1L << dest));
 		}
 		else
 		{
-			m_black = m_black & origMask;
-			m_white = m_white & destMask;
-			m_black = m_black | (1L << dest);
+			setBlack(getBlack() & origMask);
+			setWhite(getWhite() & destMask);
+			setBlack(getBlack() | (1L << dest));
 		}		
 		m_turn = Definitions.flip(m_turn);
 	}
@@ -374,29 +365,25 @@ public class StandardChessBoard extends Board
 	public ArrayList<Move> allMoves()
 	{
 		ArrayList<Move> legalMoves = new ArrayList<Move>();
-		long turnpieces, pawns, knights, bishops, rooks, queens, kings;
+		long turnpieces, allpieces, pawns, knights, bishops, rooks, queens, kings;
 		int kingsq;
 
 		if (m_turn == Definitions.Color.WHITE)
 		{
-			turnpieces = m_white;
-			pawns = m_white & m_pawns;
-			knights = m_white & m_knights;
-			bishops = m_white & m_bishops;
-			rooks = m_white & m_rooks;
-			queens = m_white & m_queens;
-			kings = m_white & m_kings;
+			turnpieces = getWhite();
 		}
 		else
 		{
-			turnpieces = m_black;
-			pawns = m_black & m_pawns;
-			knights = m_black & m_knights;
-			bishops = m_black & m_bishops;
-			rooks = m_black & m_rooks;
-			queens = m_black & m_queens;
-			kings = m_black & m_kings;
+			turnpieces = getBlack();
 		}
+		pawns = turnpieces & getPawns();
+		knights = turnpieces & getKnights();
+		bishops = turnpieces & getBishops();
+		rooks = turnpieces & getRooks();
+		queens = turnpieces & getQueens();
+		kings = turnpieces & getKings();
+		allpieces = getWhite() | getBlack();
+		
 		kingsq = (int)((Math.log(kings)/Math.log(2)) + 0.5);
 
 		for (int r = 0; r < 8; r++)
@@ -417,10 +404,10 @@ public class StandardChessBoard extends Board
 						if (m_turn == Definitions.Color.WHITE)
 						{							
 							attacks = Definitions.wpawnAttacks(pawns);
-							moves = Definitions.wpawnMoves(pawns, ~(m_white | m_black));
+							moves = Definitions.wpawnMoves(pawns, ~allpieces);
 
 							if (((bitsq << 7) & attacks & ~Definitions.allA) != 0 && 
-									(((bitsq << 7) & m_black) != 0 || (epcol >= 0 && epcol == c+1 && r == 3)))
+									(((bitsq << 7) & getBlack()) != 0 || (epcol >= 0 && epcol == c+1 && r == 3)))
 							{
 								int dsq = sq + 7;
 								StandardChessBoard temp = this.clone();
@@ -432,7 +419,7 @@ public class StandardChessBoard extends Board
 								}
 							}
 							if (((bitsq << 9) & attacks & ~Definitions.allH) != 0 && 
-									((bitsq << 9) & m_black) != 0 || (epcol >= 0 && epcol == c-1 && r == 3))
+									((bitsq << 9) & getBlack()) != 0 || (epcol >= 0 && epcol == c-1 && r == 3))
 							{
 								int dsq = sq + 9;
 								StandardChessBoard temp = this.clone();
@@ -443,7 +430,7 @@ public class StandardChessBoard extends Board
 									legalMoves.add(new Move(r, c, 7 - (dsq / 8), 7 - (dsq % 8)));
 								}
 							}
-							if (((bitsq << 8) & moves) != 0 && ((bitsq << 8) & (m_black | m_white)) == 0)
+							if (((bitsq << 8) & moves) != 0 && ((bitsq << 8) & allpieces) == 0)
 							{
 								int dsq = sq + 8;
 								StandardChessBoard temp = this.clone();
@@ -455,8 +442,8 @@ public class StandardChessBoard extends Board
 								}
 							}
 
-							if (((bitsq << 16) & moves) != 0 && ((bitsq << 16) & (m_black | m_white)) == 0
-									&& ((bitsq << 8) & (m_black | m_white)) == 0)
+							if (((bitsq << 16) & moves) != 0 && ((bitsq << 16) & allpieces) == 0
+									&& ((bitsq << 8) & allpieces) == 0)
 							{
 								int dsq = sq + 16;
 								StandardChessBoard temp = this.clone();
@@ -471,10 +458,10 @@ public class StandardChessBoard extends Board
 						else
 						{
 							attacks = Definitions.bpawnAttacks(pawns);
-							moves = Definitions.bpawnMoves(pawns, ~(m_white | m_black));
+							moves = Definitions.bpawnMoves(pawns, ~allpieces);
 									
 							if (((bitsq >>> 7) & attacks & ~Definitions.allH) != 0 && 
-									((bitsq >>> 7) & m_white) != 0 || (epcol >= 0 && epcol == c-1 && r == 4))
+									((bitsq >>> 7) & getWhite()) != 0 || (epcol >= 0 && epcol == c-1 && r == 4))
 							{
 								int dsq = sq - 7;
 								StandardChessBoard temp = this.clone();
@@ -486,7 +473,7 @@ public class StandardChessBoard extends Board
 								}
 							}
 							if (((bitsq >>> 9) & attacks & ~Definitions.allA) != 0 && 
-									((bitsq >>> 9) & m_white) != 0 || (epcol >= 0 && epcol == c+1 && r == 4))
+									((bitsq >>> 9) & getWhite()) != 0 || (epcol >= 0 && epcol == c+1 && r == 4))
 							{
 								int dsq = sq - 9;
 								StandardChessBoard temp = this.clone();
@@ -497,7 +484,7 @@ public class StandardChessBoard extends Board
 									legalMoves.add(new Move(r, c, 7 - (dsq / 8), 7 - (dsq % 8)));
 								}
 							}
-							if (((bitsq >>> 8) & moves) != 0 && ((bitsq >>> 8) & (m_black | m_white)) == 0)
+							if (((bitsq >>> 8) & moves) != 0 && ((bitsq >>> 8) & allpieces) == 0)
 							{
 								int dsq = sq - 8;
 								StandardChessBoard temp = this.clone();
@@ -509,8 +496,8 @@ public class StandardChessBoard extends Board
 								}
 							}
 
-							if (((bitsq >>> 16) & moves) != 0 && ((bitsq >>> 16) & (m_black | m_white)) == 0
-									&& ((bitsq >>> 8) & (m_black | m_white)) == 0)
+							if (((bitsq >>> 16) & moves) != 0 && ((bitsq >>> 16) & allpieces) == 0
+									&& ((bitsq >>> 8) & allpieces) == 0)
 							{
 								int dsq = sq - 16;
 								StandardChessBoard temp = this.clone();
@@ -542,7 +529,7 @@ public class StandardChessBoard extends Board
 					}
 					else if (((bishops >>> sq) & 1L) == 1) //bishop
 					{
-						long moves = Definitions.bishopAttacks(sq, ~(m_white | m_black)) & ~turnpieces;
+						long moves = Definitions.bishopAttacks(sq, ~allpieces) & ~turnpieces;
 						for (int i = 0; i < 64; i++)
 						{
 							if (((moves >>> i) & 1L) == 1)
@@ -559,7 +546,7 @@ public class StandardChessBoard extends Board
 					}
 					else if (((rooks >>> sq) & 1L) == 1) //rook
 					{
-						long moves = Definitions.rookAttacks(sq, ~(m_white | m_black)) & ~turnpieces;
+						long moves = Definitions.rookAttacks(sq, ~allpieces) & ~turnpieces;
 						for (int i = 0; i < 64; i++)
 						{
 							if (((moves >>> i) & 1L) == 1)
@@ -576,7 +563,7 @@ public class StandardChessBoard extends Board
 					}
 					else if (((queens >>> sq) & 1L) == 1) //queen
 					{
-						long moves = Definitions.queenAttacks(sq, ~(m_white | m_black)) & ~turnpieces;
+						long moves = Definitions.queenAttacks(sq, ~allpieces) & ~turnpieces;
 						for (int i = 0; i < 64; i++)
 						{
 							if (((moves >>> i) & 1L) == 1)
@@ -629,8 +616,8 @@ public class StandardChessBoard extends Board
 									Definitions.isAttacked(this, kingsq - 1, Definitions.flip(whoseTurn())) ||
 									Definitions.isAttacked(this, kingsq - 2, Definitions.flip(whoseTurn()))))
 							{
-								if ((((king >>> 1) & (~(m_white | m_black))) != 0) &&
-										(((king >>> 2) & (~(m_white | m_black))) != 0))
+								if ((((king >>> 1) & ~allpieces) != 0) &&
+										(((king >>> 2) & ~allpieces) != 0))
 								{
 									legalMoves.add(new Move(r, c, r, c + 2));
 								}
@@ -643,8 +630,8 @@ public class StandardChessBoard extends Board
 									Definitions.isAttacked(this, kingsq + 1, Definitions.flip(whoseTurn())) |
 									Definitions.isAttacked(this, kingsq + 2, Definitions.flip(whoseTurn()))))
 							{
-								if ((((king << 1) & (~(m_white | m_black))) != 0) &&
-										(((king << 2) & (~(m_white | m_black))) != 0))
+								if ((((king << 1) & ~allpieces) != 0) &&
+										(((king << 2) & ~allpieces) != 0))
 								{
 									legalMoves.add(new Move(r, c, r, c - 2));
 								}	
@@ -661,9 +648,9 @@ public class StandardChessBoard extends Board
 	{
 		long king;
 		if (whoseTurn() == Definitions.Color.WHITE)
-			king = m_white & m_kings;
+			king = getWhite() & getKings();
 		else
-			king = m_black & m_kings;
+			king = getBlack() & getKings();
 		int kingsq = (int)((Math.log(king)/Math.log(2)) + 0.5);
 		return Definitions.isAttacked(this, kingsq, Definitions.flip(whoseTurn()));
 	}
@@ -791,34 +778,34 @@ public class StandardChessBoard extends Board
 		for (int i = 63; i >= 0; i--)
 		{
 			long s = (1L << i);
-			if ((s & m_white) != 0)
+			if ((s & getWhite()) != 0)
 			{
-				if ((s & m_pawns) != 0)
+				if ((s & getPawns()) != 0)
 					str = str + "P";
-				else if ((s & m_knights) != 0)
+				else if ((s & getKnights()) != 0)
 					str = str + "N";
-				else if ((s & m_bishops) != 0)
+				else if ((s & getBishops()) != 0)
 					str = str + "B";
-				else if ((s & m_rooks) != 0)
+				else if ((s & getRooks()) != 0)
 					str = str + "R";
-				else if ((s & m_queens) != 0)
+				else if ((s & getQueens()) != 0)
 					str = str + "Q";
-				else if ((s & m_kings) != 0)
+				else if ((s & getKings()) != 0)
 					str = str + "K";
 			}
-			else if ((s & m_black) != 0)
+			else if ((s & getBlack()) != 0)
 			{
-				if ((s & m_pawns) != 0)
+				if ((s & getPawns()) != 0)
 					str = str + "p";
-				else if ((s & m_knights) != 0)
+				else if ((s & getKnights()) != 0)
 					str = str + "n";
-				else if ((s & m_bishops) != 0)
+				else if ((s & getBishops()) != 0)
 					str = str + "b";
-				else if ((s & m_rooks) != 0)
+				else if ((s & getRooks()) != 0)
 					str = str + "r";
-				else if ((s & m_queens) != 0)
+				else if ((s & getQueens()) != 0)
 					str = str + "q";
-				else if ((s & m_kings) != 0)
+				else if ((s & getKings()) != 0)
 					str = str + "k";
 			}
 			else

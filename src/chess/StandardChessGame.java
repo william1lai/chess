@@ -7,6 +7,7 @@ import java.awt.event.MouseEvent;
 
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
+import java.util.Stack;
 
 @SuppressWarnings("serial")
 public class StandardChessGame extends Game implements Runnable
@@ -16,6 +17,7 @@ public class StandardChessGame extends Game implements Runnable
 	private StandardChessGameGraphics m_graphics;
 	private StandardChessGameAnimation m_animation;
 	private StandardChessGameGUI m_gui;
+	private Stack<String> movesHistory = new Stack<String>();
 
 	public void init()
 	{
@@ -70,7 +72,7 @@ public class StandardChessGame extends Game implements Runnable
 			EasyButton b = new EasyButton("/Images/buttonFace.png", 470, 220, 150, 50, new EasyButtonAction() {
 				public void on_press()
 				{
-					System.out.println("fart");
+					undo();
 				}
 			});
 			m_gui.addButton(b);
@@ -94,6 +96,7 @@ public class StandardChessGame extends Game implements Runnable
 				m_game_board.incrementTurncount();
 			if (cur.isDone()) 
 			{
+				movesHistory.push(m_game_board.toFEN(true));
 				Move m = cur.getMove();
 				if (m == null)
 					break;
@@ -253,6 +256,21 @@ public class StandardChessGame extends Game implements Runnable
 		}
 	}
 
+	public void undo()
+	{
+		if(movesHistory.size() < 2)
+			return;
+		
+		Player cur = (m_game_board.whoseTurn() == Definitions.Color.WHITE ? p1 : p2);
+		if (cur.getColor() == Definitions.Color.WHITE)
+			m_game_board.decrementTurncount();
+		
+		movesHistory.pop();
+		String returnMove = movesHistory.pop();
+		
+		m_game_board.FENtoPosition(returnMove);
+	}
+	
 	//Prevents flickering when repainting
 	public void update(Graphics g)
 	{

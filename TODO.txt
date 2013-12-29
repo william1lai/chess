@@ -1,6 +1,6 @@
 UI
 - Menu when starting up applet
-- Undo button
+- Undo button: Disable for the opposing player when it is current player's turn
 
 Standard Chess
 - 50 move rule and threefold repetition (hash table of FEN's)

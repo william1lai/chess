@@ -222,6 +222,11 @@ public class StandardChessBoard extends Board
 	{
 		m_data.m_turncount++;
 	}
+	
+	public void decrementTurncount()
+	{
+		m_data.m_turncount--;
+	}
 
 	public int getTurnCount()
 	{

@@ -1,5 +1,10 @@
 ChangeLog
 
+Name: William Lai
+Date: 12-31-2013
+Description: Cleaned up undo function
+    * src/chess/StandardChessGame.java: Undo function is disabled during a CPU player's turn and also disables the instant the player has clicked a destination square (to prevent strange situations where two moves are undone but the player's move was also processed and the moving piece changed colors).
+
 Name: Eric Du
 Date: 12-29-2013
 Description: Implemented the undo function

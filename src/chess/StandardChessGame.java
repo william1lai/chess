@@ -18,6 +18,7 @@ public class StandardChessGame extends Game implements Runnable
 	private StandardChessGameAnimation m_animation;
 	private StandardChessGameGUI m_gui;
 	private Stack<String> movesHistory = new Stack<String>();
+	private boolean canUndo;
 
 	public void init()
 	{
@@ -25,7 +26,8 @@ public class StandardChessGame extends Game implements Runnable
 		m_gui = new StandardChessGameGUI();
 		m_graphics = new StandardChessGameGraphics(m_gui);
 		m_animation = new StandardChessGameAnimation(m_graphics);
-
+		canUndo = false;
+		
 		Definitions.makeInitB();
 		Definitions.makeMaskB();
 		Definitions.makeInitR();
@@ -66,7 +68,7 @@ public class StandardChessGame extends Game implements Runnable
 			p1.promptMove();
 		else
 			p2.promptMove();
-		
+
 		// Example productive usage of GUI and EasyButton
 		try {
 			EasyButton b = new EasyButton("/Images/buttonFace.png", 470, 220, 150, 50, new EasyButtonAction() {
@@ -76,7 +78,7 @@ public class StandardChessGame extends Game implements Runnable
 				}
 			});
 			m_gui.addButton(b);
-			}
+		}
 		catch (Exception ex) {}
 	}
 
@@ -94,8 +96,11 @@ public class StandardChessGame extends Game implements Runnable
 			Player cur = (m_game_board.whoseTurn() == Definitions.Color.WHITE ? p1 : p2);
 			if (cur.getColor() == Definitions.Color.WHITE)
 				m_game_board.incrementTurncount();
-			if (cur.isDone()) 
+			if (cur instanceof HumanPlayer)
+				canUndo = true;
+			if (cur.isDone())
 			{
+				canUndo = false;
 				movesHistory.push(m_game_board.toFEN(true));
 				Move m = cur.getMove();
 				if (m == null)
@@ -260,17 +265,18 @@ public class StandardChessGame extends Game implements Runnable
 	{
 		if(movesHistory.size() < 2)
 			return;
-		
-		Player cur = (m_game_board.whoseTurn() == Definitions.Color.WHITE ? p1 : p2);
-		if (cur.getColor() == Definitions.Color.WHITE)
+
+		if (canUndo)
+		{
 			m_game_board.decrementTurncount();
-		
-		movesHistory.pop();
-		String returnMove = movesHistory.pop();
-		
-		m_game_board.FENtoPosition(returnMove);
+
+			movesHistory.pop();
+			String returnMove = movesHistory.pop();
+
+			m_game_board.FENtoPosition(returnMove);
+		}
 	}
-	
+
 	//Prevents flickering when repainting
 	public void update(Graphics g)
 	{

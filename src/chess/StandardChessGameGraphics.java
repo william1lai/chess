@@ -52,6 +52,12 @@ public class StandardChessGameGraphics
 		}
 	}
 	
+	public void drawBackground(Graphics g)
+	{
+		g.setColor(new Color(238, 238, 238));
+		g.fillRect(0, 0, Definitions.WIDTH, Definitions.HEIGHT);
+	}
+	
 	public void drawNames(Graphics g, Player p1, Player p2, Definitions.Color turn)
 	{
 		g.setColor(Color.BLACK);
@@ -163,7 +169,8 @@ public class StandardChessGameGraphics
 	public void drawGUI(Graphics g)
 	{
 		for (EasyButton b : m_gui.getButtons()) {
-			g.drawImage(b.getImg(), b.getX(), b.getY(), b.getW(), b.getH(), null);
+			BufferedImage img = (b.isPressed() ? b.getPressedImg() : b.getReleasedImg());
+			g.drawImage(img, b.getX(), b.getY(), b.getW(), b.getH(), null);
 		}
 	}
 	

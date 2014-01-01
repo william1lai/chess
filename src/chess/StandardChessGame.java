@@ -61,6 +61,7 @@ public class StandardChessGame extends Game implements Runnable
 		}
 
 		addMouseListener(m_gui);
+		addFocusListener(m_gui);
 		m_thread = new Thread(this);
 		m_thread.start();
 
@@ -69,9 +70,8 @@ public class StandardChessGame extends Game implements Runnable
 		else
 			p2.promptMove();
 
-		// Example productive usage of GUI and EasyButton
 		try {
-			EasyButton b = new EasyButton("/Images/buttonFace.png", 470, 220, 150, 50, new EasyButtonAction() {
+			EasyButton b = new EasyButton("buttonUndo", 480, 220, 90, 30, new EasyButtonAction() {
 				public void on_press()
 				{
 					undo();
@@ -140,6 +140,7 @@ public class StandardChessGame extends Game implements Runnable
 		Image backbuffer = createImage(g.getClipBounds().width, g.getClipBounds().height);
 		Graphics backg = backbuffer.getGraphics();
 
+		m_graphics.drawBackground(backg);
 		m_graphics.drawBoard(backg);
 		if (p1 instanceof HumanPlayer)
 		{

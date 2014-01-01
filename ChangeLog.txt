@@ -1,5 +1,17 @@
 ChangeLog
 
+Name: Vincent Wong
+Date: 12-31-2013
+Description: Added simple background, made undo button prettier
+    * src/Images/buttonUndo*: Prettier undo buttons
+    * src/chess/StandardChessGameGraphics.java: Added code for painting an app background
+    * src/chess/StandardChessGame.java: Added code to call painting an app background
+    * src/chess/EasyButton.java: Made clicking a proper two step process, with a different
+    image on each stage
+    * src/chess/StandardChessGameGUI.java: Added code to properly use the tweaked EasyButton,
+    along with a focuslistener to properly deal with lost focus
+    
+
 Name: William Lai
 Date: 12-31-2013
 Description: Cleaned up undo function

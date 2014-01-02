@@ -7,12 +7,6 @@ public class HumanPlayer extends Player implements MouseListener
 {	
 	private int m_selected;
 
-	public HumanPlayer(String name)
-	{
-		setName(name);
-		m_selected = -1;
-	}
-
 	public HumanPlayer(String name, Definitions.Color c, Game g)
 	{
 		setName(name);
@@ -42,7 +36,7 @@ public class HumanPlayer extends Player implements MouseListener
 		{
 			m_done = false;
 			m_move = null;
-			getGame().addMouseListener(this);
+			getGame().m_applet.addMouseListener(this);
 		}
 	}
 
@@ -76,7 +70,7 @@ public class HumanPlayer extends Player implements MouseListener
 						if (g.getBoard().isLegalMove(m_move)) {
 							m_selected = -1;
 							m_done = true;
-							g.removeMouseListener(this);
+							getGame().m_applet.removeMouseListener(this);
 						}
 						else {
 							m_move = null;
@@ -99,7 +93,7 @@ public class HumanPlayer extends Player implements MouseListener
 						if (g.getBoard().isLegalMove(m_move)) {
 							m_selected = -1;
 							m_done = true;
-							g.removeMouseListener(this);
+							getGame().m_applet.removeMouseListener(this);
 						}
 						else {
 							m_move = null;

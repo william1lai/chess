@@ -7,9 +7,7 @@ import javax.swing.JOptionPane;
 
 public class StandardChessBoard extends Board 
 {
-	private Definitions.Color m_turn;
-
-	private class GameData
+	public class GameData
 	{
 		public int m_enpassantCol; //the column (0-7) of the pawn to move two spaces last turn, -1 if no pawn moved two spaces
 		public boolean m_whiteCanCastleKingside; //false if king's rook or king have moved
@@ -45,9 +43,11 @@ public class StandardChessBoard extends Board
 			m_game = other.m_game;
 		}
 	};
-
 	private GameData m_data;
+	
+	private Definitions.Color m_turn;
 
+	
 	public StandardChessBoard(StandardChessGame scg) //standard setup
 	{
 		m_turn = Definitions.Color.WHITE;
@@ -78,6 +78,11 @@ public class StandardChessBoard extends Board
 		setKings(other.getKings());
 	}
 
+	public GameData getData()
+	{
+		return m_data;
+	}
+	
 	public char getPiece(int r, int c) //returns 0 if no piece exists
 	{
 		long bit = 1L << ((7-r)*8 + (7-c));
@@ -402,7 +407,7 @@ public class StandardChessBoard extends Board
 			{
 				int sq = (7-r)*8 + (7-c);
 
-				if (((turnpieces >>> sq) & 1) == 1) //white piece
+				if (((turnpieces >>> sq) & 1) == 1)
 				{
 					if (((pawns >>> sq) & 1) == 1) //pawn
 					{
@@ -714,124 +719,6 @@ public class StandardChessBoard extends Board
 		}
 	}
 	
-	//TODO: Might need clean up
-	public void processMove(Move newMove)
-	{
-		int row = newMove.r0;
-		int col = newMove.c0;
-		char movedPiece = getPiece(row, col);
-		m_data.m_fiftymoverulecount++;
-
-		int castlingRow;
-		if (whoseTurn() == Definitions.Color.WHITE)
-		{
-			castlingRow = 7;
-		}
-		else //Black
-		{
-			castlingRow = 0;
-		}
-
-		Move correspondingRookMove = null; //if we have castling
-		m_data.m_enpassantCol = -1; //default
-		if (Character.toLowerCase(movedPiece) == 'p')
-		{
-			m_data.m_fiftymoverulecount = 0; //pawn was moved
-			if (Math.abs(newMove.rf - newMove.r0) == 2)
-			{
-				m_data.m_enpassantCol = newMove.c0; //enpassant now available on this column
-			}
-			else if ((Math.abs(newMove.cf - newMove.c0) == 1) && (getPiece(newMove.rf, newMove.cf) == 0))
-				//en passant
-			{
-				if (whoseTurn() == Definitions.Color.WHITE)
-				{
-					removePiece(3, newMove.cf); //not sure if this is best way, but "move" call will not erase piece
-				}
-				else
-				{
-					removePiece(4, newMove.cf);
-				}
-			}
-		}
-		else if (Character.toLowerCase(movedPiece) == 'k')
-		{			
-			if (whoseTurn() == Definitions.Color.WHITE)
-			{
-				m_data.m_whiteCanCastleKingside = false;
-				m_data.m_whiteCanCastleQueenside = false;
-			}
-			else
-			{
-				m_data.m_blackCanCastleKingside = false;
-				m_data.m_blackCanCastleQueenside = false;
-			}
-
-			int kingMoveLength = newMove.cf - col; //should be 2 or -2, if the move was a castling move
-			if (row == castlingRow)
-			{
-				if (kingMoveLength == 2) //kingside
-				{
-					correspondingRookMove = new Move(castlingRow, 7, castlingRow, 5);
-				}
-				else if (kingMoveLength == -2) //queenside
-				{
-					correspondingRookMove = new Move(castlingRow, 0, castlingRow, 3);
-				}
-			}
-		}
-		else if (row == castlingRow)
-		{
-			if (col == 0) //queen's rook
-			{
-				if (whoseTurn() == Definitions.Color.WHITE)
-				{
-					m_data.m_whiteCanCastleQueenside = false;
-				}
-				else
-				{
-					m_data.m_blackCanCastleQueenside = false;
-				}
-			}
-			else if (col == 7) //king's rook
-			{			
-				if (whoseTurn() == Definitions.Color.WHITE)
-				{
-					m_data.m_whiteCanCastleKingside = false;
-				}
-				else
-				{
-					m_data.m_blackCanCastleKingside = false;
-				}
-			}
-		}
-
-		if (getPiece(newMove.rf, newMove.cf) != 0) //capture was made
-		{
-			m_data.m_fiftymoverulecount = 0; //reset counter
-		}
-
-		StandardChessGame scg =  m_data.m_game;
-		scg.getAnimation().animateMove(scg.getGraphics(), newMove, this);
-		move(newMove); //has to be down here for time being because en passant needs to know dest sq is empty; fix if you can
-
-		if (correspondingRookMove != null)
-		{
-			scg.getAnimation().animateMove(scg.getGraphics(), correspondingRookMove, this);
-			setTurn(Definitions.flip(whoseTurn())); //to undo double flipping of moving king and then rook
-			move(correspondingRookMove);
-		}
-
-		if (Character.toLowerCase(movedPiece) == 'p')
-		{
-			if (((whoseTurn() == Definitions.Color.BLACK) && (newMove.rf == 0)) 
-					|| ((whoseTurn() == Definitions.Color.WHITE) && (newMove.rf == 7))) //flipped by earlier move
-			{
-				promotePawn(newMove.rf, newMove.cf);
-			}
-		}
-	}
-
 	public StandardChessBoard clone()
 	{
 		return new StandardChessBoard(this);

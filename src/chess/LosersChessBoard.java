@@ -12,9 +12,7 @@ import javax.swing.JOptionPane;
  */
 public class LosersChessBoard extends Board 
 {
-	private Definitions.Color m_turn;
-
-	private class GameData
+	public class GameData
 	{
 		public int m_enpassantCol; //the column (0-7) of the pawn to move two spaces last turn, -1 if no pawn moved two spaces
 		public int m_fiftymoverulecount;
@@ -38,9 +36,11 @@ public class LosersChessBoard extends Board
 			m_game = other.m_game;
 		}
 	};
-
 	private GameData m_data;
-
+	
+	private Definitions.Color m_turn;
+	
+	
 	public LosersChessBoard(LosersChessGame lcg) //standard setup
 	{
 		m_turn = Definitions.Color.WHITE;
@@ -60,7 +60,7 @@ public class LosersChessBoard extends Board
 	{
 		m_turn = other.m_turn;
 		m_data = new GameData(other.m_data);
-		
+
 		setWhite(other.getWhite());
 		setBlack(other.getBlack());
 		setPawns(other.getPawns());
@@ -71,6 +71,11 @@ public class LosersChessBoard extends Board
 		setKings(other.getKings());
 	}
 
+	public GameData getData()
+	{
+		return m_data;
+	}
+	
 	public char getPiece(int r, int c) //returns 0 if no piece exists
 	{
 		long bit = 1L << ((7-r)*8 + (7-c));
@@ -131,7 +136,7 @@ public class LosersChessBoard extends Board
 		int sq = (7-r)*8 + (7-c);
 		long s = (1L << sq);
 		long mask = ~s;
-		
+
 		setWhite(getWhite() & mask);
 		setBlack(getBlack() & mask);
 		setPawns(getPawns() & mask);
@@ -140,7 +145,7 @@ public class LosersChessBoard extends Board
 		setRooks(getRooks() & mask);
 		setQueens(getQueens() & mask);
 		setKings(getKings() & mask);
-		
+
 		if (color == Definitions.Color.WHITE)
 		{
 			setWhite(getWhite() | s);
@@ -149,7 +154,7 @@ public class LosersChessBoard extends Board
 		{
 			setBlack(getBlack() | s);
 		}
-		
+
 		switch (piece)
 		{
 		case 'p':
@@ -178,7 +183,7 @@ public class LosersChessBoard extends Board
 			break;
 		}
 	}
-	
+
 	public void removePiece(int r, int c)
 	{
 		int sq = (7-r)*8 + (7-c);
@@ -193,7 +198,7 @@ public class LosersChessBoard extends Board
 		setQueens(getQueens() & mask);
 		setKings(getKings() & mask);
 	}
-	
+
 	public void clearBoard()
 	{
 		setWhite(0);
@@ -205,7 +210,7 @@ public class LosersChessBoard extends Board
 		setQueens(0);
 		setKings(0);
 	}
-	
+
 	public void incrementFiftymoverulecount()
 	{
 		m_data.m_fiftymoverulecount++;
@@ -220,7 +225,7 @@ public class LosersChessBoard extends Board
 	{
 		m_data.m_turncount++;
 	}
-	
+
 	public void decrementTurncount()
 	{
 		m_data.m_turncount--;
@@ -247,14 +252,14 @@ public class LosersChessBoard extends Board
 		{
 			if (whoseTurn() == Definitions.Color.WHITE)
 			{
-				if (getWhite() != 0)
+				if (getWhite() == 0)
 					return Definitions.State.STALEMATE; //remember that in Loser's chess, stalemate is a win
 				else
 					return Definitions.State.CHECKMATE;
 			}
 			else
 			{
-				if (getBlack() != 0)
+				if (getBlack() == 0)
 					return Definitions.State.STALEMATE;
 				else
 					return Definitions.State.CHECKMATE;
@@ -265,8 +270,8 @@ public class LosersChessBoard extends Board
 			return Definitions.State.NORMAL;
 		}
 	}
-	
- 	public void move(Move m)
+
+	public void move(Move m)
 	{
 		int orig = (7-m.r0)*8 + (7-m.c0);
 		long origMask = ~(1L << orig);
@@ -372,9 +377,8 @@ public class LosersChessBoard extends Board
 	{
 		ArrayList<Move> captures = new ArrayList<Move>();
 		ArrayList<Move> mvs = new ArrayList<Move>();
-		
+
 		long turnpieces, allpieces, pawns, knights, bishops, rooks, queens, kings;
-		int kingsq;
 
 		if (m_turn == Definitions.Color.WHITE)
 		{
@@ -391,8 +395,6 @@ public class LosersChessBoard extends Board
 		queens = turnpieces & getQueens();
 		kings = turnpieces & getKings();
 		allpieces = getWhite() | getBlack();
-		
-		kingsq = (int)((Math.log(kings)/Math.log(2)) + 0.5);
 
 		for (int r = 0; r < 8; r++)
 		{
@@ -400,7 +402,7 @@ public class LosersChessBoard extends Board
 			{
 				int sq = (7-r)*8 + (7-c);
 
-				if (((turnpieces >>> sq) & 1) == 1) //white piece
+				if (((turnpieces >>> sq) & 1) == 1)
 				{
 					if (((pawns >>> sq) & 1) == 1) //pawn
 					{
@@ -418,106 +420,59 @@ public class LosersChessBoard extends Board
 									(((bitsq << 7) & getBlack()) != 0 || (epcol >= 0 && epcol == c+1 && r == 3)))
 							{
 								int dsq = sq + 7;
-								LosersChessBoard temp = this.clone();
-								temp.move(new Move(r, c, 7 - (dsq / 8), 7 - (dsq % 8)));
-
-								if (!Definitions.isAttacked(temp, kingsq, Definitions.flip(m_turn)))
-								{
-									captures.add(new Move(r, c, 7 - (dsq / 8), 7 - (dsq % 8)));
-								}
+								captures.add(new Move(r, c, 7 - (dsq / 8), 7 - (dsq % 8)));
 							}
 							if (((bitsq << 9) & attacks & ~Definitions.allH) != 0 && 
 									((bitsq << 9) & getBlack()) != 0 || (epcol >= 0 && epcol == c-1 && r == 3))
 							{
 								int dsq = sq + 9;
-								LosersChessBoard temp = this.clone();
-								temp.move(new Move(r, c, 7 - (dsq / 8), 7 - (dsq % 8)));
-
-								if (!Definitions.isAttacked(temp, kingsq, Definitions.flip(m_turn)))
-								{
-									captures.add(new Move(r, c, 7 - (dsq / 8), 7 - (dsq % 8)));
-								}
+								captures.add(new Move(r, c, 7 - (dsq / 8), 7 - (dsq % 8)));
 							}
 							if (((bitsq << 8) & moves) != 0 && ((bitsq << 8) & allpieces) == 0)
 							{
 								int dsq = sq + 8;
-								LosersChessBoard temp = this.clone();
-								temp.move(new Move(r, c, 7 - (dsq / 8), 7 - (dsq % 8)));
-
-								if (!Definitions.isAttacked(temp, kingsq, Definitions.flip(m_turn)))
-								{
-									mvs.add(new Move(r, c, 7 - (dsq / 8), 7 - (dsq % 8)));
-								}
+								mvs.add(new Move(r, c, 7 - (dsq / 8), 7 - (dsq % 8)));
 							}
 
 							if (((bitsq << 16) & moves) != 0 && ((bitsq << 16) & allpieces) == 0
 									&& ((bitsq << 8) & allpieces) == 0)
 							{
 								int dsq = sq + 16;
-								LosersChessBoard temp = this.clone();
-								temp.move(new Move(r, c, 7 - (dsq / 8), 7 - (dsq % 8)));
-
-								if (!Definitions.isAttacked(temp, kingsq, Definitions.flip(m_turn)))
-								{
-									mvs.add(new Move(r, c, 7 - (dsq / 8), 7 - (dsq % 8)));
-								}
+								mvs.add(new Move(r, c, 7 - (dsq / 8), 7 - (dsq % 8)));
 							}
 						}
 						else
 						{
 							attacks = Definitions.bpawnAttacks(pawns);
 							moves = Definitions.bpawnMoves(pawns, ~allpieces);
-									
+
 							if (((bitsq >>> 7) & attacks & ~Definitions.allH) != 0 && 
 									((bitsq >>> 7) & getWhite()) != 0 || (epcol >= 0 && epcol == c-1 && r == 4))
 							{
 								int dsq = sq - 7;
-								LosersChessBoard temp = this.clone();
-								temp.move(new Move(r, c, 7 - (dsq / 8), 7 - (dsq % 8)));
-
-								if (!Definitions.isAttacked(temp, kingsq, Definitions.flip(m_turn)))
-								{
-									captures.add(new Move(r, c, 7 - (dsq / 8), 7 - (dsq % 8)));
-								}
+								captures.add(new Move(r, c, 7 - (dsq / 8), 7 - (dsq % 8)));
 							}
 							if (((bitsq >>> 9) & attacks & ~Definitions.allA) != 0 && 
 									((bitsq >>> 9) & getWhite()) != 0 || (epcol >= 0 && epcol == c+1 && r == 4))
 							{
 								int dsq = sq - 9;
-								LosersChessBoard temp = this.clone();
-								temp.move(new Move(r, c, 7 - (dsq / 8), 7 - (dsq % 8)));
-
-								if (!Definitions.isAttacked(temp, kingsq, Definitions.flip(m_turn)))
-								{
-									captures.add(new Move(r, c, 7 - (dsq / 8), 7 - (dsq % 8)));
-								}
+								captures.add(new Move(r, c, 7 - (dsq / 8), 7 - (dsq % 8)));
 							}
 							if (((bitsq >>> 8) & moves) != 0 && ((bitsq >>> 8) & allpieces) == 0)
 							{
 								int dsq = sq - 8;
-								LosersChessBoard temp = this.clone();
-								temp.move(new Move(r, c, 7 - (dsq / 8), 7 - (dsq % 8)));
-
-								if (!Definitions.isAttacked(temp, kingsq, Definitions.flip(m_turn)))
-								{
-									mvs.add(new Move(r, c, 7 - (dsq / 8), 7 - (dsq % 8)));
-								}
+								mvs.add(new Move(r, c, 7 - (dsq / 8), 7 - (dsq % 8)));
 							}
 
 							if (((bitsq >>> 16) & moves) != 0 && ((bitsq >>> 16) & allpieces) == 0
 									&& ((bitsq >>> 8) & allpieces) == 0)
 							{
 								int dsq = sq - 16;
-								LosersChessBoard temp = this.clone();
-								temp.move(new Move(r, c, 7 - (dsq / 8), 7 - (dsq % 8)));
-
-								if (!Definitions.isAttacked(temp, kingsq, Definitions.flip(m_turn)))
-								{
-									mvs.add(new Move(r, c, 7 - (dsq / 8), 7 - (dsq % 8)));
-								}
+								mvs.add(new Move(r, c, 7 - (dsq / 8), 7 - (dsq % 8)));
 							}
 						}
 					}
+
 					else if (((knights >>> sq) & 1L) == 1) //knight
 					{
 						long moves = Definitions.knightAttacks(1L << sq) & ~turnpieces;
@@ -525,19 +480,13 @@ public class LosersChessBoard extends Board
 						{
 							if (((moves >>> i) & 1L) == 1)
 							{
-								LosersChessBoard temp = this.clone();
-								temp.move(new Move(r, c, 7 - (i / 8), 7 - (i % 8)));
-
-								if (!Definitions.isAttacked(temp, kingsq, Definitions.flip(m_turn)))
+								if (((1L << i) & allpieces) != 0)
 								{
-									if (((1L << i) & allpieces) != 0)
-									{
-										captures.add(new Move(r, c, 7 - (i / 8), 7 - (i % 8)));										
-									}
-									else
-									{
-										mvs.add(new Move(r, c, 7 - (i / 8), 7 - (i % 8)));
-									}
+									captures.add(new Move(r, c, 7 - (i / 8), 7 - (i % 8)));										
+								}
+								else
+								{
+									mvs.add(new Move(r, c, 7 - (i / 8), 7 - (i % 8)));
 								}
 							}
 						}
@@ -549,19 +498,13 @@ public class LosersChessBoard extends Board
 						{
 							if (((moves >>> i) & 1L) == 1)
 							{
-								LosersChessBoard temp = this.clone();
-								temp.move(new Move(r, c, 7 - (i / 8), 7 - (i % 8)));
-
-								if (!Definitions.isAttacked(temp, kingsq, Definitions.flip(m_turn)))
+								if (((1L << i) & allpieces) != 0)
 								{
-									if (((1L << i) & allpieces) != 0)
-									{
-										captures.add(new Move(r, c, 7 - (i / 8), 7 - (i % 8)));										
-									}
-									else
-									{
-										mvs.add(new Move(r, c, 7 - (i / 8), 7 - (i % 8)));
-									}
+									captures.add(new Move(r, c, 7 - (i / 8), 7 - (i % 8)));										
+								}
+								else
+								{
+									mvs.add(new Move(r, c, 7 - (i / 8), 7 - (i % 8)));
 								}
 							}
 						}
@@ -573,19 +516,13 @@ public class LosersChessBoard extends Board
 						{
 							if (((moves >>> i) & 1L) == 1)
 							{
-								LosersChessBoard temp = this.clone();
-								temp.move(new Move(r, c, 7 - (i / 8), 7 - (i % 8)));
-
-								if (!Definitions.isAttacked(temp, kingsq, Definitions.flip(m_turn)))
+								if (((1L << i) & allpieces) != 0)
 								{
-									if (((1L << i) & allpieces) != 0)
-									{
-										captures.add(new Move(r, c, 7 - (i / 8), 7 - (i % 8)));										
-									}
-									else
-									{
-										mvs.add(new Move(r, c, 7 - (i / 8), 7 - (i % 8)));
-									}
+									captures.add(new Move(r, c, 7 - (i / 8), 7 - (i % 8)));										
+								}
+								else
+								{
+									mvs.add(new Move(r, c, 7 - (i / 8), 7 - (i % 8)));
 								}
 							}
 						}
@@ -597,43 +534,31 @@ public class LosersChessBoard extends Board
 						{
 							if (((moves >>> i) & 1L) == 1)
 							{
-								LosersChessBoard temp = this.clone();
-								temp.move(new Move(r, c, 7 - (i / 8), 7 - (i % 8)));
-
-								if (!Definitions.isAttacked(temp, kingsq, Definitions.flip(m_turn)))
+								if (((1L << i) & allpieces) != 0)
 								{
-									if (((1L << i) & allpieces) != 0)
-									{
-										captures.add(new Move(r, c, 7 - (i / 8), 7 - (i % 8)));										
-									}
-									else
-									{
-										mvs.add(new Move(r, c, 7 - (i / 8), 7 - (i % 8)));
-									}
+									captures.add(new Move(r, c, 7 - (i / 8), 7 - (i % 8)));										
+								}
+								else
+								{
+									mvs.add(new Move(r, c, 7 - (i / 8), 7 - (i % 8)));
 								}
 							}
 						}
 					}
 					else //king
 					{
-						long moves = Definitions.kingAttacks(1L << sq) & ~turnpieces;
+						long moves = Definitions.kingAttacks(kings) & ~turnpieces;
 						for (int i = 0; i < 64; i++)
 						{
 							if (((moves >>> i) & 1L) == 1)
 							{
-								LosersChessBoard temp = this.clone();
-								temp.move(new Move(r, c, 7 - (i / 8), 7 - (i % 8)));
-
-								if (!Definitions.isAttacked(temp, i, Definitions.flip(m_turn)))
+								if (((1L << i) & allpieces) != 0)
 								{
-									if (((1L << i) & allpieces) != 0)
-									{
-										captures.add(new Move(r, c, 7 - (i / 8), 7 - (i % 8)));										
-									}
-									else
-									{
-										mvs.add(new Move(r, c, 7 - (i / 8), 7 - (i % 8)));
-									}
+									captures.add(new Move(r, c, 7 - (i / 8), 7 - (i % 8)));										
+								}
+								else
+								{
+									mvs.add(new Move(r, c, 7 - (i / 8), 7 - (i % 8)));
 								}
 							}
 						}
@@ -641,8 +566,9 @@ public class LosersChessBoard extends Board
 				}
 			}
 		}
+
 		if (captures.size() > 0)
-		{
+		{	
 			return captures;
 		}
 		else
@@ -690,55 +616,6 @@ public class LosersChessBoard extends Board
 			setKnights(getKnights() | (1L << sq));
 		}
 	}
-	
-	//TODO: Might need clean up
-	public void processMove(Move newMove)
-	{
-		int row = newMove.r0;
-		int col = newMove.c0;
-		char movedPiece = getPiece(row, col);
-		m_data.m_fiftymoverulecount++;
-
-		m_data.m_enpassantCol = -1; //default
-		if (Character.toLowerCase(movedPiece) == 'p')
-		{
-			m_data.m_fiftymoverulecount = 0; //pawn was moved
-			if (Math.abs(newMove.rf - newMove.r0) == 2)
-			{
-				m_data.m_enpassantCol = newMove.c0; //enpassant now available on this column
-			}
-			else if ((Math.abs(newMove.cf - newMove.c0) == 1) && (getPiece(newMove.rf, newMove.cf) == 0))
-				//en passant
-			{
-				if (whoseTurn() == Definitions.Color.WHITE)
-				{
-					removePiece(3, newMove.cf); //not sure if this is best way, but "move" call will not erase piece
-				}
-				else
-				{
-					removePiece(4, newMove.cf);
-				}
-			}
-		}
-
-		if (getPiece(newMove.rf, newMove.cf) != 0) //capture was made
-		{
-			m_data.m_fiftymoverulecount = 0; //reset counter
-		}
-
-		LosersChessGame lcg =  m_data.m_game;
-		lcg.getAnimation().animateMove(lcg.getGraphics(), newMove, this);
-		move(newMove); //has to be down here for time being because en passant needs to know dest sq is empty; fix if you can
-
-		if (Character.toLowerCase(movedPiece) == 'p')
-		{
-			if (((whoseTurn() == Definitions.Color.BLACK) && (newMove.rf == 0)) 
-					|| ((whoseTurn() == Definitions.Color.WHITE) && (newMove.rf == 7))) //flipped by earlier move
-			{
-				promotePawn(newMove.rf, newMove.cf);
-			}
-		}
-	}
 
 	public LosersChessBoard clone()
 	{
@@ -783,14 +660,14 @@ public class LosersChessBoard extends Board
 			}
 			else
 				str = str + "-";
-			
+
 			if (i % 8 == 0)
 				str = str + '\n';
 		}
-		
+
 		return str;
 	}
-	
+
 	public String toFEN(boolean complete)
 	{
 		String FEN = "";
@@ -907,7 +784,7 @@ public class LosersChessBoard extends Board
 			m_data.m_enpassantCol = -1;
 		m_data.m_fiftymoverulecount = Integer.parseInt(detailElems[3]);
 		m_data.m_turncount = Integer.parseInt(detailElems[4]);
-		
+
 		clearBoard();
 		for (int r = 0; r < 8; r++)
 		{
@@ -929,7 +806,7 @@ public class LosersChessBoard extends Board
 				{
 					color = Definitions.Color.BLACK;
 				}				
-				
+
 				placePiece(p, color, r, c);
 			}
 		}

@@ -157,7 +157,7 @@ public class ComputerPlayer extends Player
 		}
 		else if (g instanceof LosersChessGame)
 		{
-			m_move = evaluate(((LosersChessGame)g).getBoard(), Definitions.MAXDEPTH);
+			m_move = evaluate(((LosersChessGame)g).getBoard());
 		}
 		m_done = true;
 	}
@@ -166,36 +166,33 @@ public class ComputerPlayer extends Player
 	{
 		m_book = new HashMap<String, Move>();
 
-		//White
-		m_book.put("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq -", new Move(6, 4, 4, 4)); //1.e4
-		m_book.put("rnbqkbnr/pp1ppppp/8/2p5/4P3/8/PPPP1PPP/RNBQKBNR w KQkq c6", new Move(7, 1, 5, 2)); //1.e4 c5 2.Nc3
-		m_book.put("r1bqkbnr/pp1ppppp/2n5/2p5/4P3/2N5/PPPP1PPP/R1BQKBNR w KQkq -", new Move(6, 5, 4, 5)); //1.e4 c5 2.Nc3 Nc6 3.f4
-		m_book.put("rnbqkbnr/pp1p1ppp/4p3/2p5/4P3/2N5/PPPP1PPP/R1BQKBNR w KQkq -", new Move(6, 5, 4, 5)); //1.e4 c5 2.Nc3 e6 3.f4
-		m_book.put("rnbqkbnr/pp2pppp/3p4/2p5/4P3/2N5/PPPP1PPP/R1BQKBNR w KQkq -", new Move(6, 5, 4, 5)); //1.e4 c5 2.Nc3 d6 3.f4
-		m_book.put("rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq e6", new Move(7, 6, 5, 5)); //1.e4 e5 2.Nf3
-		m_book.put("r1bqkbnr/pppp1ppp/2n5/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq -", new Move(7, 5, 3, 1)); //1.e4 e5 2.Nf3 Nc6 3.Bb5
+		if (getGame() instanceof StandardChessGame)
+		{
+			//White
+			m_book.put("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq -", new Move(6, 4, 4, 4)); //1.e4
+			m_book.put("rnbqkbnr/pp1ppppp/8/2p5/4P3/8/PPPP1PPP/RNBQKBNR w KQkq c6", new Move(7, 1, 5, 2)); //1.e4 c5 2.Nc3
+			m_book.put("r1bqkbnr/pp1ppppp/2n5/2p5/4P3/2N5/PPPP1PPP/R1BQKBNR w KQkq -", new Move(6, 5, 4, 5)); //1.e4 c5 2.Nc3 Nc6 3.f4
+			m_book.put("rnbqkbnr/pp1p1ppp/4p3/2p5/4P3/2N5/PPPP1PPP/R1BQKBNR w KQkq -", new Move(6, 5, 4, 5)); //1.e4 c5 2.Nc3 e6 3.f4
+			m_book.put("rnbqkbnr/pp2pppp/3p4/2p5/4P3/2N5/PPPP1PPP/R1BQKBNR w KQkq -", new Move(6, 5, 4, 5)); //1.e4 c5 2.Nc3 d6 3.f4
+			m_book.put("rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq e6", new Move(7, 6, 5, 5)); //1.e4 e5 2.Nf3
+			m_book.put("r1bqkbnr/pppp1ppp/2n5/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq -", new Move(7, 5, 3, 1)); //1.e4 e5 2.Nf3 Nc6 3.Bb5
 
-		//Black
-		m_book.put("rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3", new Move(1, 4, 3, 4)); //1.e4 e5
-		m_book.put("rnbqkbnr/pppp1ppp/8/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq -", new Move(0, 1, 2, 2)); //1.e4 e5 2.Nf3 Nc6		
-		m_book.put("r1bqkbnr/pppp1ppp/2n5/1B2p3/4P3/5N2/PPPP1PPP/RNBQK2R b KQkq -", new Move(1, 5, 3, 5)); //1.e4 e5 2.Nf3 Nc6 3.Bb5 f5
-		m_book.put("rnbqkbnr/pppppppp/8/8/3P4/8/PPP1PPPP/RNBQKBNR b KQkq d3", new Move(1, 5, 3, 5)); //1.d4 f5
-		/*m_book.put("", new Move(6, 4, 4, 4));
-		m_book.put("", new Move(6, 4, 4, 4));
-		m_book.put("", new Move(6, 4, 4, 4));
-		m_book.put("", new Move(6, 4, 4, 4));
-		m_book.put("", new Move(6, 4, 4, 4));
-		m_book.put("", new Move(6, 4, 4, 4));
-		m_book.put("", new Move(6, 4, 4, 4));
-		m_book.put("", new Move(6, 4, 4, 4));
-		m_book.put("", new Move(6, 4, 4, 4));
-		m_book.put("", new Move(6, 4, 4, 4));
-		m_book.put("", new Move(6, 4, 4, 4));
-		m_book.put("", new Move(6, 4, 4, 4));
-		m_book.put("", new Move(6, 4, 4, 4));
-		m_book.put("", new Move(6, 4, 4, 4));
-		m_book.put("", new Move(6, 4, 4, 4));
-		m_book.put("", new Move(6, 4, 4, 4));*/
+			//Black
+			m_book.put("rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3", new Move(1, 4, 3, 4)); //1.e4 e5
+			m_book.put("rnbqkbnr/pppp1ppp/8/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq -", new Move(0, 1, 2, 2)); //1.e4 e5 2.Nf3 Nc6		
+			m_book.put("r1bqkbnr/pppp1ppp/2n5/1B2p3/4P3/5N2/PPPP1PPP/RNBQK2R b KQkq -", new Move(1, 5, 3, 5)); //1.e4 e5 2.Nf3 Nc6 3.Bb5 f5
+			m_book.put("rnbqkbnr/pppppppp/8/8/3P4/8/PPP1PPPP/RNBQKBNR b KQkq d3", new Move(1, 5, 3, 5)); //1.d4 f5
+		}
+		else if (getGame() instanceof LosersChessGame)
+		{
+			//White
+			m_book.put("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w - -", new Move(6, 2, 4, 3)); //1.c3
+			
+			//Black
+			m_book.put("rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b - e3", new Move(1, 1, 3, 1)); //1.e4 b5
+			m_book.put("rnbqkbnr/pppppppp/8/8/8/4P3/PPPP1PPP/RNBQKBNR b - e3", new Move(1, 1, 3, 1)); //1.e3 b5
+			m_book.put("rnbqkbnr/pppppppp/8/8/3P4/8/PPP1PPPP/RNBQKBNR b - d3", new Move(1, 6, 3, 6)); //1.d4 g5
+		}
 	}
 
 	private double getDuration(long starttime, long endtime)
@@ -203,9 +200,9 @@ public class ComputerPlayer extends Player
 		return ((endtime - starttime) / 100000) / 10000.0;
 	}
 
-	
+
 	//Standard Chess Evaluation
-	
+
 	public Move evaluate(StandardChessBoard scb, int maxdepth)
 	{
 		String completeFEN = scb.toFEN(false);
@@ -250,7 +247,7 @@ public class ComputerPlayer extends Player
 		System.out.println();
 		return hashmoves.get(0); //the best next move
 	}
-	
+
 	private MovelistScore alphabetaMax(StandardChessBoard scb, double alpha, double beta, 
 			int ply, int maxply, boolean considerHashMoves, boolean extended, int checkcount)
 	{
@@ -510,7 +507,7 @@ public class ComputerPlayer extends Player
 		}		
 		return new MovelistScore(movelist, beta);
 	}
-	
+
 	private boolean existsThreatByLower(StandardChessBoard scb)
 	{
 		long turnpieces;
@@ -567,7 +564,7 @@ public class ComputerPlayer extends Player
 
 		return false; //no threats
 	}
-	
+
 	private double staticEval(StandardChessBoard scb)
 	{
 		if (getGame() instanceof StandardChessGame)
@@ -717,10 +714,10 @@ public class ComputerPlayer extends Player
 		return order;
 	}
 
-	
+
 	//Loser's Chess Evaluation
-	
-	public Move evaluate(LosersChessBoard lcb, int maxdepth)
+
+	public Move evaluate(LosersChessBoard lcb)
 	{
 		String completeFEN = lcb.toFEN(false);
 		System.out.println(completeFEN);
@@ -764,7 +761,7 @@ public class ComputerPlayer extends Player
 		System.out.println();
 		return hashmoves.get(0); //the best next move
 	}
-	
+
 	private MovelistScore alphabetaMax(LosersChessBoard lcb, double alpha, double beta, 
 			int ply, int maxply, boolean considerHashMoves, boolean extended)
 	{

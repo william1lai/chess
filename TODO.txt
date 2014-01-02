@@ -1,6 +1,5 @@
 UI
 - Menu when starting up applet
-- Undo button: Change the button so it actually indicates that it is for undoing moves
 
 Standard Chess
 - 50 move rule and threefold repetition (hash table of FEN's)
@@ -8,9 +7,7 @@ Standard Chess
 - Algebraic to Move function
 
 Program Structure
-- Move some logic from StandardChessBoard back into Board, so that other variants can more logically inherit; let the board's dimensions be decided on construction
 - Implement Alice Chess with BoardPair class?
-- ProcessMove structure needs work
 
 Miscellaneous
-- Implement new variants: Loser's Chess, Alice Chess, Maharajah, Fischer Random
+- Implement new variants: Alice Chess, Maharajah, Fischer Random

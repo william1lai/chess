@@ -1,31 +1,25 @@
 package chess;
 
-import java.awt.Graphics;
-import java.awt.Image;
 import java.awt.event.MouseEvent;
 import javax.swing.JOptionPane;
 import java.util.Stack;
 
-@SuppressWarnings("serial")
-public class StandardChessGame extends Game implements Runnable
+public class StandardChessGame extends Game
 {
-	private Thread m_thread;
 	private StandardChessBoard m_game_board;
-	private StandardChessGameGraphics m_graphics;
-	private StandardChessGameAnimation m_animation;
-	private StandardChessGameGUI m_gui;
-	private Stack<String> movesHistory = new Stack<String>();
-	private boolean canUndo;
-	private boolean doneInitializing;
+	private boolean m_canUndo;
+	
+	public StandardChessGame(GameApplet applet)
+	{
+		m_applet = applet;
+		init();
+	}
 
 	public void init()
 	{
-		doneInitializing = false;
 		m_game_board = new StandardChessBoard(this);
-		m_gui = new StandardChessGameGUI();
-		m_graphics = new StandardChessGameGraphics(m_gui);
-		m_animation = new StandardChessGameAnimation(m_graphics);
-		canUndo = false;
+		m_canUndo = false;
+		movesHistory = new Stack<String>();
 		
 		Definitions.makeInitB();
 		Definitions.makeMaskB();
@@ -68,37 +62,8 @@ public class StandardChessGame extends Game implements Runnable
 		{
 			return;
 		}
-		
-
-		addMouseListener(m_gui);
-		addFocusListener(m_gui);
-		m_thread = new Thread(this);
-		m_thread.start();
-
-		if (m_game_board.whoseTurn() == Definitions.Color.WHITE)
-			p1.promptMove();
-		else
-			p2.promptMove();
-
-		try {
-			EasyButton b = new EasyButton("buttonUndo", 480, 220, 90, 30, new EasyButtonAction() {
-				public void on_press()
-				{
-					undo();
-				}
-			});
-			m_gui.addButton(b);
-		}
-		catch (Exception ex) {}
-		
-		doneInitializing = true;
 	}
 
-	public boolean initialized()
-	{
-		return doneInitializing;
-	}
-	
 	public void setupStandard()
 	{
 		//by default, the board is set up in the standard fashion
@@ -114,22 +79,22 @@ public class StandardChessGame extends Game implements Runnable
 			if (cur.getColor() == Definitions.Color.WHITE)
 				m_game_board.incrementTurncount();
 			if (cur instanceof HumanPlayer)
-				canUndo = true;
+				m_canUndo = true;
 			if (cur.isDone())
 			{
-				canUndo = false;
+				m_canUndo = false;
 				movesHistory.push(m_game_board.toFEN(true));
 				Move m = cur.getMove();
 				if (m == null)
 					break;
 
-				m_game_board.processMove(m);
+				processMove(m);
 				flipTurn();
 				state = m_game_board.getState();
 			}
 			try { Thread.sleep(30); }
 			catch (InterruptedException e) {}
-			repaint();
+			//repaint();
 		}
 		String reason = "";
 		Definitions.Color winner = null; //indicating stalemate by default
@@ -151,43 +116,14 @@ public class StandardChessGame extends Game implements Runnable
 		System.out.println("The game has ended.");
 	}
 
-	public void paint(Graphics g)
-	{
-		//Painting with a backbuffer reduces flickering
-		Image backbuffer = createImage(g.getClipBounds().width, g.getClipBounds().height);
-		Graphics backg = backbuffer.getGraphics();
-
-		m_graphics.drawBackground(backg);
-		m_graphics.drawBoard(backg);
-		if (p1 instanceof HumanPlayer)
-		{
-			int sq = ((HumanPlayer)p1).getSelected();
-			m_graphics.drawMovable(backg, m_game_board.allMovesPiece(7 - (sq / 8), 7 - (sq % 8)));
-			m_graphics.drawSelected(backg, ((HumanPlayer)p1).getSelected());
-		}
-		if (p2 instanceof HumanPlayer)
-		{
-			int sq = ((HumanPlayer)p2).getSelected();
-			m_graphics.drawMovable(backg, m_game_board.allMovesPiece(7 - (sq / 8), 7 - (sq % 8)));
-			m_graphics.drawSelected(backg, ((HumanPlayer)p2).getSelected());
-		}
-		m_graphics.drawBorders(backg);
-		m_graphics.drawMarkers(backg);
-		m_graphics.drawNames(backg, p1, p2, m_game_board.whoseTurn());
-		m_graphics.drawPieces(backg, m_game_board);
-		m_graphics.drawGUI(backg);
-
-		g.drawImage(backbuffer, 0, 0, this);
-	}
-
 	public StandardChessBoard getBoard()
 	{
 		return m_game_board;
 	}
 
-	public StandardChessGameAnimation getAnimation()
+	public boolean canUndo()
 	{
-		return m_animation;
+		return m_canUndo;
 	}
 	
 	private void flipTurn() //prompts next player's move; board does actual flipping of turns
@@ -228,7 +164,7 @@ public class StandardChessGame extends Game implements Runnable
 		if(movesHistory.size() < 2)
 			return;
 
-		if (canUndo)
+		if (m_canUndo)
 		{
 			m_game_board.decrementTurncount();
 
@@ -239,30 +175,127 @@ public class StandardChessGame extends Game implements Runnable
 		}
 	}
 
-	//Prevents flickering when repainting
-	public void update(Graphics g)
+	//TODO: Might need clean up
+	public void processMove(Move newMove)
 	{
-		paint(g);
-	}
+		int row = newMove.r0;
+		int col = newMove.c0;
+		char movedPiece = getBoard().getPiece(row, col);
+		getBoard().getData().m_fiftymoverulecount++;
 
-	public void stop()
-	{
-		if (m_thread == null)
+		int castlingRow;
+		if (getBoard().whoseTurn() == Definitions.Color.WHITE)
 		{
-			super.stop();
+			castlingRow = 7;
 		}
-		else if (m_thread.isAlive()) 
+		else //Black
 		{
-			m_thread.interrupt();
+			castlingRow = 0;
+		}
+
+		Move correspondingRookMove = null; //if we have castling
+		getBoard().getData().m_enpassantCol = -1; //default
+		if (Character.toLowerCase(movedPiece) == 'p')
+		{
+			getBoard().getData().m_fiftymoverulecount = 0; //pawn was moved
+			if (Math.abs(newMove.rf - newMove.r0) == 2)
+			{
+				getBoard().getData().m_enpassantCol = newMove.c0; //enpassant now available on this column
+			}
+			else if ((Math.abs(newMove.cf - newMove.c0) == 1) && (getBoard().getPiece(newMove.rf, newMove.cf) == 0))
+				//en passant
+			{
+				if (getBoard().whoseTurn() == Definitions.Color.WHITE)
+				{
+					getBoard().removePiece(3, newMove.cf); //not sure if this is best way, but "move" call will not erase piece
+				}
+				else
+				{
+					getBoard().removePiece(4, newMove.cf);
+				}
+			}
+		}
+		else if (Character.toLowerCase(movedPiece) == 'k')
+		{			
+			if (getBoard().whoseTurn() == Definitions.Color.WHITE)
+			{
+				getBoard().getData().m_whiteCanCastleKingside = false;
+				getBoard().getData().m_whiteCanCastleQueenside = false;
+			}
+			else
+			{
+				getBoard().getData().m_blackCanCastleKingside = false;
+				getBoard().getData().m_blackCanCastleQueenside = false;
+			}
+
+			int kingMoveLength = newMove.cf - col; //should be 2 or -2, if the move was a castling move
+			if (row == castlingRow)
+			{
+				if (kingMoveLength == 2) //kingside
+				{
+					correspondingRookMove = new Move(castlingRow, 7, castlingRow, 5);
+				}
+				else if (kingMoveLength == -2) //queenside
+				{
+					correspondingRookMove = new Move(castlingRow, 0, castlingRow, 3);
+				}
+			}
+		}
+		else if (row == castlingRow)
+		{
+			if (col == 0) //queen's rook
+			{
+				if (getBoard().whoseTurn() == Definitions.Color.WHITE)
+				{
+					getBoard().getData().m_whiteCanCastleQueenside = false;
+				}
+				else
+				{
+					getBoard().getData().m_blackCanCastleQueenside = false;
+				}
+			}
+			else if (col == 7) //king's rook
+			{			
+				if (getBoard().whoseTurn() == Definitions.Color.WHITE)
+				{
+					getBoard().getData().m_whiteCanCastleKingside = false;
+				}
+				else
+				{
+					getBoard().getData().m_blackCanCastleKingside = false;
+				}
+			}
+		}
+
+		if (getBoard().getPiece(newMove.rf, newMove.cf) != 0) //capture was made
+		{
+			getBoard().getData().m_fiftymoverulecount = 0; //reset counter
+		}
+
+		m_applet.getAnimation().animateMove(m_applet.getGraphics(), newMove, getBoard());
+		getBoard().move(newMove); //has to be down here for time being because en passant needs to know dest sq is empty; fix if you can
+
+		if (correspondingRookMove != null)
+		{
+			m_applet.getAnimation().animateMove(m_applet.getGraphics(), correspondingRookMove, getBoard());
+			getBoard().setTurn(Definitions.flip(getBoard().whoseTurn())); //to undo double flipping of moving king and then rook
+			getBoard().move(correspondingRookMove);
+		}
+
+		if (Character.toLowerCase(movedPiece) == 'p')
+		{
+			if (((getBoard().whoseTurn() == Definitions.Color.BLACK) && (newMove.rf == 0)) 
+					|| ((getBoard().whoseTurn() == Definitions.Color.WHITE) && (newMove.rf == 7))) //flipped by earlier move
+			{
+				getBoard().promotePawn(newMove.rf, newMove.cf);
+			}
 		}
 	}
-
+	
 	//Useless for now
 	public void mouseReleased(MouseEvent e) {}
 	public void mouseClicked(MouseEvent e) {}
 	public void mouseEntered(MouseEvent e) {}
 	public void mouseExited(MouseEvent e) {}
 	public void mousePressed(MouseEvent e) {}
-
-	
 }

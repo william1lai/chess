@@ -2,7 +2,7 @@ package chess;
 
 
 public abstract class Player implements Runnable
-{
+{	
 	private String m_name;
 	private Game m_game;
 	private Definitions.Color m_color;

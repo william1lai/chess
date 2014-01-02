@@ -30,6 +30,9 @@ public class StandardChessGameAnimation implements Runnable
 	
 	public void animateMove(Graphics g, Move m, Board b)
 	{
+		if (m == null || b == null)
+			return;
+		
 		m_gContext = g;
 		m_moveContext = new MoveInfo(m, b);
 		m_animator = new Thread(this);

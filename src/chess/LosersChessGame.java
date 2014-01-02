@@ -7,10 +7,10 @@ import javax.swing.JOptionPane;
 import java.util.Stack;
 
 @SuppressWarnings("serial")
-public class StandardChessGame extends Game implements Runnable
+public class LosersChessGame extends Game implements Runnable
 {
 	private Thread m_thread;
-	private StandardChessBoard m_game_board;
+	private LosersChessBoard m_game_board;
 	private StandardChessGameGraphics m_graphics;
 	private StandardChessGameAnimation m_animation;
 	private StandardChessGameGUI m_gui;
@@ -20,8 +20,7 @@ public class StandardChessGame extends Game implements Runnable
 
 	public void init()
 	{
-		doneInitializing = false;
-		m_game_board = new StandardChessBoard(this);
+		m_game_board = new LosersChessBoard(this);
 		m_gui = new StandardChessGameGUI();
 		m_graphics = new StandardChessGameGraphics(m_gui);
 		m_animation = new StandardChessGameAnimation(m_graphics);
@@ -66,9 +65,9 @@ public class StandardChessGame extends Game implements Runnable
 		}
 		else
 		{
+			doneInitializing = false;
 			return;
 		}
-		
 
 		addMouseListener(m_gui);
 		addFocusListener(m_gui);
@@ -90,15 +89,14 @@ public class StandardChessGame extends Game implements Runnable
 			m_gui.addButton(b);
 		}
 		catch (Exception ex) {}
-		
 		doneInitializing = true;
 	}
-
+	
 	public boolean initialized()
 	{
 		return doneInitializing;
 	}
-	
+
 	public void setupStandard()
 	{
 		//by default, the board is set up in the standard fashion
@@ -140,7 +138,8 @@ public class StandardChessGame extends Game implements Runnable
 		}
 		else if (state == Definitions.State.STALEMATE)
 		{
-			reason = "Drawn by Stalemate!";
+			winner = m_game_board.whoseTurn();
+			reason = winner.toString() + " won by Stalemate!";
 		}
 		else if (m_game_board.getFiftymoverulecount() >= 100)
 		{
@@ -180,7 +179,7 @@ public class StandardChessGame extends Game implements Runnable
 		g.drawImage(backbuffer, 0, 0, this);
 	}
 
-	public StandardChessBoard getBoard()
+	public LosersChessBoard getBoard()
 	{
 		return m_game_board;
 	}

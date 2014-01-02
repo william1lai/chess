@@ -1,5 +1,17 @@
 ChangeLog
 
+Name: William Lai
+Date: 01-01-2014
+Description: Implemented Loser's Chess
+    * src/chess/ComputerPlayer.java: Added AI logic for Loser's Chess
+    * src/chess/Definitions.java: Made isAttacked function more flexible
+    * src/chess/HumanPlayer.java: Now handles Loser's Chess move selections
+    * src/chess/StandardChessBoard.java: Moved all of processMove into StandardChessBoard from StandardChessGame
+    * src/chess/StandardChessGame.java: Moved all of processMove into StandardChessBoard from StandardChessGame
+    * src/chess/LosersChessBoard.java: Board for Loser's Chess
+    * src/chess/LosersChessGame.java: Game for Loser's Chess
+    * src/chess/Main.java: New class for running as standalone app (since there are now multiple game choices)
+
 Name: Vincent Wong
 Date: 12-31-2013
 Description: Added simple background, made undo button prettier

@@ -38,7 +38,7 @@ public class HumanPlayer extends Player implements MouseListener
 
 	public void promptMove()
 	{
-		if (getGame() instanceof StandardChessGame)
+		if (getGame() instanceof StandardChessGame || getGame() instanceof LosersChessGame)
 		{
 			m_done = false;
 			m_move = null;
@@ -50,7 +50,7 @@ public class HumanPlayer extends Player implements MouseListener
 
 	public void mousePressed(MouseEvent e)
 	{
-		if (getGame() instanceof StandardChessGame)
+		if (getGame() instanceof StandardChessGame || getGame() instanceof LosersChessGame)
 		{
 			int row = StandardChessGameGraphics.getRow(e.getY());
 			int col = StandardChessGameGraphics.getCol(e.getX());
@@ -58,25 +58,52 @@ public class HumanPlayer extends Player implements MouseListener
 			if (e.getButton() == MouseEvent.BUTTON3)
 				deselect();
 			//Left-click to select
-			else if (e.getButton() == MouseEvent.BUTTON1 && row >= 0 && col >= 0) {
-				StandardChessGame g = ((StandardChessGame)getGame());
-				int sq = (7-row)*8 + (7-col);
-				StandardChessBoard scb = g.getBoard();
-				char p = scb.getPiece(row, col);
-				if (p != 0 && ((Character.isUpperCase(p)) ^ (scb.whoseTurn() == Definitions.Color.BLACK))) //colors match
+			else if (e.getButton() == MouseEvent.BUTTON1 && row >= 0 && col >= 0) 
+			{
+				if (getGame() instanceof StandardChessGame)
 				{
-					select(sq);
-				}
-				else if (m_selected != -1)
-				{
-					m_move = new Move(7 - (m_selected / 8), 7 - (m_selected % 8), row, col);
-					if (g.getBoard().isLegalMove(m_move)) {
-						m_selected = -1;
-						m_done = true;
-						g.removeMouseListener(this);
+					StandardChessGame g = ((StandardChessGame)getGame());
+					int sq = (7-row)*8 + (7-col);
+					StandardChessBoard scb = g.getBoard();
+					char p = scb.getPiece(row, col);
+					if (p != 0 && ((Character.isUpperCase(p)) ^ (scb.whoseTurn() == Definitions.Color.BLACK))) //colors match
+					{
+						select(sq);
 					}
-					else {
-						m_move = null;
+					else if (m_selected != -1)
+					{
+						m_move = new Move(7 - (m_selected / 8), 7 - (m_selected % 8), row, col);
+						if (g.getBoard().isLegalMove(m_move)) {
+							m_selected = -1;
+							m_done = true;
+							g.removeMouseListener(this);
+						}
+						else {
+							m_move = null;
+						}
+					}
+				}
+				else if (getGame() instanceof LosersChessGame)
+				{
+					LosersChessGame g = ((LosersChessGame)getGame());
+					int sq = (7-row)*8 + (7-col);
+					LosersChessBoard lcb = g.getBoard();
+					char p = lcb.getPiece(row, col);
+					if (p != 0 && ((Character.isUpperCase(p)) ^ (lcb.whoseTurn() == Definitions.Color.BLACK))) //colors match
+					{
+						select(sq);
+					}
+					else if (m_selected != -1)
+					{
+						m_move = new Move(7 - (m_selected / 8), 7 - (m_selected % 8), row, col);
+						if (g.getBoard().isLegalMove(m_move)) {
+							m_selected = -1;
+							m_done = true;
+							g.removeMouseListener(this);
+						}
+						else {
+							m_move = null;
+						}
 					}
 				}
 			}

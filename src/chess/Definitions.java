@@ -17,7 +17,7 @@ public class Definitions
 	public static final String PIECENAMES[] = {"BK","BQ","BN","BB","BR","BP","WK","WQ","WN","WB","WR","WP"};
 	public static final String RMARKERS[] = {"8","7","6","5","4","3","2","1"};
 	public static final String CMARKERS[] = {"a","b","c","d","e","f","g","h"};
-	public static final int MAXDEPTH = 3; //PLY = 2 * DEPTH
+	public static final int MAXDEPTH = 4; //PLY = 2 * DEPTH
 	public static final double MAXTHINKINGTIME = 5; //in seconds
 
 	public static final int repsB[] =
@@ -394,13 +394,13 @@ public class Definitions
 		return false;
 	}
 
-	public static boolean isAttacked(StandardChessBoard scb, int square, Color color)
+	public static boolean isAttacked(Board b, int square, Color color)
 	{
-		long colorpieces = scb.getWhite();
+		long colorpieces = b.getWhite();
 		if (color == Color.BLACK)
-			colorpieces = scb.getBlack();
-		return isAttacked(square, color, scb.getWhite() | scb.getBlack(), colorpieces & scb.getPawns(), colorpieces & scb.getKnights(),
-				colorpieces & scb.getBishops(), colorpieces & scb.getRooks(), colorpieces & scb.getQueens(), colorpieces & scb.getKings());
+			colorpieces = b.getBlack();
+		return isAttacked(square, color, b.getWhite() | b.getBlack(), colorpieces & b.getPawns(), colorpieces & b.getKnights(),
+				colorpieces & b.getBishops(), colorpieces & b.getRooks(), colorpieces & b.getQueens(), colorpieces & b.getKings());
 	}
 
 	public static Color flip(Color c)

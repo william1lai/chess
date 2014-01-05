@@ -1,27 +1,31 @@
 package chess;
 
-import java.awt.Color;
-import java.awt.Font;
-import java.awt.Graphics;
-import java.awt.GraphicsEnvironment;
+import java.awt.*;
+import java.util.*;
 import java.awt.image.BufferedImage;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-
 import javax.imageio.ImageIO;
 
-public class StandardChessGameGraphics
+@SuppressWarnings("serial")
+public class StandardChessGameGraphics extends GameGraphics
 {
+	private StandardChessGame m_game;
+	private StandardChessGameGUI m_gui;
 	private static int m_boardOffsetX, m_boardOffsetY, m_blockSize;
 	private Map<String, BufferedImage> m_gPieces;
 	private BufferedImage m_gMovable, m_gSelected;
 	private BufferedImage[] m_gBlocks = new BufferedImage[2];
-	private StandardChessGameGUI m_gui;
+	private Thread m_moveAnimator;
+	private MoveAnimation m_moveAnimation;
 	
-	public StandardChessGameGraphics(StandardChessGameGUI gui)
+	public StandardChessGameGraphics(GameApplet applet)
 	{
-		m_gui = gui;
+		m_applet = applet;
+	}
+	
+	public void init(Game game)
+	{
+		m_game = (StandardChessGame)game;
+		m_gui = new StandardChessGameGUI();
 		m_boardOffsetY = Definitions.HEIGHT/8;
 		m_boardOffsetX = Definitions.HEIGHT/8;
 		m_blockSize = Definitions.HEIGHT*3/4 / Definitions.NUMROWS;
@@ -50,6 +54,49 @@ public class StandardChessGameGraphics
 		catch (Exception ex) {
 			System.out.println("Error loading fonts!");
 		}
+	}
+	
+	public GameGUI getGUI()
+	{
+		return m_gui;
+	}
+	
+    public Dimension getPreferredSize()
+    {
+        return new Dimension(640, 480);
+    }
+	
+	public void paintComponent(Graphics g)
+	{
+		super.paintComponent(g);
+		Image backbuffer = new BufferedImage(g.getClipBounds().width, g.getClipBounds().height, BufferedImage.TYPE_INT_ARGB);
+		Graphics backg = backbuffer.getGraphics();
+		
+		drawBackground(backg);
+		drawBoard(backg);
+		if (m_game.p1 instanceof HumanPlayer)
+		{
+			int sq = ((HumanPlayer)m_game.p1).getSelected();
+			drawMovable(backg, m_game.getBoard().allMovesPiece(7 - (sq / 8), 7 - (sq % 8)));
+			drawSelected(backg, ((HumanPlayer)m_game.p1).getSelected());
+		}
+		if (m_game.p2 instanceof HumanPlayer)
+		{
+			int sq = ((HumanPlayer)m_game.p2).getSelected();
+			drawMovable(backg, m_game.getBoard().allMovesPiece(7 - (sq / 8), 7 - (sq % 8)));
+			drawSelected(backg, ((HumanPlayer)m_game.p2).getSelected());
+		}
+		drawBorders(backg);
+		drawMarkers(backg);
+		drawNames(backg, m_game.p1, m_game.p2, m_game.getBoard().whoseTurn());
+		drawPieces(backg, m_game.getBoard());
+		drawGUI(backg);	
+		
+		if (isAnimating()) {
+			backg.drawImage(m_moveAnimation.getFrame(), 0, 0, this);
+		}
+		
+		g.drawImage(backbuffer, 0, 0, this);
 	}
 	
 	public void drawBackground(Graphics g)
@@ -102,6 +149,13 @@ public class StandardChessGameGraphics
 		else
 			pstr = "B" + Character.toUpperCase(p);
 		g.drawImage(m_gPieces.get(pstr), x, y, m_blockSize, m_blockSize, null);
+	}
+	
+	public void drawPieceInBoard(Graphics g, char p, int r, int c)
+	{
+		int y = StandardChessGameGraphics.getY(r);
+		int x = StandardChessGameGraphics.getX(c);
+		drawPiece(g, p, x, y);
 	}
 	
 	public void drawMarkers(Graphics g)
@@ -202,5 +256,68 @@ public class StandardChessGameGraphics
 	{
 		if (col < 0 || col >= Definitions.NUMCOLS) return -1;
 		return m_boardOffsetX + col*m_blockSize;
+	}
+	
+	private class MoveAnimation implements Runnable
+	{
+		public char traveler, incumbent;
+		public double curX, curY;
+		public double dX, dY;
+		public Move move;
+		private BufferedImage m_frame;
+		public final int NUMTICKS = 10;
+		
+		public MoveAnimation(Move m, Board b)
+		{
+			m_frame = new BufferedImage(Definitions.WIDTH, Definitions.HEIGHT, BufferedImage.TYPE_INT_ARGB);
+			move = m;
+			traveler = b.getPiece(m.r0, m.c0);
+			incumbent = b.getPiece(m.rf, m.cf);
+			curY = StandardChessGameGraphics.getY(m.r0);
+			curX = StandardChessGameGraphics.getX(m.c0);
+			dY = ((double)StandardChessGameGraphics.getY(m.rf) - curY) / NUMTICKS;
+			dX = ((double)StandardChessGameGraphics.getX(m.cf) - curX) / NUMTICKS;
+		}
+		
+		public BufferedImage getFrame()
+		{
+			synchronized(this) {
+				return m_frame;
+			}
+		}
+
+		public void run()
+		{
+			for (int t = 0; t < NUMTICKS; t++) {
+				synchronized (this) {
+					curX += dX;
+					curY += dY;
+					Graphics2D g = (Graphics2D)m_frame.getGraphics();
+					g.setBackground(new Color(255, 255, 255, 0));
+					g.clearRect(0, 0, Definitions.WIDTH, Definitions.HEIGHT);
+					drawBlock(g, move.r0, move.c0);
+					drawBlock(g, move.rf, move.cf);
+					if (incumbent != 0) drawPieceInBoard(g, incumbent, move.rf, move.cf);
+					drawBorders(g);
+					drawPiece(g, traveler, (int)curX, (int)curY);
+				}
+		 		try { Thread.sleep(Definitions.TICK); }
+		 		catch (InterruptedException ex) {}
+			}
+		}
+	};
+
+	public void animateMove(Move m, Board b)
+	{
+		if (m == null || b == null)
+			return;
+		m_moveAnimation = new MoveAnimation(m, b);
+		m_moveAnimator = new Thread(m_moveAnimation);
+		m_moveAnimator.start();
+	}
+
+	public boolean isAnimating()
+	{
+		return m_moveAnimator != null && m_moveAnimator.isAlive();
 	}
 }

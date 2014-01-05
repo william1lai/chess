@@ -1,12 +1,10 @@
 package chess;
 
 import java.awt.event.FocusEvent;
-import java.awt.event.FocusListener;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.util.ArrayList;
 
-public class StandardChessGameGUI implements MouseListener, FocusListener
+public class StandardChessGameGUI extends GameGUI
 {
 	ArrayList<EasyButton> m_buttons;
 	
@@ -57,10 +55,7 @@ public class StandardChessGameGUI implements MouseListener, FocusListener
 	public void mouseEntered(MouseEvent e) {}
 	public void mouseExited(MouseEvent e) {}
 
-	public void focusGained(FocusEvent e)
-	{
-		
-	}
+	public void focusGained(FocusEvent e) {}
 
 	public void focusLost(FocusEvent e)
 	{

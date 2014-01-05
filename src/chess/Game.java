@@ -9,4 +9,6 @@ public abstract class Game
 	protected Player p1;
 	protected Player p2;	
 	protected Stack<String> movesHistory;
+	
+	abstract public void init(GameGraphics graphics);
 }

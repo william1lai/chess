@@ -10,10 +10,9 @@ public class LosersChessGame extends Game
 	public LosersChessGame(GameApplet applet)
 	{
 		m_applet = applet;
-		init();
 	}
 
-	public void init()
+	public void init(GameGraphics graphics)
 	{
 		m_game_board = new LosersChessBoard(this);
 		m_canUndo = false;
@@ -212,7 +211,6 @@ public class LosersChessGame extends Game
 			getBoard().getData().m_fiftymoverulecount = 0; //reset counter
 		}
 
-		m_applet.getAnimation().animateMove(m_applet.getGraphics(), newMove, getBoard());
 		getBoard().move(newMove); //has to be down here for time being because en passant needs to know dest sq is empty; fix if you can
 
 		if (Character.toLowerCase(movedPiece) == 'p')

@@ -6,17 +6,18 @@ import java.util.Stack;
 
 public class StandardChessGame extends Game
 {
+	private StandardChessGameGraphics m_graphics;
 	private StandardChessBoard m_game_board;
 	private boolean m_canUndo;
 	
 	public StandardChessGame(GameApplet applet)
 	{
 		m_applet = applet;
-		init();
 	}
 
-	public void init()
+	public void init(GameGraphics graphics)
 	{
+		m_graphics = (StandardChessGameGraphics)graphics;
 		m_game_board = new StandardChessBoard(this);
 		m_canUndo = false;
 		movesHistory = new Stack<String>();
@@ -80,7 +81,7 @@ public class StandardChessGame extends Game
 				m_game_board.incrementTurncount();
 			if (cur instanceof HumanPlayer)
 				m_canUndo = true;
-			if (cur.isDone())
+			if (!m_graphics.isAnimating() && cur.isDone())
 			{
 				m_canUndo = false;
 				movesHistory.push(m_game_board.toFEN(true));
@@ -94,7 +95,7 @@ public class StandardChessGame extends Game
 			}
 			try { Thread.sleep(30); }
 			catch (InterruptedException e) {}
-			//repaint();
+			m_applet.repaint();
 		}
 		String reason = "";
 		Definitions.Color winner = null; //indicating stalemate by default
@@ -272,12 +273,12 @@ public class StandardChessGame extends Game
 			getBoard().getData().m_fiftymoverulecount = 0; //reset counter
 		}
 
-		m_applet.getAnimation().animateMove(m_applet.getGraphics(), newMove, getBoard());
+		m_graphics.animateMove(newMove, getBoard());
 		getBoard().move(newMove); //has to be down here for time being because en passant needs to know dest sq is empty; fix if you can
 
 		if (correspondingRookMove != null)
 		{
-			m_applet.getAnimation().animateMove(m_applet.getGraphics(), correspondingRookMove, getBoard());
+			m_graphics.animateMove(correspondingRookMove, getBoard());
 			getBoard().setTurn(Definitions.flip(getBoard().whoseTurn())); //to undo double flipping of moving king and then rook
 			getBoard().move(correspondingRookMove);
 		}

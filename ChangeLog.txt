@@ -1,5 +1,11 @@
 ChangeLog
 
+Name: Vincent Wong
+Date: 01-05-2014
+Description: Separated graphics tasks from GameApplet, revamped how animation is done
+    * src/chess/GameApplet.java: Adds GameGraphics as a JPanel which handles _all_ painting
+    * src/chess/StandardChessGameGraphics.java: Handles move animation internally in a non-blocking manner
+
 Name: William Lai
 Date: 01-01-2014
 Description: Implemented Loser's Chess

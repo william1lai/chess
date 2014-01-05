@@ -1,20 +1,18 @@
 package chess;
 
-import java.applet.Applet;
 import java.awt.Graphics;
-import java.awt.Image;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+
+import javax.swing.JApplet;
 import javax.swing.JOptionPane;
 
 @SuppressWarnings("serial")
-public class GameApplet extends Applet implements Runnable, MouseListener
+public class GameApplet extends JApplet implements Runnable, MouseListener
 {
 	private Thread m_thread;
 	private Game m_game;
-	private StandardChessGameGraphics m_graphics;
-	private StandardChessGameAnimation m_animation;
-	private StandardChessGameGUI m_gui;
+	private GameGraphics m_graphics;
 	private boolean m_cancel;
 
 	public void init()
@@ -25,13 +23,13 @@ public class GameApplet extends Applet implements Runnable, MouseListener
 		{
 			return;
 		}
+		m_game.init(m_graphics);
+		m_graphics.init(m_game);
 		
-		m_gui = new StandardChessGameGUI();
-		m_graphics = new StandardChessGameGraphics(m_gui);
-		m_animation = new StandardChessGameAnimation(m_graphics);
-
-		addMouseListener(m_gui);
-		addFocusListener(m_gui);
+		add(m_graphics);
+		addMouseListener(m_graphics.getGUI());
+		addFocusListener(m_graphics.getGUI());
+		
 		m_thread = new Thread(this);
 		m_thread.start();
 
@@ -42,7 +40,7 @@ public class GameApplet extends Applet implements Runnable, MouseListener
 					undo();
 				}
 			});
-			m_gui.addButton(b);
+			((StandardChessGameGUI)m_graphics.getGUI()).addButton(b);
 		}
 		catch (Exception ex) {}
 
@@ -75,6 +73,7 @@ public class GameApplet extends Applet implements Runnable, MouseListener
 		if (input == "Standard Chess")
 		{
 			m_game = new StandardChessGame(this);
+			m_graphics = new StandardChessGameGraphics(this);
 			m_cancel = false;
 		}
 		else if (input == "Loser's Chess")
@@ -87,6 +86,11 @@ public class GameApplet extends Applet implements Runnable, MouseListener
 	public Game getGame()
 	{
 		return m_game;
+	}
+	
+	public GameGraphics getGameGraphics()
+	{
+		return m_graphics;
 	}
 
 	public boolean cancelled()
@@ -106,75 +110,11 @@ public class GameApplet extends Applet implements Runnable, MouseListener
 		}
 	}
 
-	public void paint(Graphics g)
+	public void paintComponent(Graphics g)
 	{
+		super.paintComponents(g);
 		if (m_cancel)
 			return;
-		
-		//Painting with a backbuffer reduces flickering
-		Image backbuffer = createImage(g.getClipBounds().width, g.getClipBounds().height);
-		Graphics backg = backbuffer.getGraphics();
-
-		m_graphics.drawBackground(backg);
-		m_graphics.drawBoard(backg);
-		if (getGame().p1 instanceof HumanPlayer)
-		{
-			int sq = ((HumanPlayer)getGame().p1).getSelected();
-
-			if (getGame() instanceof StandardChessGame)
-			{
-				StandardChessGame scg = (StandardChessGame)getGame();
-				m_graphics.drawMovable(backg, scg.getBoard().allMovesPiece(7 - (sq / 8), 7 - (sq % 8)));
-			}
-			else if (getGame() instanceof LosersChessGame)
-			{
-				LosersChessGame lcg = (LosersChessGame)getGame();
-				m_graphics.drawMovable(backg, lcg.getBoard().allMovesPiece(7 - (sq / 8), 7 - (sq % 8)));
-			}
-
-			m_graphics.drawSelected(backg, ((HumanPlayer)getGame().p1).getSelected());
-		}
-		if (getGame().p2 instanceof HumanPlayer)
-		{
-			int sq = ((HumanPlayer)getGame().p2).getSelected();
-
-			if (getGame() instanceof StandardChessGame)
-			{
-				StandardChessGame scg = (StandardChessGame)getGame();
-				m_graphics.drawMovable(backg, scg.getBoard().allMovesPiece(7 - (sq / 8), 7 - (sq % 8)));
-			}
-			else if (getGame() instanceof LosersChessGame)
-			{
-				LosersChessGame lcg = (LosersChessGame)getGame();
-				m_graphics.drawMovable(backg, lcg.getBoard().allMovesPiece(7 - (sq / 8), 7 - (sq % 8)));
-			}
-
-			m_graphics.drawSelected(backg, ((HumanPlayer)getGame().p2).getSelected());
-		}
-		m_graphics.drawBorders(backg);
-		m_graphics.drawMarkers(backg);
-
-		if (getGame() instanceof StandardChessGame)
-		{
-			StandardChessGame scg = (StandardChessGame)getGame();
-			m_graphics.drawNames(backg, getGame().p1, getGame().p2, scg.getBoard().whoseTurn());
-			m_graphics.drawPieces(backg, scg.getBoard());			
-		}
-		else if (getGame() instanceof LosersChessGame)
-		{
-			LosersChessGame lcg = (LosersChessGame)getGame();
-			m_graphics.drawNames(backg, getGame().p1, getGame().p2, lcg.getBoard().whoseTurn());
-			m_graphics.drawPieces(backg, lcg.getBoard());
-		}
-
-		m_graphics.drawGUI(backg);
-
-		g.drawImage(backbuffer, 0, 0, this);
-	}
-
-	public StandardChessGameAnimation getAnimation()
-	{
-		return m_animation;
 	}
 
 	public void undo()

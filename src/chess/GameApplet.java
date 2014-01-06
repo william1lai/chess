@@ -40,7 +40,14 @@ public class GameApplet extends JApplet implements Runnable, MouseListener
 					undo();
 				}
 			});
-			((StandardChessGameGUI)m_graphics.getGUI()).addButton(b);
+			if (m_game instanceof StandardChessGame)
+			{
+				((StandardChessGameGUI)m_graphics.getGUI()).addButton(b);
+			}
+			else if (m_game instanceof LosersChessGame)
+			{
+				((LosersChessGameGUI)m_graphics.getGUI()).addButton(b);	
+			}
 		}
 		catch (Exception ex) {}
 
@@ -79,6 +86,7 @@ public class GameApplet extends JApplet implements Runnable, MouseListener
 		else if (input == "Loser's Chess")
 		{
 			m_game = new LosersChessGame(this);
+			m_graphics = new LosersChessGameGraphics(this);
 			m_cancel = false;
 		}
 	}

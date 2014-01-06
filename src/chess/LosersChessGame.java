@@ -1,9 +1,12 @@
 package chess;
 
+import java.util.Stack;
+
 import javax.swing.JOptionPane;
 
 public class LosersChessGame extends Game
 {
+	private LosersChessGameGraphics m_graphics;
 	private LosersChessBoard m_game_board;
 	private boolean m_canUndo;
 	
@@ -14,8 +17,10 @@ public class LosersChessGame extends Game
 
 	public void init(GameGraphics graphics)
 	{
+		m_graphics = (LosersChessGameGraphics)graphics;
 		m_game_board = new LosersChessBoard(this);
 		m_canUndo = false;
+		movesHistory = new Stack<String>();
 		
 		Definitions.makeInitB();
 		Definitions.makeMaskB();
@@ -179,6 +184,8 @@ public class LosersChessGame extends Game
 	//TODO: Might need clean up
 	public void processMove(Move newMove)
 	{
+		m_graphics.animateMove(newMove, getBoard());
+		
 		int row = newMove.r0;
 		int col = newMove.c0;
 		char movedPiece = getBoard().getPiece(row, col);

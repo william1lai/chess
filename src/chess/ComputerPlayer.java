@@ -186,7 +186,7 @@ public class ComputerPlayer extends Player
 		else if (getGame() instanceof LosersChessGame)
 		{
 			//White
-			m_book.put("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w - -", new Move(6, 2, 4, 3)); //1.c3
+			m_book.put("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w - -", new Move(6, 2, 5, 2)); //1.c3
 			
 			//Black
 			m_book.put("rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b - e3", new Move(1, 1, 3, 1)); //1.e4 b5

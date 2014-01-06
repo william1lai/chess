@@ -46,8 +46,18 @@ public class HumanPlayer extends Player implements MouseListener
 	{
 		if (getGame() instanceof StandardChessGame || getGame() instanceof LosersChessGame)
 		{
-			int row = StandardChessGameGraphics.getRow(e.getY());
-			int col = StandardChessGameGraphics.getCol(e.getX());
+			int row = -1;
+			int col = -1;			
+			if (getGame() instanceof StandardChessGame)
+			{
+				row = StandardChessGameGraphics.getRow(e.getY());
+				col = StandardChessGameGraphics.getCol(e.getX());
+			}
+			else if (getGame() instanceof LosersChessGame)
+			{
+				row = LosersChessGameGraphics.getRow(e.getY());
+				col = LosersChessGameGraphics.getCol(e.getX());
+			}
 			//Right-click to deselect
 			if (e.getButton() == MouseEvent.BUTTON3)
 				deselect();

@@ -86,7 +86,7 @@ public class LosersChessGame extends Game
 				m_game_board.incrementTurncount();
 			if (cur instanceof HumanPlayer)
 				m_canUndo = true;
-			if (cur.isDone())
+			if (!m_graphics.isAnimating() && cur.isDone())
 			{
 				m_canUndo = false;
 				movesHistory.push(m_game_board.toFEN(true));
@@ -100,13 +100,14 @@ public class LosersChessGame extends Game
 			}
 			try { Thread.sleep(30); }
 			catch (InterruptedException e) {}
+			m_applet.repaint();
 		}
 		String reason = "";
 		Definitions.Color winner = null; //indicating stalemate by default
 		if (state == Definitions.State.CHECKMATE)
 		{
-			winner = Definitions.flip(m_game_board.whoseTurn());
-			reason = winner.toString() + " won by Checkmate!";
+			winner = m_game_board.whoseTurn();
+			reason = winner.toString() + " won by lack of pieces!";
 		}
 		else if (state == Definitions.State.STALEMATE)
 		{
@@ -219,14 +220,14 @@ public class LosersChessGame extends Game
 		}
 
 		getBoard().move(newMove); //has to be down here for time being because en passant needs to know dest sq is empty; fix if you can
-
 		if (Character.toLowerCase(movedPiece) == 'p')
 		{
 			if (((getBoard().whoseTurn() == Definitions.Color.BLACK) && (newMove.rf == 0)) 
-					|| ((getBoard().whoseTurn() == Definitions.Color.WHITE) && (newMove.rf == 7))) //flipped by earlier move
+					|| ((getBoard().whoseTurn() == Definitions.Color.WHITE) && (newMove.rf == 7)))
 			{
 				getBoard().promotePawn(newMove.rf, newMove.cf);
 			}
 		}
+		
 	}
 }

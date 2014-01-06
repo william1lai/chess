@@ -313,6 +313,7 @@ public class LosersChessGameGraphics extends GameGraphics
 			return;
 		m_moveAnimation = new MoveAnimation(m, b);
 		m_moveAnimator = new Thread(m_moveAnimation);
+		m_moveAnimator.setPriority(Thread.MAX_PRIORITY);
 		m_moveAnimator.start();
 	}
 

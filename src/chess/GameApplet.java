@@ -50,26 +50,6 @@ public class GameApplet extends JApplet implements Runnable, MouseListener
 			}
 		}
 		catch (Exception ex) {}
-
-		m_thread = new Thread(this);
-		m_thread.start();
-
-		if (getGame() instanceof StandardChessGame)
-		{
-			StandardChessGame scg = (StandardChessGame)getGame();
-			if (scg.getBoard().whoseTurn() == Definitions.Color.WHITE)
-				scg.p1.promptMove();
-			else
-				scg.p2.promptMove();
-		}
-		else if (getGame() instanceof LosersChessGame)
-		{
-			LosersChessGame lcg = (LosersChessGame)getGame();
-			if (lcg.getBoard().whoseTurn() == Definitions.Color.WHITE)
-				lcg.p1.promptMove();
-			else
-				lcg.p2.promptMove();
-		}
 	}
 
 	public void chooseGame()

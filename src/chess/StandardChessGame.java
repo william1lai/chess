@@ -32,6 +32,7 @@ public class StandardChessGame extends Game
 		//String testFEN = "6k1/8/5r2/6K1/8/8/8/5q2 w - - 0 37"; //losing badly, tests player 2 checkmate power
 		//String testFEN = "k7/7Q/K7/8/8/8/8/8 w - - 0 37"; //winning badly, can use to test checkmate/stalemate
 		//String testFEN = "r1b1k2B/1p5p/2p3p1/p4p2/2BK4/8/PPP1Q1PP/R6R b - - 0 37";
+		//String testFEN = "8/8/8/1Q6/8/8/8/k6K w - - 0 37"; //test queen movement on b file
 		//m_game_board.FENtoPosition(testFEN);
 
 		setupStandard();
@@ -62,6 +63,15 @@ public class StandardChessGame extends Game
 		else
 		{
 			return;
+		}
+		
+		if (m_game_board.whoseTurn() == Definitions.Color.WHITE)
+		{
+			p1.promptMove();
+		}
+		else
+		{
+			p2.promptMove();
 		}
 	}
 

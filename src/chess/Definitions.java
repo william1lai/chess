@@ -51,7 +51,7 @@ public class Definitions
 	public static final long[] initR = new long[64];
 	public static final long[] maskR = new long[64];
 	public static final int[][] rankR = new int[8][128];
-
+	
 	public static void makeInitB()
 	{
 		for ( int sq = 0; sq < 64; ++sq )
@@ -195,7 +195,7 @@ public class Definitions
 						break;
 				case 6:
 					bb >>>= 8; bb *= 0x00010281L;
-					//bb &= ~1L << (sq - 6);      // Clears for b-squares a nasty overflow from south-west-first-step to h file
+					bb &= ~(1L << (sq - 6));      // Clears for b-squares a nasty overflow from south-west-first-step to h file
 					bb &= msk; at |= bb; bb &= free;
 					bb &= ~cl;
 					break;
@@ -205,7 +205,7 @@ public class Definitions
 						ov = 1L << (sq + 3);
 						bb |= (bb & ov) >>> 1;
 						bb &= ~ov;
-						//bb &= ~1L << (sq - 6);      // Clears for b-squares a nasty overflow from south-west-first-step to h file
+						bb &= ~(1L << (sq - 6));      // Clears for b-squares a nasty overflow from south-west-first-step to h file
 						bb &= msk; at |= bb; bb &= free;
 						bb &= ~cl;
 						todo = 4;

@@ -252,14 +252,14 @@ public class LosersChessBoard extends Board
 		{
 			if (whoseTurn() == Definitions.Color.WHITE)
 			{
-				if (getWhite() == 0)
+				if (getWhite() != 0)
 					return Definitions.State.STALEMATE; //remember that in Loser's chess, stalemate is a win
 				else
 					return Definitions.State.CHECKMATE;
 			}
 			else
 			{
-				if (getBlack() == 0)
+				if (getBlack() != 0)
 					return Definitions.State.STALEMATE;
 				else
 					return Definitions.State.CHECKMATE;
@@ -286,7 +286,7 @@ public class LosersChessBoard extends Board
 			setBishops(getBishops() & ~(1L << dest));
 			setRooks(getRooks() & ~(1L << dest));
 			setQueens(getQueens() & ~(1L << dest));
-			//no king because it shouldn't be able to be captured
+			setKings(getKings() & ~(1L << dest));
 		}
 		else if ((getKnights() & (1L << orig)) != 0)
 		{
@@ -296,7 +296,7 @@ public class LosersChessBoard extends Board
 			setBishops(getBishops() & ~(1L << dest));
 			setRooks(getRooks() & ~(1L << dest));
 			setQueens(getQueens() & ~(1L << dest));
-			//no king because it shouldn't be able to be captured
+			setKings(getKings() & ~(1L << dest));
 		}
 		else if ((getBishops() & (1L << orig)) != 0)
 		{
@@ -306,7 +306,7 @@ public class LosersChessBoard extends Board
 			setKnights(getKnights() & ~(1L << dest));
 			setRooks(getRooks() & ~(1L << dest));
 			setQueens(getQueens() & ~(1L << dest));
-			//no king because it shouldn't be able to be captured
+			setKings(getKings() & ~(1L << dest));
 		}
 		else if ((getRooks() & (1L << orig)) != 0)
 		{
@@ -316,7 +316,7 @@ public class LosersChessBoard extends Board
 			setKnights(getKnights() & ~(1L << dest));
 			setBishops(getBishops() & ~(1L << dest));
 			setQueens(getQueens() & ~(1L << dest));
-			//no king because it shouldn't be able to be captured
+			setKings(getKings() & ~(1L << dest));
 		}
 		else if ((getQueens() & (1L << orig)) != 0)
 		{
@@ -326,7 +326,7 @@ public class LosersChessBoard extends Board
 			setKnights(getKnights() & ~(1L << dest));
 			setBishops(getBishops() & ~(1L << dest));
 			setRooks(getRooks() & ~(1L << dest));
-			//no king because it shouldn't be able to be captured
+			setKings(getKings() & ~(1L << dest));
 		}
 		else if ((getKings() & (1L << orig)) != 0)
 		{
@@ -579,7 +579,7 @@ public class LosersChessBoard extends Board
 
 	public void promotePawn(int r, int c)
 	{
-		Player cur = (whoseTurn() == Definitions.Color.WHITE ? m_data.m_game.p1 : m_data.m_game.p2);
+		Player cur = (Definitions.flip(whoseTurn()) == Definitions.Color.WHITE ? m_data.m_game.p1 : m_data.m_game.p2);
 
 		if (cur instanceof HumanPlayer)
 		{

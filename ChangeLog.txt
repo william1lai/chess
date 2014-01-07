@@ -1,3 +1,13 @@
+Name: William Lai
+Date: 01-07-2014
+Description: Merged restruct back into master, following changes listed are for the previous three commits together
+    * src/chess/ComputerPlayer.java: Now a superclass of StandardComputerPlayer and LosersComputerPlayer.
+    * src/chess/Definitions.java: Fixed a subtle bug in finding orthogonal attacks that was causing orthogonal moves to be calculated incorrectly on 6 squares on the b-file
+    * src/chess/GameApplet.java: Removed duplicate call of instantiating thread, which was causing everything to be happening doubly
+    * src/chess/HumanPlayer.java: Now a superclass of StandardHumanPlayer and LosersComputerPlayer.
+    * src/chess/LosersChessBoard.java: Fixed bug that was causing the capture of kings to be handled improperly
+    * src/chess/LosersChessGame.java: Now correctly ends game with proper message.
+
 Name: Vincent Wong
 Date: 01-05-2014
 Description: Separated graphics tasks from GameApplet, revamped how animation is done

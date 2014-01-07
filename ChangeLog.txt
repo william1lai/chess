@@ -1,5 +1,3 @@
-ChangeLog
-
 Name: Vincent Wong
 Date: 01-05-2014
 Description: Separated graphics tasks from GameApplet, revamped how animation is done

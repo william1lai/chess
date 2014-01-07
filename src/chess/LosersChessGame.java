@@ -41,23 +41,23 @@ public class LosersChessGame extends Game
 
 		if (input == "White vs AI")
 		{
-			p1 = new HumanPlayer("Human WHITE", Definitions.Color.WHITE, this);
-			p2 = new ComputerPlayer("CPU BLACK", Definitions.Color.BLACK, this);
+			p1 = new LosersHumanPlayer("Human WHITE", Definitions.Color.WHITE, this);
+			p2 = new LosersComputerPlayer("CPU BLACK", Definitions.Color.BLACK, this);
 		}
 		else if (input == "Black vs AI")
 		{
-			p2 = new HumanPlayer("Human BLACK", Definitions.Color.BLACK, this);
-			p1 = new ComputerPlayer("CPU WHITE", Definitions.Color.WHITE, this);
+			p2 = new LosersHumanPlayer("Human BLACK", Definitions.Color.BLACK, this);
+			p1 = new LosersComputerPlayer("CPU WHITE", Definitions.Color.WHITE, this);
 		}
 		else if (input == "Hotseat Game")
 		{
-			p1 = new HumanPlayer("Human WHITE", Definitions.Color.WHITE, this);
-			p2 = new HumanPlayer("Human BLACK", Definitions.Color.BLACK, this);
+			p1 = new LosersHumanPlayer("Human WHITE", Definitions.Color.WHITE, this);
+			p2 = new LosersHumanPlayer("Human BLACK", Definitions.Color.BLACK, this);
 		}
 		else if (input == "AI vs AI")
 		{
-			p1 = new ComputerPlayer("CPU WHITE", Definitions.Color.WHITE, this);
-			p2 = new ComputerPlayer("CPU BLACK", Definitions.Color.BLACK, this);
+			p1 = new LosersComputerPlayer("CPU WHITE", Definitions.Color.WHITE, this);
+			p2 = new LosersComputerPlayer("CPU BLACK", Definitions.Color.BLACK, this);
 		}
 		else
 		{

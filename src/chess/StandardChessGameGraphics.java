@@ -74,17 +74,17 @@ public class StandardChessGameGraphics extends GameGraphics
 		
 		drawBackground(backg);
 		drawBoard(backg);
-		if (m_game.p1 instanceof HumanPlayer)
+		if (m_game.p1 instanceof StandardHumanPlayer)
 		{
-			int sq = ((HumanPlayer)m_game.p1).getSelected();
+			int sq = ((StandardHumanPlayer)m_game.p1).getSelected();
 			drawMovable(backg, m_game.getBoard().allMovesPiece(7 - (sq / 8), 7 - (sq % 8)));
-			drawSelected(backg, ((HumanPlayer)m_game.p1).getSelected());
+			drawSelected(backg, ((StandardHumanPlayer)m_game.p1).getSelected());
 		}
-		if (m_game.p2 instanceof HumanPlayer)
+		if (m_game.p2 instanceof StandardHumanPlayer)
 		{
-			int sq = ((HumanPlayer)m_game.p2).getSelected();
+			int sq = ((StandardHumanPlayer)m_game.p2).getSelected();
 			drawMovable(backg, m_game.getBoard().allMovesPiece(7 - (sq / 8), 7 - (sq % 8)));
-			drawSelected(backg, ((HumanPlayer)m_game.p2).getSelected());
+			drawSelected(backg, ((StandardHumanPlayer)m_game.p2).getSelected());
 		}
 		drawBorders(backg);
 		drawMarkers(backg);

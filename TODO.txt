@@ -1,10 +1,13 @@
 UI
-- Menu when starting up applet
+- Improve applet start-up menu
 
 Standard Chess
 - 50 move rule and threefold repetition (hash table of FEN's)
 - Different level AI's
 - Algebraic to Move function
+
+Loser's Chess
+- Threefold repetition (maybe 50 move rule too)
 
 Program Structure
 - Implement Alice Chess with BoardPair class?

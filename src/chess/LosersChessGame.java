@@ -98,9 +98,16 @@ public class LosersChessGame extends Game
 				flipTurn();
 				state = m_game_board.getState();
 			}
+			m_graphics.updateGameState();
+			m_applet.repaint();
 			try { Thread.sleep(30); }
 			catch (InterruptedException e) {}
+		}
+		while (m_graphics.isAnimating()) {
+			m_graphics.updateGameState();
 			m_applet.repaint();
+			try { Thread.sleep(30); }
+			catch (InterruptedException e) {}
 		}
 		String reason = "";
 		Definitions.Color winner = null; //indicating stalemate by default

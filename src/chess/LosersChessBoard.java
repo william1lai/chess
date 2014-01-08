@@ -245,6 +245,21 @@ public class LosersChessBoard extends Board
 	{
 		m_turn = color;
 	}
+	
+	public int toSq(int row, int col)
+	{
+		return (7-row)*8 + (7-col);
+	}
+	
+	public int toRow(int sq)
+	{
+		return 7 - (sq / 8);
+	}
+	
+	public int toCol(int sq)
+	{
+		return 7 - (sq % 8);
+	}
 
 	public Definitions.State getState()
 	{

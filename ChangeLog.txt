@@ -1,3 +1,10 @@
+Name: Vincent Wong
+Date: 01-08-2014
+Description: Fixed animation when castling, moving into a green square, and game ending
+    * src/chess/*ChessBoard.java: Added utility functions for conversion between (row, col) and square #
+    * src/chess/*ChessGameGraphics.java: Added graphical state tracking of the board, updated once per game loop iteration. For Standard, added a castling animation
+    * src/chess/*ChessGame.java: Added small loop after game ends to allow animation to finish
+
 Name: William Lai
 Date: 01-07-2014
 Description: Merged restruct back into master, following changes listed are for the previous three commits together

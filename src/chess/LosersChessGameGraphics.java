@@ -14,6 +14,7 @@ public class LosersChessGameGraphics extends GameGraphics
 	private Map<String, BufferedImage> m_gPieces;
 	private BufferedImage m_gMovable, m_gSelected;
 	private BufferedImage[] m_gBlocks = new BufferedImage[2];
+	private long m_movableBlocks, m_selectedBlocks;
 	private Thread m_moveAnimator;
 	private MoveAnimation m_moveAnimation;
 	
@@ -65,6 +66,38 @@ public class LosersChessGameGraphics extends GameGraphics
     {
         return new Dimension(640, 480);
     }
+    
+    public void updateGameState()
+    {
+    	m_movableBlocks = 0;
+    	m_selectedBlocks = 0;
+    	LosersChessBoard b = m_game.getBoard();
+		if (m_game.p1 instanceof LosersHumanPlayer)
+		{
+			int sq = ((LosersHumanPlayer)m_game.p1).getSelected();
+			updateMovable(b.allMovesPiece(b.toRow(sq), b.toCol(sq)));
+			updateSelected(sq);
+		}
+		if (m_game.p2 instanceof LosersHumanPlayer)
+		{
+			int sq = ((LosersHumanPlayer)m_game.p2).getSelected();
+			updateMovable(b.allMovesPiece(b.toRow(sq), b.toCol(sq)));
+			updateSelected(sq);
+		}
+    }
+	
+	private void updateMovable(ArrayList<Move> moves)
+	{
+		for (Move m : moves) {
+			int sq = m_game.getBoard().toSq(m.rf, m.cf);
+			m_movableBlocks |= (1L << sq);
+		}
+	}
+	
+	private void updateSelected(int sq)
+	{
+		m_selectedBlocks |= (1L << sq);
+	}
 	
 	public void paintComponent(Graphics g)
 	{
@@ -74,18 +107,6 @@ public class LosersChessGameGraphics extends GameGraphics
 		
 		drawBackground(backg);
 		drawBoard(backg);
-		if (m_game.p1 instanceof LosersHumanPlayer)
-		{
-			int sq = ((LosersHumanPlayer)m_game.p1).getSelected();
-			drawMovable(backg, m_game.getBoard().allMovesPiece(7 - (sq / 8), 7 - (sq % 8)));
-			drawSelected(backg, ((LosersHumanPlayer)m_game.p1).getSelected());
-		}
-		if (m_game.p2 instanceof LosersHumanPlayer)
-		{
-			int sq = ((LosersHumanPlayer)m_game.p2).getSelected();
-			drawMovable(backg, m_game.getBoard().allMovesPiece(7 - (sq / 8), 7 - (sq % 8)));
-			drawSelected(backg, ((LosersHumanPlayer)m_game.p2).getSelected());
-		}
 		drawBorders(backg);
 		drawMarkers(backg);
 		drawNames(backg, m_game.p1, m_game.p2, m_game.getBoard().whoseTurn());
@@ -138,7 +159,16 @@ public class LosersChessGameGraphics extends GameGraphics
 	
 	public void drawBlock(Graphics g, int row, int col)
 	{
-		g.drawImage(m_gBlocks[(row+col)%2], col * m_blockSize + m_boardOffsetX, row * m_blockSize + m_boardOffsetX, m_blockSize, m_blockSize, null);
+		int x = getX(col);
+		int y = getY(row);
+		g.drawImage(m_gBlocks[(row+col)%2], x, y, m_blockSize, m_blockSize, null);
+		int sq = m_game.getBoard().toSq(row, col);
+		if ((m_selectedBlocks & (1L << sq)) > 0) {
+			g.drawImage(m_gSelected, x, y, m_blockSize, m_blockSize, null);
+		}
+		else if ((m_movableBlocks & (1L << sq)) > 0) {
+			g.drawImage(m_gMovable, x, y, m_blockSize, m_blockSize, null);
+		}
 	}
 	
 	public void drawPiece(Graphics g, char p, int x, int y)
@@ -199,24 +229,6 @@ public class LosersChessGameGraphics extends GameGraphics
 			for (int c = 0; c < Definitions.NUMCOLS; c++) {
 				drawBlock(g, r, c);
 			}
-		}
-	}
-	
-	public void drawSelected(Graphics g, int sq)
-	{
-		if (sq == -1) return;
-		int x = getX(7 - (sq % 8));
-		int y = getY(7 - (sq / 8));
-		g.drawImage(m_gSelected, x, y, m_blockSize, m_blockSize, null);
-	}
-	
-	public void drawMovable(Graphics g, ArrayList<Move> list)
-	{
-		if (list == null) return;
-		for (Move m : list) {
-			int x = getX(m.cf);
-			int y = getY(m.rf);
-			g.drawImage(m_gMovable, x, y, m_blockSize, m_blockSize, null);
 		}
 	}
 	
@@ -295,7 +307,6 @@ public class LosersChessGameGraphics extends GameGraphics
 					Graphics2D g = (Graphics2D)m_frame.getGraphics();
 					g.setBackground(new Color(255, 255, 255, 0));
 					g.clearRect(0, 0, Definitions.WIDTH, Definitions.HEIGHT);
-					drawBlock(g, move.r0, move.c0);
 					drawBlock(g, move.rf, move.cf);
 					if (incumbent != 0) drawPieceInBoard(g, incumbent, move.rf, move.cf);
 					drawBorders(g);
@@ -306,15 +317,22 @@ public class LosersChessGameGraphics extends GameGraphics
 			}
 		}
 	};
+	
+	private void startAnimation()
+	{
+		if (isAnimating() || m_moveAnimation == null)
+			return;
+		m_moveAnimator = new Thread(m_moveAnimation);
+		m_moveAnimator.setPriority(Thread.MAX_PRIORITY);
+		m_moveAnimator.start();
+	}
 
 	public void animateMove(Move m, Board b)
 	{
 		if (m == null || b == null)
 			return;
 		m_moveAnimation = new MoveAnimation(m, b);
-		m_moveAnimator = new Thread(m_moveAnimation);
-		m_moveAnimator.setPriority(Thread.MAX_PRIORITY);
-		m_moveAnimator.start();
+		startAnimation();
 	}
 
 	public boolean isAnimating()

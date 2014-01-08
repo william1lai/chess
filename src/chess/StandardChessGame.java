@@ -103,9 +103,16 @@ public class StandardChessGame extends Game
 				flipTurn();
 				state = m_game_board.getState();
 			}
+			m_graphics.updateGameState();
+			m_applet.repaint();
 			try { Thread.sleep(30); }
 			catch (InterruptedException e) {}
+		}
+		while (m_graphics.isAnimating()) {
+			m_graphics.updateGameState();
 			m_applet.repaint();
+			try { Thread.sleep(30); }
+			catch (InterruptedException e) {}
 		}
 		String reason = "";
 		Definitions.Color winner = null; //indicating stalemate by default
@@ -283,12 +290,14 @@ public class StandardChessGame extends Game
 			getBoard().getData().m_fiftymoverulecount = 0; //reset counter
 		}
 
-		m_graphics.animateMove(newMove, getBoard());
-		getBoard().move(newMove); //has to be down here for time being because en passant needs to know dest sq is empty; fix if you can
-
-		if (correspondingRookMove != null)
+		if (correspondingRookMove == null)
 		{
-			m_graphics.animateMove(correspondingRookMove, getBoard());
+			m_graphics.animateMove(newMove, getBoard());
+			getBoard().move(newMove); //has to be down here for time being because en passant needs to know dest sq is empty; fix if you can
+		}
+		else {
+			m_graphics.animateCastlingMoves(newMove, correspondingRookMove, getBoard());
+			getBoard().move(newMove);
 			getBoard().setTurn(Definitions.flip(getBoard().whoseTurn())); //to undo double flipping of moving king and then rook
 			getBoard().move(correspondingRookMove);
 		}

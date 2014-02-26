@@ -17,6 +17,32 @@ public class AliceBoard //really a board pair
 			m = mv;
 			board = b;
 		}
+		
+		AliceMove(AliceMove other)
+		{
+			m.r0 = other.m.r0;
+			m.c0 = other.m.c0;
+			m.rf = other.m.rf;
+			m.cf = other.m.cf;
+			board = other.board;
+		}
+		
+		public String toString()
+		{
+			return "" + (char)(m.c0 + 'a') + "" + (8 - m.r0) + "-" + (char)(m.cf + 'a') 
+					+ "" + (8 - m.rf) + "[" + (char)('0' + board) + "]";
+		}
+		
+		public boolean equals(Object obj) //we must have this so that the contains() method works
+		{
+			if (obj instanceof AliceMove)
+			{
+				AliceMove other = (AliceMove)obj;
+				boolean eq = (m.equals(other.m) && (board == other.board));
+				return eq;
+			}
+			return false;
+		}
 	}
 	
 	public class GameData
@@ -421,9 +447,11 @@ public class AliceBoard //really a board pair
 		m_turn = Definitions.flip(m_turn);
 	}
 
-	public boolean isLegalMove(Move m)
+	public boolean isLegalMove(Move m, int board)
 	{
-		return allMoves().contains(m);
+		AliceMove am = new AliceMove(m, board);
+		boolean res = allMoves().contains(am);
+		return res;
 	}
 
 	public ArrayList<AliceMove> allMovesPiece(int r, int c)

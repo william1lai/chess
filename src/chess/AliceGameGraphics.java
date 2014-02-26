@@ -74,15 +74,15 @@ public class AliceGameGraphics extends GameGraphics
     	m_movableBlocks = 0;
     	m_selectedBlocks = 0;
     	AliceBoard b = m_game.getBoard();
-		if (m_game.p1 instanceof StandardHumanPlayer)
+		if (m_game.p1 instanceof AliceHumanPlayer)
 		{
-			int sq = ((StandardHumanPlayer)m_game.p1).getSelected();
+			int sq = ((AliceHumanPlayer)m_game.p1).getSelected();
 			updateMovable(b.allMovesPiece(b.toRow(sq), b.toCol(sq)));
 			updateSelected(sq);
 		}
-		if (m_game.p2 instanceof StandardHumanPlayer)
+		if (m_game.p2 instanceof AliceHumanPlayer)
 		{
-			int sq = ((StandardHumanPlayer)m_game.p2).getSelected();
+			int sq = ((AliceHumanPlayer)m_game.p2).getSelected();
 			updateMovable(b.allMovesPiece(b.toRow(sq), b.toCol(sq)));
 			updateSelected(sq);
 		}

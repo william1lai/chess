@@ -45,23 +45,23 @@ public class AliceGame extends Game
 
 		if (input == "White vs AI")
 		{
-			p1 = new StandardHumanPlayer("Human WHITE", Definitions.Color.WHITE, this);
-			p2 = new StandardComputerPlayer("CPU BLACK", Definitions.Color.BLACK, this);
+			p1 = new AliceHumanPlayer("Human WHITE", Definitions.Color.WHITE, this);
+			p2 = new AliceComputerPlayer("CPU BLACK", Definitions.Color.BLACK, this);
 		}
 		else if (input == "Black vs AI")
 		{
-			p2 = new StandardHumanPlayer("Human BLACK", Definitions.Color.BLACK, this);
-			p1 = new StandardComputerPlayer("CPU WHITE", Definitions.Color.WHITE, this);
+			p2 = new AliceHumanPlayer("Human BLACK", Definitions.Color.BLACK, this);
+			p1 = new AliceComputerPlayer("CPU WHITE", Definitions.Color.WHITE, this);
 		}
 		else if (input == "Hotseat Game")
 		{
-			p1 = new StandardHumanPlayer("Human WHITE", Definitions.Color.WHITE, this);
-			p2 = new StandardHumanPlayer("Human BLACK", Definitions.Color.BLACK, this);
+			p1 = new AliceHumanPlayer("Human WHITE", Definitions.Color.WHITE, this);
+			p2 = new AliceHumanPlayer("Human BLACK", Definitions.Color.BLACK, this);
 		}
 		else if (input == "AI vs AI")
 		{
-			p1 = new StandardComputerPlayer("CPU WHITE", Definitions.Color.WHITE, this);
-			p2 = new StandardComputerPlayer("CPU BLACK", Definitions.Color.BLACK, this);
+			p1 = new AliceComputerPlayer("CPU WHITE", Definitions.Color.WHITE, this);
+			p2 = new AliceComputerPlayer("CPU BLACK", Definitions.Color.BLACK, this);
 		}
 		else
 		{

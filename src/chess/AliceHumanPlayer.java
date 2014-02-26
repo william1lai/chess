@@ -27,9 +27,10 @@ public class AliceHumanPlayer extends HumanPlayer
 	}
 
 	public void mousePressed(MouseEvent e)
-	{		
-		int row = StandardGameGraphics.getRow(e.getY());
-		int col = StandardGameGraphics.getCol(e.getX());
+	{
+		int board = 0; //HARD CODE
+		int row = AliceGameGraphics.getRow(e.getY());
+		int col = AliceGameGraphics.getCol(e.getX());
 		//Right-click to deselect
 		if (e.getButton() == MouseEvent.BUTTON3)
 			deselect();
@@ -47,7 +48,7 @@ public class AliceHumanPlayer extends HumanPlayer
 			else if (m_selected != -1)
 			{
 				m_move = new Move(7 - (m_selected / 8), 7 - (m_selected % 8), row, col);
-				if (g.getBoard().isLegalMove(m_move)) {
+				if (g.getBoard().isLegalMove(m_move, board)) {
 					m_selected = -1;
 					m_done = true;
 					getGame().m_applet.removeMouseListener(this);

@@ -28,8 +28,8 @@ public class LosersHumanPlayer extends HumanPlayer
 
 	public void mousePressed(MouseEvent e)
 	{
-		int row = LosersChessGameGraphics.getRow(e.getY());
-		int col = LosersChessGameGraphics.getCol(e.getX());
+		int row = LosersGameGraphics.getRow(e.getY());
+		int col = LosersGameGraphics.getCol(e.getX());
 
 		//Right-click to deselect
 		if (e.getButton() == MouseEvent.BUTTON3)
@@ -37,9 +37,9 @@ public class LosersHumanPlayer extends HumanPlayer
 		//Left-click to select
 		else if (e.getButton() == MouseEvent.BUTTON1 && row >= 0 && col >= 0) 
 		{
-			LosersChessGame g = ((LosersChessGame)getGame());
+			LosersGame g = ((LosersGame)getGame());
 			int sq = (7-row)*8 + (7-col);
-			LosersChessBoard lcb = g.getBoard();
+			LosersBoard lcb = g.getBoard();
 			char p = lcb.getPiece(row, col);
 			if (p != 0 && ((Character.isUpperCase(p)) ^ (lcb.whoseTurn() == Definitions.Color.BLACK))) //colors match
 			{

@@ -4,21 +4,21 @@ import java.util.Stack;
 
 import javax.swing.JOptionPane;
 
-public class LosersChessGame extends Game
+public class LosersGame extends Game
 {
-	private LosersChessGameGraphics m_graphics;
-	private LosersChessBoard m_game_board;
+	private LosersGameGraphics m_graphics;
+	private LosersBoard m_game_board;
 	private boolean m_canUndo;
 	
-	public LosersChessGame(GameApplet applet)
+	public LosersGame(GameApplet applet)
 	{
 		m_applet = applet;
 	}
 
 	public void init(GameGraphics graphics)
 	{
-		m_graphics = (LosersChessGameGraphics)graphics;
-		m_game_board = new LosersChessBoard(this);
+		m_graphics = (LosersGameGraphics)graphics;
+		m_game_board = new LosersBoard(this);
 		m_canUndo = false;
 		movesHistory = new Stack<String>();
 		
@@ -130,7 +130,7 @@ public class LosersChessGame extends Game
 		System.out.println("The game has ended.");
 	}
 
-	public LosersChessBoard getBoard()
+	public LosersBoard getBoard()
 	{
 		return m_game_board;
 	}

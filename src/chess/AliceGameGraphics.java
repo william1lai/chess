@@ -5,11 +5,13 @@ import java.util.*;
 import java.awt.image.BufferedImage;
 import javax.imageio.ImageIO;
 
+import chess.AliceBoard.AliceMove;
+
 @SuppressWarnings("serial")
-public class StandardChessGameGraphics extends GameGraphics
+public class AliceGameGraphics extends GameGraphics
 {
-	private StandardChessGame m_game;
-	private StandardChessGameGUI m_gui;
+	private AliceGame m_game;
+	private AliceGameGUI m_gui;
 	private static int m_boardOffsetX, m_boardOffsetY, m_blockSize;
 	private Map<String, BufferedImage> m_gPieces;
 	private BufferedImage m_gMovable, m_gSelected;
@@ -18,15 +20,15 @@ public class StandardChessGameGraphics extends GameGraphics
 	private Thread m_moveAnimator;
 	private MoveAnimation m_moveAnimation;
 	
-	public StandardChessGameGraphics(GameApplet applet)
+	public AliceGameGraphics(GameApplet applet)
 	{
 		m_applet = applet;
 	}
 	
 	public void init(Game game)
 	{
-		m_game = (StandardChessGame)game;
-		m_gui = new StandardChessGameGUI();
+		m_game = (AliceGame)game;
+		m_gui = new AliceGameGUI();
 		m_boardOffsetY = Definitions.HEIGHT/8;
 		m_boardOffsetX = Definitions.HEIGHT/8;
 		m_blockSize = Definitions.HEIGHT*3/4 / Definitions.NUMROWS;
@@ -71,7 +73,7 @@ public class StandardChessGameGraphics extends GameGraphics
     {
     	m_movableBlocks = 0;
     	m_selectedBlocks = 0;
-    	StandardChessBoard b = m_game.getBoard();
+    	AliceBoard b = m_game.getBoard();
 		if (m_game.p1 instanceof StandardHumanPlayer)
 		{
 			int sq = ((StandardHumanPlayer)m_game.p1).getSelected();
@@ -86,10 +88,10 @@ public class StandardChessGameGraphics extends GameGraphics
 		}
     }
 	
-	private void updateMovable(ArrayList<Move> moves)
+	private void updateMovable(ArrayList<AliceMove> moves)
 	{
-		for (Move m : moves) {
-			int sq = m_game.getBoard().toSq(m.rf, m.cf);
+		for (AliceMove am : moves) {
+			int sq = m_game.getBoard().toSq(am.m.rf, am.m.cf);
 			m_movableBlocks |= (1L << sq);
 		}
 	}
@@ -110,7 +112,8 @@ public class StandardChessGameGraphics extends GameGraphics
 		drawBorders(backg);
 		drawMarkers(backg);
 		drawNames(backg, m_game.p1, m_game.p2, m_game.getBoard().whoseTurn());
-		drawPieces(backg, m_game.getBoard());
+		drawPieces(backg, m_game.getBoard().getBoard(0));
+		drawPieces(backg, m_game.getBoard().getBoard(1));
 		drawGUI(backg);	
 		
 		if (isAnimating()) {
@@ -183,8 +186,8 @@ public class StandardChessGameGraphics extends GameGraphics
 	
 	public void drawPieceInBoard(Graphics g, char p, int r, int c)
 	{
-		int y = StandardChessGameGraphics.getY(r);
-		int x = StandardChessGameGraphics.getX(c);
+		int y = AliceGameGraphics.getY(r);
+		int x = AliceGameGraphics.getX(c);
 		drawPiece(g, p, x, y);
 	}
 	
@@ -285,10 +288,10 @@ public class StandardChessGameGraphics extends GameGraphics
 			move = m;
 			traveler = b.getPiece(m.r0, m.c0);
 			incumbent = b.getPiece(m.rf, m.cf);
-			curY = StandardChessGameGraphics.getY(m.r0);
-			curX = StandardChessGameGraphics.getX(m.c0);
-			dY = ((double)StandardChessGameGraphics.getY(m.rf) - curY) / NUMTICKS;
-			dX = ((double)StandardChessGameGraphics.getX(m.cf) - curX) / NUMTICKS;
+			curY = AliceGameGraphics.getY(m.r0);
+			curX = AliceGameGraphics.getX(m.c0);
+			dY = ((double)AliceGameGraphics.getY(m.rf) - curY) / NUMTICKS;
+			dX = ((double)AliceGameGraphics.getX(m.cf) - curX) / NUMTICKS;
 		}
 		
 		public BufferedImage getFrame()
@@ -360,19 +363,19 @@ public class StandardChessGameGraphics extends GameGraphics
 		m_moveAnimator.start();
 	}
 
-	public void animateMove(Move m, Board b)
+	public void animateMove(AliceMove am, AliceBoard ab)
 	{
-		if (m == null || b == null)
+		if (am == null || ab == null)
 			return;
-		m_moveAnimation = new MoveAnimation(m, b);
+		m_moveAnimation = new MoveAnimation(am.m, ab.getBoard(am.board));
 		startAnimation();
 	}
 	
-	public void animateCastlingMoves(Move kingMove, Move rookMove, Board b)
+	public void animateCastlingMoves(AliceMove kingMove, Move rookMove, AliceBoard ab)
 	{
-		if (kingMove == null || rookMove == null || b == null)
+		if (kingMove == null || rookMove == null || ab == null)
 			return;
-		m_moveAnimation = new CastleMoveAnimation(kingMove, rookMove, b);
+		m_moveAnimation = new CastleMoveAnimation(kingMove.m, rookMove, ab.getBoard(kingMove.board));
 		startAnimation();
 	}
 

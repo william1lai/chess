@@ -4,11 +4,11 @@ import java.awt.event.FocusEvent;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 
-public class StandardChessGameGUI extends GameGUI
+public class AliceGameGUI extends GameGUI
 {
 	ArrayList<EasyButton> m_buttons;
 	
-	public StandardChessGameGUI()
+	public AliceGameGUI()
 	{
 		m_buttons = new ArrayList<EasyButton>();
 	}

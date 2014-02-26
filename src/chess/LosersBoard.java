@@ -10,17 +10,17 @@ import javax.swing.JOptionPane;
  * 	Stalemate is won by the player who is stalemated
  * 	En passant is legal
  */
-public class LosersChessBoard extends Board 
+public class LosersBoard extends Board 
 {
 	public class GameData
 	{
 		public int m_enpassantCol; //the column (0-7) of the pawn to move two spaces last turn, -1 if no pawn moved two spaces
 		public int m_fiftymoverulecount;
 		public int m_turncount;
-		public LosersChessGame m_game;
+		public LosersGame m_game;
 		//public HashMap<String, Integer> positionTable;
 
-		public GameData(LosersChessGame lcg)
+		public GameData(LosersGame lcg)
 		{
 			m_enpassantCol = -1;
 			m_fiftymoverulecount = 0;
@@ -41,7 +41,7 @@ public class LosersChessBoard extends Board
 	private Definitions.Color m_turn;
 	
 	
-	public LosersChessBoard(LosersChessGame lcg) //standard setup
+	public LosersBoard(LosersGame lcg) //standard setup
 	{
 		m_turn = Definitions.Color.WHITE;
 		m_data = new GameData(lcg);
@@ -56,7 +56,7 @@ public class LosersChessBoard extends Board
 		setKings(0x0800000000000008L);
 	}
 
-	public LosersChessBoard(LosersChessBoard other)
+	public LosersBoard(LosersBoard other)
 	{
 		m_turn = other.m_turn;
 		m_data = new GameData(other.m_data);
@@ -632,9 +632,9 @@ public class LosersChessBoard extends Board
 		}
 	}
 
-	public LosersChessBoard clone()
+	public LosersBoard clone()
 	{
-		return new LosersChessBoard(this);
+		return new LosersBoard(this);
 	}
 
 	public String toString()

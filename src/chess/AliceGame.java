@@ -2,23 +2,26 @@ package chess;
 
 import java.awt.event.MouseEvent;
 import javax.swing.JOptionPane;
+
+import chess.AliceBoard.AliceMove;
+
 import java.util.Stack;
 
-public class StandardChessGame extends Game
+public class AliceGame extends Game
 {
-	private StandardChessGameGraphics m_graphics;
-	private StandardChessBoard m_game_board;
+	private AliceGameGraphics m_graphics;
+	private AliceBoard m_game_board;
 	private boolean m_canUndo;
 	
-	public StandardChessGame(GameApplet applet)
+	public AliceGame(GameApplet applet)
 	{
 		m_applet = applet;
 	}
 
 	public void init(GameGraphics graphics)
 	{
-		m_graphics = (StandardChessGameGraphics)graphics;
-		m_game_board = new StandardChessBoard(this);
+		m_graphics = (AliceGameGraphics)graphics;
+		m_game_board = new AliceBoard(this);
 		m_canUndo = false;
 		movesHistory = new Stack<String>();
 		
@@ -94,12 +97,14 @@ public class StandardChessGame extends Game
 			if (!m_graphics.isAnimating() && cur.isDone())
 			{
 				m_canUndo = false;
-				movesHistory.push(m_game_board.toFEN(true));
+				//movesHistory.push(m_game_board.toFEN(true)); //TODO
 				Move m = cur.getMove();
-				if (m == null)
+				int board = 0; //replace
+				AliceMove am = m_game_board.new AliceMove(m, board);
+				if (am.m == null)
 					break;
 
-				processMove(m);
+				processMove(am);
 				flipTurn();
 				state = m_game_board.getState();
 			}
@@ -134,7 +139,7 @@ public class StandardChessGame extends Game
 		System.out.println("The game has ended.");
 	}
 
-	public StandardChessBoard getBoard()
+	public AliceBoard getBoard()
 	{
 		return m_game_board;
 	}
@@ -156,27 +161,6 @@ public class StandardChessGame extends Game
 		return new Move(0, 0, 0, 0);
 	}
 
-	public void interpretMoveList(String movelist) //does not work yet
-	{
-		//start with naive format of "1.e4 c5 2.Nc3 Nc6 3.f4 g6 4.Bb5 Nd4", with proper spacing and all
-		String[] moves = movelist.split(" ");
-
-		for (int i = 0; i < moves.length; i++)
-		{
-			String mv = moves[i];
-			if (Character.isDigit(mv.charAt(0)))
-			{
-				System.out.print(mv + " "); //print out moves
-				m_game_board.move(algebraicToMove(Definitions.Color.WHITE, mv.split(".")[1])); //want the part after the period
-			}
-			else
-			{
-				System.out.println(mv);
-				m_game_board.move(algebraicToMove(Definitions.Color.BLACK, mv));
-			}
-		}
-	}
-
 	public void undo()
 	{
 		if(movesHistory.size() < 2)
@@ -189,16 +173,17 @@ public class StandardChessGame extends Game
 			movesHistory.pop();
 			String returnMove = movesHistory.pop();
 
-			m_game_board.FENtoPosition(returnMove);
+			//m_game_board.FENtoPosition(returnMove); //TODO
 		}
 	}
 
 	//TODO: Might need clean up
-	public void processMove(Move newMove)
+	public void processMove(AliceMove newMove)
 	{
-		int row = newMove.r0;
-		int col = newMove.c0;
-		char movedPiece = getBoard().getPiece(row, col);
+		int row = newMove.m.r0;
+		int col = newMove.m.c0;
+		int board = newMove.board;
+		char movedPiece = getBoard().getPiece(row, col, board);
 		getBoard().getData().m_fiftymoverulecount++;
 
 		int castlingRow;
@@ -216,20 +201,20 @@ public class StandardChessGame extends Game
 		if (Character.toLowerCase(movedPiece) == 'p')
 		{
 			getBoard().getData().m_fiftymoverulecount = 0; //pawn was moved
-			if (Math.abs(newMove.rf - newMove.r0) == 2)
+			if (Math.abs(newMove.m.rf - newMove.m.r0) == 2)
 			{
-				getBoard().getData().m_enpassantCol = newMove.c0; //enpassant now available on this column
+				getBoard().getData().m_enpassantCol = col; //enpassant now available on this column
 			}
-			else if ((Math.abs(newMove.cf - newMove.c0) == 1) && (getBoard().getPiece(newMove.rf, newMove.cf) == 0))
+			else if ((Math.abs(newMove.m.cf - col) == 1) && (getBoard().getPiece(newMove.m.rf, newMove.m.cf, board) == 0))
 				//en passant
 			{
 				if (getBoard().whoseTurn() == Definitions.Color.WHITE)
 				{
-					getBoard().removePiece(3, newMove.cf); //not sure if this is best way, but "move" call will not erase piece
+					getBoard().removePiece(3, newMove.m.cf, board); //not sure if this is best way, but "move" call will not erase piece
 				}
 				else
 				{
-					getBoard().removePiece(4, newMove.cf);
+					getBoard().removePiece(4, newMove.m.cf, board);
 				}
 			}
 		}
@@ -246,7 +231,7 @@ public class StandardChessGame extends Game
 				getBoard().getData().m_blackCanCastleQueenside = false;
 			}
 
-			int kingMoveLength = newMove.cf - col; //should be 2 or -2, if the move was a castling move
+			int kingMoveLength = newMove.m.cf - col; //should be 2 or -2, if the move was a castling move
 			if (row == castlingRow)
 			{
 				if (kingMoveLength == 2) //kingside
@@ -285,7 +270,7 @@ public class StandardChessGame extends Game
 			}
 		}
 
-		if (getBoard().getPiece(newMove.rf, newMove.cf) != 0) //capture was made
+		if (getBoard().getPiece(newMove.m.rf, newMove.m.cf, board) != 0) //capture was made
 		{
 			getBoard().getData().m_fiftymoverulecount = 0; //reset counter
 		}
@@ -293,21 +278,21 @@ public class StandardChessGame extends Game
 		if (correspondingRookMove == null)
 		{
 			m_graphics.animateMove(newMove, getBoard());
-			getBoard().move(newMove); //has to be down here for time being because en passant needs to know dest sq is empty; fix if you can
+			getBoard().move(newMove.m, board); //has to be down here for time being because en passant needs to know dest sq is empty; fix if you can
 		}
 		else {
 			m_graphics.animateCastlingMoves(newMove, correspondingRookMove, getBoard());
-			getBoard().move(newMove);
+			getBoard().move(newMove.m, board);
 			getBoard().setTurn(Definitions.flip(getBoard().whoseTurn())); //to undo double flipping of moving king and then rook
-			getBoard().move(correspondingRookMove);
+			getBoard().move(correspondingRookMove, board);
 		}
 
 		if (Character.toLowerCase(movedPiece) == 'p')
 		{
-			if (((getBoard().whoseTurn() == Definitions.Color.BLACK) && (newMove.rf == 0)) 
-					|| ((getBoard().whoseTurn() == Definitions.Color.WHITE) && (newMove.rf == 7))) //flipped by earlier move
+			if (((getBoard().whoseTurn() == Definitions.Color.BLACK) && (newMove.m.rf == 0)) 
+					|| ((getBoard().whoseTurn() == Definitions.Color.WHITE) && (newMove.m.rf == 7))) //flipped by earlier move
 			{
-				getBoard().promotePawn(newMove.rf, newMove.cf);
+				getBoard().promotePawn(newMove.m.rf, newMove.m.cf, board);
 			}
 		}
 	}

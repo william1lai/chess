@@ -62,11 +62,11 @@ public class LosersComputerPlayer extends ComputerPlayer
 	{
 		Game g = getGame();
 		initOpeningBook();
-		m_move = evaluate(((LosersChessGame)g).getBoard());
+		m_move = evaluate(((LosersGame)g).getBoard());
 		m_done = true;
 	}
 
-	public Move evaluate(LosersChessBoard lcb)
+	public Move evaluate(LosersBoard lcb)
 	{
 		String completeFEN = lcb.toFEN(false);
 		System.out.println(completeFEN);
@@ -88,7 +88,7 @@ public class LosersComputerPlayer extends ComputerPlayer
 		{
 			long starttime = System.nanoTime();
 			branches = 0;
-			LosersChessBoard temp = lcb.clone();
+			LosersBoard temp = lcb.clone();
 			bms = new MovelistScore(alphabetaMax(temp, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY, 0, 2*d, true, false));
 			long endtime = System.nanoTime();
 			double duration = getDuration(starttime, endtime);
@@ -109,7 +109,7 @@ public class LosersComputerPlayer extends ComputerPlayer
 		return hashmoves.get(0); //the best next move
 	}
 
-	private MovelistScore alphabetaMax(LosersChessBoard lcb, double alpha, double beta, 
+	private MovelistScore alphabetaMax(LosersBoard lcb, double alpha, double beta, 
 			int ply, int maxply, boolean considerHashMoves, boolean extended)
 	{
 		if (stop) //time's up
@@ -147,7 +147,7 @@ public class LosersComputerPlayer extends ComputerPlayer
 
 		if (considerHashMoves && hashmoves.size() > ply)
 		{
-			LosersChessBoard temp = lcb.clone();
+			LosersBoard temp = lcb.clone();
 
 			if (!lcb.isLegalMove(hashmoves.get(ply)))
 			{
@@ -178,7 +178,7 @@ public class LosersComputerPlayer extends ComputerPlayer
 		}
 		for (Move m : mvs)
 		{			
-			LosersChessBoard temp = lcb.clone();
+			LosersBoard temp = lcb.clone();
 			temp.move(m);
 
 			bms = alphabetaMin(temp, alpha, beta, ply + 1, maxply, true, extended);
@@ -211,7 +211,7 @@ public class LosersComputerPlayer extends ComputerPlayer
 		return new MovelistScore(movelist, alpha);
 	}
 
-	private MovelistScore alphabetaMin(LosersChessBoard lcb, double alpha, double beta, 
+	private MovelistScore alphabetaMin(LosersBoard lcb, double alpha, double beta, 
 			int ply, int maxply, boolean considerHashMoves, boolean extended)
 	{
 		if (stop) //time's up
@@ -232,7 +232,7 @@ public class LosersComputerPlayer extends ComputerPlayer
 		Move best = null;
 		ArrayList<Move> movelist = new ArrayList<Move>();
 		double score;
-		LosersChessBoard temp;
+		LosersBoard temp;
 		MovelistScore bms = new MovelistScore(null, 0);
 
 		if (considerHashMoves && hashmoves.size() > ply)
@@ -313,9 +313,9 @@ public class LosersComputerPlayer extends ComputerPlayer
 		return new MovelistScore(movelist, beta);
 	}
 
-	private double staticEval(LosersChessBoard lcb)
+	private double staticEval(LosersBoard lcb)
 	{
-		if (getGame() instanceof StandardChessGame)
+		if (getGame() instanceof StandardGame)
 		{
 			Definitions.State state = lcb.getState();
 			if (state == Definitions.State.CHECKMATE) //instant loss

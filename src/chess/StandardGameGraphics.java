@@ -6,10 +6,10 @@ import java.awt.image.BufferedImage;
 import javax.imageio.ImageIO;
 
 @SuppressWarnings("serial")
-public class LosersChessGameGraphics extends GameGraphics
+public class StandardGameGraphics extends GameGraphics
 {
-	private LosersChessGame m_game;
-	private LosersChessGameGUI m_gui;
+	private StandardGame m_game;
+	private StandardGameGUI m_gui;
 	private static int m_boardOffsetX, m_boardOffsetY, m_blockSize;
 	private Map<String, BufferedImage> m_gPieces;
 	private BufferedImage m_gMovable, m_gSelected;
@@ -18,15 +18,15 @@ public class LosersChessGameGraphics extends GameGraphics
 	private Thread m_moveAnimator;
 	private MoveAnimation m_moveAnimation;
 	
-	public LosersChessGameGraphics(GameApplet applet)
+	public StandardGameGraphics(GameApplet applet)
 	{
 		m_applet = applet;
 	}
 	
 	public void init(Game game)
 	{
-		m_game = (LosersChessGame)game;
-		m_gui = new LosersChessGameGUI();
+		m_game = (StandardGame)game;
+		m_gui = new StandardGameGUI();
 		m_boardOffsetY = Definitions.HEIGHT/8;
 		m_boardOffsetX = Definitions.HEIGHT/8;
 		m_blockSize = Definitions.HEIGHT*3/4 / Definitions.NUMROWS;
@@ -71,16 +71,16 @@ public class LosersChessGameGraphics extends GameGraphics
     {
     	m_movableBlocks = 0;
     	m_selectedBlocks = 0;
-    	LosersChessBoard b = m_game.getBoard();
-		if (m_game.p1 instanceof LosersHumanPlayer)
+    	StandardBoard b = m_game.getBoard();
+		if (m_game.p1 instanceof StandardHumanPlayer)
 		{
-			int sq = ((LosersHumanPlayer)m_game.p1).getSelected();
+			int sq = ((StandardHumanPlayer)m_game.p1).getSelected();
 			updateMovable(b.allMovesPiece(b.toRow(sq), b.toCol(sq)));
 			updateSelected(sq);
 		}
-		if (m_game.p2 instanceof LosersHumanPlayer)
+		if (m_game.p2 instanceof StandardHumanPlayer)
 		{
-			int sq = ((LosersHumanPlayer)m_game.p2).getSelected();
+			int sq = ((StandardHumanPlayer)m_game.p2).getSelected();
 			updateMovable(b.allMovesPiece(b.toRow(sq), b.toCol(sq)));
 			updateSelected(sq);
 		}
@@ -183,8 +183,8 @@ public class LosersChessGameGraphics extends GameGraphics
 	
 	public void drawPieceInBoard(Graphics g, char p, int r, int c)
 	{
-		int y = LosersChessGameGraphics.getY(r);
-		int x = LosersChessGameGraphics.getX(c);
+		int y = StandardGameGraphics.getY(r);
+		int x = StandardGameGraphics.getX(c);
 		drawPiece(g, p, x, y);
 	}
 	
@@ -285,10 +285,10 @@ public class LosersChessGameGraphics extends GameGraphics
 			move = m;
 			traveler = b.getPiece(m.r0, m.c0);
 			incumbent = b.getPiece(m.rf, m.cf);
-			curY = LosersChessGameGraphics.getY(m.r0);
-			curX = LosersChessGameGraphics.getX(m.c0);
-			dY = ((double)LosersChessGameGraphics.getY(m.rf) - curY) / NUMTICKS;
-			dX = ((double)LosersChessGameGraphics.getX(m.cf) - curX) / NUMTICKS;
+			curY = StandardGameGraphics.getY(m.r0);
+			curX = StandardGameGraphics.getX(m.c0);
+			dY = ((double)StandardGameGraphics.getY(m.rf) - curY) / NUMTICKS;
+			dX = ((double)StandardGameGraphics.getX(m.cf) - curX) / NUMTICKS;
 		}
 		
 		public BufferedImage getFrame()
@@ -318,6 +318,39 @@ public class LosersChessGameGraphics extends GameGraphics
 		}
 	};
 	
+	private class CastleMoveAnimation extends MoveAnimation
+	{
+		MoveAnimation rook;
+		
+		public CastleMoveAnimation(Move kingMove, Move rookMove, Board b)
+		{
+			super(kingMove, b);
+			rook = new MoveAnimation(rookMove, b);
+		}
+
+		public void run()
+		{
+			for (int t = 0; t < NUMTICKS; t++) {
+				synchronized (this) {
+					curX += dX;
+					curY += dY;
+					rook.curX += rook.dX;
+					rook.curY += rook.dY;
+					Graphics2D g = (Graphics2D)getFrame().getGraphics();
+					g.setBackground(new Color(255, 255, 255, 0));
+					g.clearRect(0, 0, Definitions.WIDTH, Definitions.HEIGHT);
+					drawBlock(g, move.rf, move.cf);
+					drawBlock(g, rook.move.rf, rook.move.cf);
+					drawBorders(g);
+					drawPiece(g, traveler, (int)curX, (int)curY);
+					drawPiece(g, rook.traveler, (int)rook.curX, (int)rook.curY);
+				}
+		 		try { Thread.sleep(Definitions.TICK); }
+		 		catch (InterruptedException ex) {}
+			}
+		}
+	}
+	
 	private void startAnimation()
 	{
 		if (isAnimating() || m_moveAnimation == null)
@@ -332,6 +365,14 @@ public class LosersChessGameGraphics extends GameGraphics
 		if (m == null || b == null)
 			return;
 		m_moveAnimation = new MoveAnimation(m, b);
+		startAnimation();
+	}
+	
+	public void animateCastlingMoves(Move kingMove, Move rookMove, Board b)
+	{
+		if (kingMove == null || rookMove == null || b == null)
+			return;
+		m_moveAnimation = new CastleMoveAnimation(kingMove, rookMove, b);
 		startAnimation();
 	}
 

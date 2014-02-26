@@ -4,9 +4,9 @@ import java.awt.event.MouseEvent;
 
 import chess.Definitions.Color;
 
-public class StandardHumanPlayer extends HumanPlayer 
+public class AliceHumanPlayer extends HumanPlayer 
 {
-	public StandardHumanPlayer(String name, Color c, Game g) 
+	public AliceHumanPlayer(String name, Color c, Game g) 
 	{
 		super(name, c, g);
 	}
@@ -36,11 +36,11 @@ public class StandardHumanPlayer extends HumanPlayer
 		//Left-click to select
 		else if (e.getButton() == MouseEvent.BUTTON1 && row >= 0 && col >= 0) 
 		{
-			StandardGame g = ((StandardGame)getGame());
+			AliceGame g = ((AliceGame)getGame());
 			int sq = (7-row)*8 + (7-col);
-			StandardBoard scb = g.getBoard();
-			char p = scb.getPiece(row, col);
-			if (p != 0 && ((Character.isUpperCase(p)) ^ (scb.whoseTurn() == Definitions.Color.BLACK))) //colors match
+			AliceBoard acb = g.getBoard();
+			char p = acb.getPiece(row, col, 0); //hardcoded
+			if (p != 0 && ((Character.isUpperCase(p)) ^ (acb.whoseTurn() == Definitions.Color.BLACK))) //colors match
 			{
 				select(sq);
 			}

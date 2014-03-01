@@ -1,0 +1,5 @@
+Manifest-Version: 1.0
+Application-Name: Chess
+Permissions: sandbox
+Codebase: duperduper.bol.ucla.edu
+Main-Class: chess.Main

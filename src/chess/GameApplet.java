@@ -17,12 +17,10 @@ public class GameApplet extends JApplet implements Runnable, MouseListener
 
 	public void init()
 	{
-		m_cancel = true;
-		chooseGame();
+		m_cancel = !chooseGame();
 		if (m_cancel)
-		{
 			return;
-		}
+		
 		m_game.init(m_graphics);
 		m_graphics.init(m_game);
 		
@@ -32,31 +30,9 @@ public class GameApplet extends JApplet implements Runnable, MouseListener
 		
 		m_thread = new Thread(this);
 		m_thread.start();
-
-		try {
-			EasyButton b = new EasyButton("buttonUndo", 480, 220, 90, 30, new EasyButtonAction() {
-				public void on_press()
-				{
-					undo();
-				}
-			});
-			if (m_game instanceof StandardGame)
-			{
-				((StandardGameGUI)m_graphics.getGUI()).addButton(b);
-			}
-			else if (m_game instanceof LosersGame)
-			{
-				((LosersGameGUI)m_graphics.getGUI()).addButton(b);	
-			}
-			else if (m_game instanceof AliceGame)
-			{
-				((AliceGameGUI)m_graphics.getGUI()).addButton(b);
-			}
-		}
-		catch (Exception ex) {}
 	}
 
-	public void chooseGame()
+	public boolean chooseGame()
 	{
 		String[] param = { "Standard Chess", "Loser's Chess", "Alice Chess" };
 		String input = (String) JOptionPane.showInputDialog(null, "Game Type?", "Choose your game", JOptionPane.QUESTION_MESSAGE, null, param, param[0]);
@@ -65,30 +41,21 @@ public class GameApplet extends JApplet implements Runnable, MouseListener
 		{
 			m_game = new StandardGame(this);
 			m_graphics = new StandardGameGraphics(this);
-			m_cancel = false;
+			return true;
 		}
-		else if (input == "Loser's Chess")
+		if (input == "Loser's Chess")
 		{
 			m_game = new LosersGame(this);
 			m_graphics = new LosersGameGraphics(this);
-			m_cancel = false;
+			return true;
 		}
-		else if (input == "Alice Chess")
+		if (input == "Alice Chess")
 		{
 			m_game = new AliceGame(this);
 			m_graphics = new AliceGameGraphics(this);
-			m_cancel = false;
+			return true;
 		}
-	}
-
-	public Game getGame()
-	{
-		return m_game;
-	}
-	
-	public GameGraphics getGameGraphics()
-	{
-		return m_graphics;
+		return false;
 	}
 
 	public boolean cancelled()
@@ -98,73 +65,7 @@ public class GameApplet extends JApplet implements Runnable, MouseListener
 
 	public void run()
 	{		
-		if (getGame() instanceof StandardGame)
-		{
-			((StandardGame)getGame()).run();
-		}
-		else if (getGame() instanceof LosersGame)
-		{
-			((LosersGame)getGame()).run();
-		}
-		else if (getGame() instanceof AliceGame)
-		{
-			((AliceGame)getGame()).run();
-		}
-	}
-
-	public void paintComponent(Graphics g)
-	{
-		super.paintComponents(g);
-		if (m_cancel)
-			return;
-	}
-
-	public void undo()
-	{
-		if (m_game.movesHistory.size() < 2)
-			return;
-
-		if (m_game instanceof StandardGame)
-		{
-			StandardGame scg = (StandardGame)m_game;
-			if (scg.canUndo())
-			{
-				scg.getBoard().decrementTurncount();
-
-				m_game.movesHistory.pop();
-				String returnMove = m_game.movesHistory.pop();
-
-				scg.getBoard().FENtoPosition(returnMove);
-			}			
-		}
-		else if (m_game instanceof LosersGame)
-		{
-			LosersGame lcg = (LosersGame)m_game;
-			if (lcg.canUndo())
-			{
-				lcg.getBoard().decrementTurncount();
-
-				m_game.movesHistory.pop();
-				String returnMove = m_game.movesHistory.pop();
-
-				lcg.getBoard().FENtoPosition(returnMove);
-			}
-		}
-		else if (m_game instanceof AliceGame) //TODO
-		{
-			int board = 0; //TODO
-			AliceGame acg = (AliceGame)m_game;
-			if (acg.canUndo())
-			{
-				acg.getBoard().decrementTurncount();
-				
-				m_game.movesHistory.pop();
-				String returnMove = m_game.movesHistory.pop();
-				
-				acg.getBoard().FENtoPosition(returnMove, board);
-			}
-		}
-
+		m_game.run();
 	}
 
 	//Prevents flickering when repainting
@@ -175,11 +76,7 @@ public class GameApplet extends JApplet implements Runnable, MouseListener
 
 	public void stop()
 	{
-		if (m_thread == null)
-		{
-			super.stop();
-		}
-		else if (m_thread.isAlive()) 
+		if (m_thread != null && m_thread.isAlive()) 
 		{
 			m_thread.interrupt();
 		}

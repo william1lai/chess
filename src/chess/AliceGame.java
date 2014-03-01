@@ -92,7 +92,7 @@ public class AliceGame extends Game
 			Player cur = (m_game_board.whoseTurn() == Definitions.Color.WHITE ? p1 : p2);
 			if (cur.getColor() == Definitions.Color.WHITE)
 				m_game_board.incrementTurncount();
-			if (cur instanceof HumanPlayer)
+			if (!m_graphics.isAnimating() && cur instanceof HumanPlayer)
 				m_canUndo = true;
 			if (!m_graphics.isAnimating() && cur.isDone())
 			{
@@ -143,11 +143,6 @@ public class AliceGame extends Game
 	{
 		return m_game_board;
 	}
-
-	public boolean canUndo()
-	{
-		return m_canUndo;
-	}
 	
 	private void flipTurn() //prompts next player's move; board does actual flipping of turns
 	{	
@@ -163,10 +158,7 @@ public class AliceGame extends Game
 
 	public void undo()
 	{
-		if(movesHistory.size() < 2)
-			return;
-
-		if (m_canUndo)
+		if (movesHistory.size() >= 2 && m_canUndo)
 		{
 			m_game_board.decrementTurncount();
 

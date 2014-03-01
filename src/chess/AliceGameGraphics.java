@@ -57,6 +57,17 @@ public class AliceGameGraphics extends GameGraphics
 		catch (Exception ex) {
 			System.out.println("Error loading fonts!");
 		}
+		
+		try {
+			EasyButton b = new EasyButton("buttonUndo", 480, 220, 90, 30, new EasyButtonAction() {
+				public void on_press()
+				{
+					m_game.undo();
+				}
+			});
+			m_gui.addButton(b);
+		}
+		catch (Exception ex) {}
 	}
 	
 	public GameGUI getGUI()

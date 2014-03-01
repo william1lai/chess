@@ -2,7 +2,7 @@ package chess;
 
 import java.util.Stack;
 
-public abstract class Game
+public abstract class Game implements Runnable
 {
 	protected GameApplet m_applet;
 	

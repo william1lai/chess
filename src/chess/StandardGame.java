@@ -7,6 +7,7 @@ import java.util.Stack;
 public class StandardGame extends Game
 {
 	private StandardGameGraphics m_graphics;
+	private StandardGameGUI m_gui;
 	private StandardBoard m_game_board;
 	private boolean m_canUndo;
 	
@@ -15,9 +16,10 @@ public class StandardGame extends Game
 		m_applet = applet;
 	}
 
-	public void init(GameGraphics graphics)
+	public void init(GameGraphics graphics, GameGUI gui)
 	{
 		m_graphics = (StandardGameGraphics)graphics;
+		m_gui = (StandardGameGUI)gui;
 		m_game_board = new StandardBoard(this);
 		m_canUndo = false;
 		movesHistory = new Stack<String>();
@@ -133,6 +135,16 @@ public class StandardGame extends Game
 
 		JOptionPane.showMessageDialog(null, reason, "Game has ended", JOptionPane.PLAIN_MESSAGE);
 		System.out.println("The game has ended.");
+	}
+	
+	public StandardGameGraphics getGraphics()
+	{
+		return m_graphics;
+	}
+	
+	public StandardGameGUI getGUI()
+	{
+		return m_gui;
 	}
 
 	public StandardBoard getBoard()

@@ -28,8 +28,9 @@ public class LosersHumanPlayer extends HumanPlayer
 
 	public void mousePressed(MouseEvent e)
 	{
-		int row = LosersGameGraphics.getRow(e.getY());
-		int col = LosersGameGraphics.getCol(e.getX());
+		LosersGame g = ((LosersGame)getGame());
+		int row = g.getGraphics().getRow(e.getY());
+		int col = g.getGraphics().getCol(e.getX());
 
 		//Right-click to deselect
 		if (e.getButton() == MouseEvent.BUTTON3)
@@ -37,7 +38,6 @@ public class LosersHumanPlayer extends HumanPlayer
 		//Left-click to select
 		else if (e.getButton() == MouseEvent.BUTTON1 && row >= 0 && col >= 0) 
 		{
-			LosersGame g = ((LosersGame)getGame());
 			int sq = (7-row)*8 + (7-col);
 			LosersBoard lcb = g.getBoard();
 			char p = lcb.getPiece(row, col);

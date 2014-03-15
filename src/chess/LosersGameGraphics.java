@@ -9,8 +9,7 @@ import javax.imageio.ImageIO;
 public class LosersGameGraphics extends GameGraphics
 {
 	private LosersGame m_game;
-	private LosersGameGUI m_gui;
-	private static int m_boardOffsetX, m_boardOffsetY, m_blockSize;
+	private int m_boardOffsetX, m_boardOffsetY, m_blockSize;
 	private Map<String, BufferedImage> m_gPieces;
 	private BufferedImage m_gMovable, m_gSelected;
 	private BufferedImage[] m_gBlocks = new BufferedImage[2];
@@ -26,7 +25,6 @@ public class LosersGameGraphics extends GameGraphics
 	public void init(Game game)
 	{
 		m_game = (LosersGame)game;
-		m_gui = new LosersGameGUI();
 		m_boardOffsetY = Definitions.HEIGHT/8;
 		m_boardOffsetX = Definitions.HEIGHT/8;
 		m_blockSize = Definitions.HEIGHT*3/4 / Definitions.NUMROWS;
@@ -55,22 +53,7 @@ public class LosersGameGraphics extends GameGraphics
 		catch (Exception ex) {
 			System.out.println("Error loading fonts!");
 		}
-		
-		try {
-			EasyButton b = new EasyButton("buttonUndo", 480, 220, 90, 30, new EasyButtonAction() {
-				public void on_press()
-				{
-					m_game.undo();
-				}
-			});
-			m_gui.addButton(b);
-		}
-		catch (Exception ex) {}
-	}
-	
-	public GameGUI getGUI()
-	{
-		return m_gui;
+
 	}
 	
     public Dimension getPreferredSize()
@@ -194,8 +177,8 @@ public class LosersGameGraphics extends GameGraphics
 	
 	public void drawPieceInBoard(Graphics g, char p, int r, int c)
 	{
-		int y = LosersGameGraphics.getY(r);
-		int x = LosersGameGraphics.getX(c);
+		int y = getY(r);
+		int x = getX(c);
 		drawPiece(g, p, x, y);
 	}
 	
@@ -245,13 +228,13 @@ public class LosersGameGraphics extends GameGraphics
 	
 	public void drawGUI(Graphics g)
 	{
-		for (EasyButton b : m_gui.getButtons()) {
+		for (EasyButton b : m_game.getGUI().getButtons()) {
 			BufferedImage img = (b.isPressed() ? b.getPressedImg() : b.getReleasedImg());
 			g.drawImage(img, b.getX(), b.getY(), b.getW(), b.getH(), null);
 		}
 	}
 	
-	public static int getRow(int y)
+	public int getRow(int y)
 	{
 		int relativeY = y - m_boardOffsetY;
 		if (relativeY < 0 || relativeY >= Definitions.NUMROWS*m_blockSize) {
@@ -260,7 +243,7 @@ public class LosersGameGraphics extends GameGraphics
 		return relativeY / m_blockSize;
 	}
 	
-	public static int getCol(int x)
+	public int getCol(int x)
 	{
 		int relativeX = x - m_boardOffsetX;
 		if (relativeX < 0 || relativeX >= Definitions.NUMCOLS*m_blockSize) {
@@ -269,13 +252,13 @@ public class LosersGameGraphics extends GameGraphics
 		return relativeX / m_blockSize;
 	}
 	
-	public static int getY(int row)
+	public int getY(int row)
 	{
 		if (row < 0 || row >= Definitions.NUMROWS) return -1;
 		return m_boardOffsetY + row*m_blockSize;
 	}
 	
-	public static int getX(int col)
+	public int getX(int col)
 	{
 		if (col < 0 || col >= Definitions.NUMCOLS) return -1;
 		return m_boardOffsetX + col*m_blockSize;
@@ -296,10 +279,10 @@ public class LosersGameGraphics extends GameGraphics
 			move = m;
 			traveler = b.getPiece(m.r0, m.c0);
 			incumbent = b.getPiece(m.rf, m.cf);
-			curY = LosersGameGraphics.getY(m.r0);
-			curX = LosersGameGraphics.getX(m.c0);
-			dY = ((double)LosersGameGraphics.getY(m.rf) - curY) / NUMTICKS;
-			dX = ((double)LosersGameGraphics.getX(m.cf) - curX) / NUMTICKS;
+			curY = getY(m.r0);
+			curX = getX(m.c0);
+			dY = ((double)getY(m.rf) - curY) / NUMTICKS;
+			dX = ((double)getX(m.cf) - curX) / NUMTICKS;
 		}
 		
 		public BufferedImage getFrame()

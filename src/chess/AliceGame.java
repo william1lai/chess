@@ -10,6 +10,7 @@ import java.util.Stack;
 public class AliceGame extends Game
 {
 	private AliceGameGraphics m_graphics;
+	private AliceGameGUI m_gui;
 	private AliceBoard m_game_board;
 	private boolean m_canUndo;
 	
@@ -18,9 +19,10 @@ public class AliceGame extends Game
 		m_applet = applet;
 	}
 
-	public void init(GameGraphics graphics)
+	public void init(GameGraphics graphics, GameGUI gui)
 	{
 		m_graphics = (AliceGameGraphics)graphics;
+		m_gui = (AliceGameGUI)gui;
 		m_game_board = new AliceBoard(this);
 		m_canUndo = false;
 		movesHistory = new Stack<String>();
@@ -137,6 +139,16 @@ public class AliceGame extends Game
 
 		JOptionPane.showMessageDialog(null, reason, "Game has ended", JOptionPane.PLAIN_MESSAGE);
 		System.out.println("The game has ended.");
+	}
+	
+	public AliceGameGraphics getGraphics()
+	{
+		return m_graphics;
+	}
+	
+	public AliceGameGUI getGUI()
+	{
+		return m_gui;
 	}
 
 	public AliceBoard getBoard()

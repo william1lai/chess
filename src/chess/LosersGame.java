@@ -7,6 +7,7 @@ import javax.swing.JOptionPane;
 public class LosersGame extends Game
 {
 	private LosersGameGraphics m_graphics;
+	private LosersGameGUI m_gui;
 	private LosersBoard m_game_board;
 	private boolean m_canUndo;
 	
@@ -15,9 +16,10 @@ public class LosersGame extends Game
 		m_applet = applet;
 	}
 
-	public void init(GameGraphics graphics)
+	public void init(GameGraphics graphics, GameGUI gui)
 	{
 		m_graphics = (LosersGameGraphics)graphics;
+		m_gui = (LosersGameGUI)gui;
 		m_game_board = new LosersBoard(this);
 		m_canUndo = false;
 		movesHistory = new Stack<String>();
@@ -129,7 +131,17 @@ public class LosersGame extends Game
 		JOptionPane.showMessageDialog(null, reason, "Game has ended", JOptionPane.PLAIN_MESSAGE);
 		System.out.println("The game has ended.");
 	}
-
+	
+	public LosersGameGraphics getGraphics()
+	{
+		return m_graphics;
+	}
+	
+	public LosersGameGUI getGUI()
+	{
+		return m_gui;
+	}
+	
 	public LosersBoard getBoard()
 	{
 		return m_game_board;

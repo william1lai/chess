@@ -28,15 +28,15 @@ public class StandardHumanPlayer extends HumanPlayer
 
 	public void mousePressed(MouseEvent e)
 	{		
-		int row = StandardGameGraphics.getRow(e.getY());
-		int col = StandardGameGraphics.getCol(e.getX());
+		StandardGame g = ((StandardGame)getGame());
+		int row = g.getGraphics().getRow(e.getY());
+		int col = g.getGraphics().getCol(e.getX());
 		//Right-click to deselect
 		if (e.getButton() == MouseEvent.BUTTON3)
 			deselect();
 		//Left-click to select
 		else if (e.getButton() == MouseEvent.BUTTON1 && row >= 0 && col >= 0) 
 		{
-			StandardGame g = ((StandardGame)getGame());
 			int sq = (7-row)*8 + (7-col);
 			StandardBoard scb = g.getBoard();
 			char p = scb.getPiece(row, col);

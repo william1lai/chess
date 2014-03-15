@@ -1,16 +1,35 @@
 package chess;
 
 import java.awt.event.FocusEvent;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 
 public class AliceGameGUI extends GameGUI
 {
+	AliceGame m_game;
 	ArrayList<EasyButton> m_buttons;
 	
-	public AliceGameGUI()
+	public AliceGameGUI(GameApplet applet)
 	{
+		m_applet = applet;
 		m_buttons = new ArrayList<EasyButton>();
+	}
+
+	public void init(Game game)
+	{
+		m_game = (AliceGame)game;
+		
+		try {
+			EasyButton b = new EasyButton("buttonUndo", 480, 220, 90, 30, new EasyButtonAction() {
+				public void on_press()
+				{
+					m_game.undo();
+				}
+			});
+			addButton(b);
+		}
+		catch (Exception ex) { System.out.println(ex.getMessage()); }
 	}
 	
 	public void addButton(EasyButton b)
@@ -51,16 +70,22 @@ public class AliceGameGUI extends GameGUI
 		}
 	}
 
-	public void mouseClicked(MouseEvent e) {}
-	public void mouseEntered(MouseEvent e) {}
-	public void mouseExited(MouseEvent e) {}
-
-	public void focusGained(FocusEvent e) {}
-
 	public void focusLost(FocusEvent e)
 	{
 		for (int i = 0; i < m_buttons.size(); i++)
 			m_buttons.get(i).release(false);
 	}
+
+	public void keyPressed(KeyEvent arg0)
+	{
+		
+	}
+
+	public void mouseClicked(MouseEvent e) {}
+	public void mouseEntered(MouseEvent e) {}
+	public void mouseExited(MouseEvent e) {}
+	public void focusGained(FocusEvent e) {}
+	public void keyReleased(KeyEvent arg0) {}
+	public void keyTyped(KeyEvent arg0) {}
 	
 }

@@ -13,6 +13,7 @@ public class GameApplet extends JApplet implements Runnable, MouseListener
 	private Thread m_thread;
 	private Game m_game;
 	private GameGraphics m_graphics;
+	private GameGUI m_gui;
 	private boolean m_cancel;
 
 	public void init()
@@ -21,12 +22,14 @@ public class GameApplet extends JApplet implements Runnable, MouseListener
 		if (m_cancel)
 			return;
 		
-		m_game.init(m_graphics);
+		m_game.init(m_graphics, m_gui);
 		m_graphics.init(m_game);
+		m_gui.init(m_game);
 		
 		add(m_graphics);
-		addMouseListener(m_graphics.getGUI());
-		addFocusListener(m_graphics.getGUI());
+		addMouseListener(m_gui);
+		addFocusListener(m_gui);
+		addKeyListener(m_gui);
 		
 		m_thread = new Thread(this);
 		m_thread.start();
@@ -41,18 +44,21 @@ public class GameApplet extends JApplet implements Runnable, MouseListener
 		{
 			m_game = new StandardGame(this);
 			m_graphics = new StandardGameGraphics(this);
+			m_gui = new StandardGameGUI(this);
 			return true;
 		}
 		if (input == "Loser's Chess")
 		{
 			m_game = new LosersGame(this);
 			m_graphics = new LosersGameGraphics(this);
+			m_gui = new LosersGameGUI(this);
 			return true;
 		}
 		if (input == "Alice Chess")
 		{
 			m_game = new AliceGame(this);
 			m_graphics = new AliceGameGraphics(this);
+			m_gui = new AliceGameGUI(this);
 			return true;
 		}
 		return false;

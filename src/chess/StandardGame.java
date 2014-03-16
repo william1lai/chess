@@ -294,7 +294,6 @@ public class StandardGame extends Game
 		{
 			getBoard().getData().m_fiftymoverulecount = 0; //reset counter
 		}
-
 		if (correspondingRookMove == null)
 		{
 			m_graphics.animateMove(newMove, getBoard());

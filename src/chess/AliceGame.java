@@ -200,7 +200,7 @@ public class AliceGame extends Game
 			castlingRow = 0;
 		}
 
-		Move correspondingRookMove = null; //if we have castling
+		AliceMove correspondingRookMove = null; //if we have castling
 		getBoard().getData().m_enpassantCol = -1; //default
 		if (Character.toLowerCase(movedPiece) == 'p')
 		{
@@ -240,11 +240,11 @@ public class AliceGame extends Game
 			{
 				if (kingMoveLength == 2) //kingside
 				{
-					correspondingRookMove = new Move(castlingRow, 7, castlingRow, 5);
+					correspondingRookMove = getBoard().new AliceMove(new Move(castlingRow, 7, castlingRow, 5), board);
 				}
 				else if (kingMoveLength == -2) //queenside
 				{
-					correspondingRookMove = new Move(castlingRow, 0, castlingRow, 3);
+					correspondingRookMove = getBoard().new AliceMove(new Move(castlingRow, 0, castlingRow, 3), board);
 				}
 			}
 		}
@@ -288,7 +288,7 @@ public class AliceGame extends Game
 			m_graphics.animateCastlingMoves(newMove, correspondingRookMove, getBoard());
 			getBoard().move(newMove.m, board);
 			getBoard().setTurn(Definitions.flip(getBoard().whoseTurn())); //to undo double flipping of moving king and then rook
-			getBoard().move(correspondingRookMove, board);
+			getBoard().move(correspondingRookMove.m, board);
 		}
 
 		if (Character.toLowerCase(movedPiece) == 'p')

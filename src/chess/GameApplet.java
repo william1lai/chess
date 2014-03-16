@@ -18,6 +18,8 @@ public class GameApplet extends JApplet implements Runnable, MouseListener
 
 	public void init()
 	{
+		setFocusable(true);
+		
 		m_cancel = !chooseGame();
 		if (m_cancel)
 			return;

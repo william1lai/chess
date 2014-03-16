@@ -76,16 +76,17 @@ public class AliceGameGUI extends GameGUI
 			m_buttons.get(i).release(false);
 	}
 
-	public void keyPressed(KeyEvent arg0)
+	public void keyPressed(KeyEvent e)
 	{
-		
+		if (e.getKeyCode() == KeyEvent.VK_RIGHT) m_game.getGraphics().setActiveBoard(1);
+		if (e.getKeyCode() == KeyEvent.VK_LEFT) m_game.getGraphics().setActiveBoard(0); 
 	}
 
 	public void mouseClicked(MouseEvent e) {}
 	public void mouseEntered(MouseEvent e) {}
 	public void mouseExited(MouseEvent e) {}
 	public void focusGained(FocusEvent e) {}
-	public void keyReleased(KeyEvent arg0) {}
-	public void keyTyped(KeyEvent arg0) {}
+	public void keyReleased(KeyEvent e) {}
+	public void keyTyped(KeyEvent e) {}
 	
 }

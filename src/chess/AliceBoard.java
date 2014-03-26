@@ -368,11 +368,14 @@ public class AliceBoard //really a board pair
 		long origMask = ~(1L << orig);
 		int dest = (7-m.rf)*8 + (7-m.cf);
 		long destMask = ~(1L << dest);
-
+		int otherboard = 0;
+		if (board == 0)
+			otherboard = 1;
+		
 		if ((m_boards[board].getPawns() & (1L << orig)) != 0)
 		{
 			m_boards[board].setPawns(m_boards[board].getPawns() & origMask);
-			m_boards[board].setPawns(m_boards[board].getPawns() | (1L << dest));
+			m_boards[otherboard].setPawns(m_boards[otherboard].getPawns() | (1L << dest));
 			m_boards[board].setKnights(m_boards[board].getKnights() & ~(1L << dest));
 			m_boards[board].setBishops(m_boards[board].getBishops() & ~(1L << dest));
 			m_boards[board].setRooks(m_boards[board].getRooks() & ~(1L << dest));
@@ -382,7 +385,7 @@ public class AliceBoard //really a board pair
 		else if ((m_boards[board].getKnights() & (1L << orig)) != 0)
 		{
 			m_boards[board].setKnights(m_boards[board].getKnights() & origMask);
-			m_boards[board].setKnights(m_boards[board].getKnights() | (1L << dest));
+			m_boards[otherboard].setKnights(m_boards[otherboard].getKnights() | (1L << dest));
 			m_boards[board].setPawns(m_boards[board].getPawns() & ~(1L << dest));
 			m_boards[board].setBishops(m_boards[board].getBishops() & ~(1L << dest));
 			m_boards[board].setRooks(m_boards[board].getRooks() & ~(1L << dest));
@@ -392,7 +395,7 @@ public class AliceBoard //really a board pair
 		else if ((m_boards[board].getBishops() & (1L << orig)) != 0)
 		{
 			m_boards[board].setBishops(m_boards[board].getBishops() & origMask);
-			m_boards[board].setBishops(m_boards[board].getBishops() | (1L << dest));
+			m_boards[otherboard].setBishops(m_boards[otherboard].getBishops() | (1L << dest));
 			m_boards[board].setPawns(m_boards[board].getPawns() & ~(1L << dest));
 			m_boards[board].setKnights(m_boards[board].getKnights() & ~(1L << dest));
 			m_boards[board].setRooks(m_boards[board].getRooks() & ~(1L << dest));
@@ -402,7 +405,7 @@ public class AliceBoard //really a board pair
 		else if ((m_boards[board].getRooks() & (1L << orig)) != 0)
 		{
 			m_boards[board].setRooks(m_boards[board].getRooks() & origMask);
-			m_boards[board].setRooks(m_boards[board].getRooks() | (1L << dest));
+			m_boards[otherboard].setRooks(m_boards[otherboard].getRooks() | (1L << dest));
 			m_boards[board].setPawns(m_boards[board].getPawns() & ~(1L << dest));
 			m_boards[board].setKnights(m_boards[board].getKnights() & ~(1L << dest));
 			m_boards[board].setBishops(m_boards[board].getBishops() & ~(1L << dest));
@@ -412,7 +415,7 @@ public class AliceBoard //really a board pair
 		else if ((m_boards[board].getQueens() & (1L << orig)) != 0)
 		{
 			m_boards[board].setQueens(m_boards[board].getQueens() & origMask);
-			m_boards[board].setQueens(m_boards[board].getQueens() | (1L << dest));
+			m_boards[otherboard].setQueens(m_boards[otherboard].getQueens() | (1L << dest));
 			m_boards[board].setPawns(m_boards[board].getPawns() & ~(1L << dest));
 			m_boards[board].setKnights(m_boards[board].getKnights() & ~(1L << dest));
 			m_boards[board].setBishops(m_boards[board].getBishops() & ~(1L << dest));
@@ -422,7 +425,7 @@ public class AliceBoard //really a board pair
 		else if ((m_boards[board].getKings() & (1L << orig)) != 0)
 		{
 			m_boards[board].setKings(m_boards[board].getKings() & origMask);
-			m_boards[board].setKings(m_boards[board].getKings() | (1L << dest));
+			m_boards[otherboard].setKings(m_boards[otherboard].getKings() | (1L << dest));
 			m_boards[board].setPawns(m_boards[board].getPawns() & ~(1L << dest));
 			m_boards[board].setKnights(m_boards[board].getKnights() & ~(1L << dest));
 			m_boards[board].setBishops(m_boards[board].getBishops() & ~(1L << dest));
@@ -436,13 +439,13 @@ public class AliceBoard //really a board pair
 		{
 			m_boards[board].setWhite(m_boards[board].getWhite() & origMask);
 			m_boards[board].setBlack(m_boards[board].getBlack() & destMask);
-			m_boards[board].setWhite(m_boards[board].getWhite() | (1L << dest));
+			m_boards[otherboard].setWhite(m_boards[otherboard].getWhite() | (1L << dest));
 		}
 		else
 		{
 			m_boards[board].setBlack(m_boards[board].getBlack() & origMask);
 			m_boards[board].setWhite(m_boards[board].getWhite() & destMask);
-			m_boards[board].setBlack(m_boards[board].getBlack() | (1L << dest));
+			m_boards[otherboard].setBlack(m_boards[otherboard].getBlack() | (1L << dest));
 		}		
 		m_turn = Definitions.flip(m_turn);
 	}
@@ -502,7 +505,7 @@ public class AliceBoard //really a board pair
 			oppkingsq = -1;
 			if (kings != 0)
 				kingsq = (int)((Math.log(kings)/Math.log(2)) + 0.5);
-			else
+			if (oppkings != 0)
 				oppkingsq = (int)((Math.log(oppkings)/ Math.log(2)) + 0.5);
 
 			for (int r = 0; r < 8; r++)
@@ -532,7 +535,7 @@ public class AliceBoard //really a board pair
 									AliceBoard temp = this.clone();
 									int dr = 7 - (dsq / 8);
 									int dc = 7 - (dsq % 8);
-									temp.move(new Move(r, c, dr, dc), boardno);
+									temp.m_boards[boardno].move(new Move(r, c, dr, dc));
 									temp.removePiece(dr, dc, boardno);
 
 									if (!Definitions.isAttacked(temp.m_boards[boardno], kingsq, Definitions.flip(m_turn)) && 
@@ -552,7 +555,7 @@ public class AliceBoard //really a board pair
 									AliceBoard temp = this.clone();
 									int dr = 7 - (dsq / 8);
 									int dc = 7 - (dsq % 8);
-									temp.move(new Move(r, c, dr, dc), boardno);
+									temp.m_boards[boardno].move(new Move(r, c, dr, dc));
 									temp.removePiece(dr, dc, boardno);
 
 									if (!Definitions.isAttacked(temp.m_boards[boardno], kingsq, Definitions.flip(m_turn)) && 
@@ -571,7 +574,7 @@ public class AliceBoard //really a board pair
 									AliceBoard temp = this.clone();
 									int dr = 7 - (dsq / 8);
 									int dc = 7 - (dsq % 8);
-									temp.move(new Move(r, c, dr, dc), boardno);
+									temp.m_boards[boardno].move(new Move(r, c, dr, dc));
 									temp.removePiece(dr, dc, boardno);
 
 									if (!Definitions.isAttacked(temp.m_boards[boardno], kingsq, Definitions.flip(m_turn)) && 
@@ -592,7 +595,7 @@ public class AliceBoard //really a board pair
 									AliceBoard temp = this.clone();
 									int dr = 7 - (dsq / 8);
 									int dc = 7 - (dsq % 8);
-									temp.move(new Move(r, c, dr, dc), boardno);
+									temp.m_boards[boardno].move(new Move(r, c, dr, dc));
 									temp.removePiece(dr, dc, boardno);
 
 									if (!Definitions.isAttacked(temp.m_boards[boardno], kingsq, Definitions.flip(m_turn)) && 
@@ -618,7 +621,7 @@ public class AliceBoard //really a board pair
 									AliceBoard temp = this.clone();
 									int dr = 7 - (dsq / 8);
 									int dc = 7 - (dsq % 8);
-									temp.move(new Move(r, c, dr, dc), boardno);
+									temp.m_boards[boardno].move(new Move(r, c, dr, dc));
 									temp.removePiece(dr, dc, boardno);
 
 									if (!Definitions.isAttacked(temp.m_boards[boardno], kingsq, Definitions.flip(m_turn)) && 
@@ -638,7 +641,7 @@ public class AliceBoard //really a board pair
 									AliceBoard temp = this.clone();
 									int dr = 7 - (dsq / 8);
 									int dc = 7 - (dsq % 8);
-									temp.move(new Move(r, c, dr, dc), boardno);
+									temp.m_boards[boardno].move(new Move(r, c, dr, dc));
 									temp.removePiece(dr, dc, boardno);
 
 									if (!Definitions.isAttacked(temp.m_boards[boardno], kingsq, Definitions.flip(m_turn)) && 
@@ -657,7 +660,7 @@ public class AliceBoard //really a board pair
 									AliceBoard temp = this.clone();
 									int dr = 7 - (dsq / 8);
 									int dc = 7 - (dsq % 8);
-									temp.move(new Move(r, c, dr, dc), boardno);
+									temp.m_boards[boardno].move(new Move(r, c, dr, dc));
 									temp.removePiece(dr, dc, boardno);
 
 									if (!Definitions.isAttacked(temp.m_boards[boardno], kingsq, Definitions.flip(m_turn)) && 
@@ -678,7 +681,7 @@ public class AliceBoard //really a board pair
 									AliceBoard temp = this.clone();
 									int dr = 7 - (dsq / 8);
 									int dc = 7 - (dsq % 8);
-									temp.move(new Move(r, c, dr, dc), boardno);
+									temp.m_boards[boardno].move(new Move(r, c, dr, dc));
 									temp.removePiece(dr, dc, boardno);
 
 									if (!Definitions.isAttacked(temp.m_boards[boardno], kingsq, Definitions.flip(m_turn)) && 
@@ -703,7 +706,7 @@ public class AliceBoard //really a board pair
 									AliceBoard temp = this.clone();
 									int dr = 7 - (i / 8);
 									int dc = 7 - (i % 8);
-									temp.move(new Move(r, c, dr, dc), boardno);
+									temp.m_boards[boardno].move(new Move(r, c, dr, dc));
 									temp.removePiece(dr, dc, boardno);
 
 									if (!Definitions.isAttacked(temp.m_boards[boardno], kingsq, Definitions.flip(m_turn)) && 
@@ -728,7 +731,7 @@ public class AliceBoard //really a board pair
 									AliceBoard temp = this.clone();
 									int dr = 7 - (i / 8);
 									int dc = 7 - (i % 8);
-									temp.move(new Move(r, c, dr, dc), boardno);
+									temp.m_boards[boardno].move(new Move(r, c, dr, dc));
 									temp.removePiece(dr, dc, boardno);
 
 									if (!Definitions.isAttacked(temp.m_boards[boardno], kingsq, Definitions.flip(m_turn)) && 
@@ -753,7 +756,7 @@ public class AliceBoard //really a board pair
 									AliceBoard temp = this.clone();
 									int dr = 7 - (i / 8);
 									int dc = 7 - (i % 8);
-									temp.move(new Move(r, c, dr, dc), boardno);
+									temp.m_boards[boardno].move(new Move(r, c, dr, dc));
 									temp.removePiece(dr, dc, boardno);
 
 									if (!Definitions.isAttacked(temp.m_boards[boardno], kingsq, Definitions.flip(m_turn)) && 
@@ -778,7 +781,7 @@ public class AliceBoard //really a board pair
 									AliceBoard temp = this.clone();
 									int dr = 7 - (i / 8);
 									int dc = 7 - (i % 8);
-									temp.move(new Move(r, c, dr, dc), boardno);
+									temp.m_boards[boardno].move(new Move(r, c, dr, dc));
 									temp.removePiece(dr, dc, boardno);
 
 									if (!Definitions.isAttacked(temp.m_boards[boardno], kingsq, Definitions.flip(m_turn)) && 
@@ -803,7 +806,7 @@ public class AliceBoard //really a board pair
 									AliceBoard temp = this.clone();
 									int dr = 7 - (i / 8);
 									int dc = 7 - (i % 8);
-									temp.move(new Move(r, c, dr, dc), boardno);
+									temp.m_boards[boardno].move(new Move(r, c, dr, dc));
 									temp.removePiece(dr, dc, boardno);
 
 									if (!Definitions.isAttacked(temp.m_boards[boardno], i, Definitions.flip(m_turn)) && 

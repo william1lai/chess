@@ -10,7 +10,6 @@ import chess.AliceBoard.AliceMove;
 @SuppressWarnings("serial")
 public class AliceGameGraphics extends GameGraphics
 {
-
 	private AliceGame m_game;
 	private int m_boardOffsetX, m_boardOffsetY, m_blockSize;
 	private Map<String, BufferedImage> m_gPieces;
@@ -70,6 +69,11 @@ public class AliceGameGraphics extends GameGraphics
     	m_activeBoard = board;
     }
     
+    public int getActiveBoard()
+    {
+    	return m_activeBoard;
+    }
+    
     public void updateGameState()
     {
     	m_movableBlocks = 0;
@@ -84,7 +88,7 @@ public class AliceGameGraphics extends GameGraphics
 		}
 		if (m_game.p2 instanceof AliceHumanPlayer)
 		{
-			AliceHumanPlayer p2 = (AliceHumanPlayer)m_game.p1;
+			AliceHumanPlayer p2 = (AliceHumanPlayer)m_game.p2;
 			int sq = p2.getSelected();
 			updateMovable(b.allMovesPiece(b.toRow(sq), b.toCol(sq)));
 			updateSelected(sq);
@@ -94,8 +98,11 @@ public class AliceGameGraphics extends GameGraphics
 	private void updateMovable(ArrayList<AliceMove> moves)
 	{
 		for (AliceMove am : moves) {
-			int sq = m_game.getBoard().toSq(am.m.rf, am.m.cf);
-			m_movableBlocks |= (1L << sq);
+			if (am.board == m_activeBoard)
+			{
+				int sq = m_game.getBoard().toSq(am.m.rf, am.m.cf);
+				m_movableBlocks |= (1L << sq);
+			}
 		}
 	}
 	

@@ -37,7 +37,7 @@ public class AliceHumanPlayer extends HumanPlayer
 	public void mousePressed(MouseEvent e)
 	{
 		AliceGame g = ((AliceGame)getGame());
-		int board = 0; //HARD CODE
+		int board = g.getGraphics().getActiveBoard();
 		int row = g.getGraphics().getRow(e.getY());
 		int col = g.getGraphics().getCol(e.getX());
 		//Right-click to deselect
@@ -48,10 +48,10 @@ public class AliceHumanPlayer extends HumanPlayer
 		{
 			int sq = (7-row)*8 + (7-col);
 			AliceBoard acb = g.getBoard();
-			char p = acb.getPiece(row, col, 0); //hardcoded
+			char p = acb.getPiece(row, col, board);
 			if (p != 0 && ((Character.isUpperCase(p)) ^ (acb.whoseTurn() == Definitions.Color.BLACK))) //colors match
 			{
-				select(0, sq); //hardcoded
+				select(g.getGraphics().getActiveBoard(), sq);
 			}
 			else if (m_selected != -1)
 			{

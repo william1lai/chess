@@ -11,13 +11,13 @@ public class AliceBoard //really a board pair
 	{
 		Move m;
 		int board;
-		
+
 		public AliceMove(Move mv, int b)
 		{
 			m = mv;
 			board = b;
 		}
-		
+
 		AliceMove(AliceMove other)
 		{
 			m.r0 = other.m.r0;
@@ -26,13 +26,13 @@ public class AliceBoard //really a board pair
 			m.cf = other.m.cf;
 			board = other.board;
 		}
-		
+
 		public String toString()
 		{
 			return "" + (char)(m.c0 + 'a') + "" + (8 - m.r0) + "-" + (char)(m.cf + 'a') 
 					+ "" + (8 - m.rf) + "[" + (char)('0' + board) + "]";
 		}
-		
+
 		public boolean equals(Object obj) //we must have this so that the contains() method works
 		{
 			if (obj instanceof AliceMove)
@@ -44,7 +44,7 @@ public class AliceBoard //really a board pair
 			return false;
 		}
 	}
-	
+
 	public class GameData
 	{
 		public int m_enpassantCol; //the column (0-7) of the pawn to move two spaces last turn, -1 if no pawn moved two spaces
@@ -95,7 +95,7 @@ public class AliceBoard //really a board pair
 		m_boards = new StandardBoard[2];
 		m_boards[0] = new StandardBoard();
 		m_boards[1] = new StandardBoard();
-		
+
 		m_boards[0].setWhite(0x000000000000FFFFL);
 		m_boards[0].setBlack(0xFFFF000000000000L);
 		m_boards[0].setPawns(0x00FF00000000FF00L);
@@ -123,7 +123,7 @@ public class AliceBoard //really a board pair
 		m_boards = new StandardBoard[2];
 		m_boards[0] = new StandardBoard();
 		m_boards[1] = new StandardBoard();
-		
+
 		m_boards[0].setWhite(other.m_boards[0].getWhite());
 		m_boards[0].setBlack(other.m_boards[0].getBlack());
 		m_boards[0].setPawns(other.m_boards[0].getPawns());
@@ -154,7 +154,7 @@ public class AliceBoard //really a board pair
 			return null;
 		return m_boards[board];
 	}
-	
+
 	public char getPiece(int r, int c, int board) //returns 0 if no piece exists
 	{
 		long bit = 1L << ((7-r)*8 + (7-c));
@@ -371,7 +371,7 @@ public class AliceBoard //really a board pair
 		int otherboard = 0;
 		if (board == 0)
 			otherboard = 1;
-		
+
 		if ((m_boards[board].getPawns() & (1L << orig)) != 0)
 		{
 			m_boards[board].setPawns(m_boards[board].getPawns() & origMask & ~(1L << dest)); //PxP now can't have pawn still exist on dest
@@ -989,67 +989,70 @@ public class AliceBoard //really a board pair
 		return str;
 	}
 
-	public String toFEN(boolean complete, int board)
+	public String toFEN(boolean complete)
 	{
 		String FEN = "";
-		for (int r = 0; r < Definitions.NUMROWS; r++)
-		{
-			for (int c = 0; c < Definitions.NUMCOLS; c++)
+		for (int board = 0; board <= 1; board++)
+			for (int r = 0; r < Definitions.NUMROWS; r++)
 			{
-				int count = 0; //count up consecutive empty squares
-				char p = m_boards[board].getPiece(r, c);
-
-				if (p == 0)
+				for (int c = 0; c < Definitions.NUMCOLS; c++)
 				{
-					count++;
-					c++;
-					p = m_boards[board].getPiece(r, c);
-					while (p == 0 && c < Definitions.NUMCOLS)
+					int count = 0; //count up consecutive empty squares
+					char p = m_boards[board].getPiece(r, c);
+
+					if (p == 0)
 					{
 						count++;
 						c++;
 						p = m_boards[board].getPiece(r, c);
-					}
-					c--; //we want to look at this piece in the next iteration
-					FEN = FEN + count;
-				}
-				else
-				{
-					if (Character.isUpperCase(p)) //White
-					{
-						if (Character.toLowerCase(p) == 'p')
-							FEN = FEN + "P";
-						else if (Character.toLowerCase(p) == 'n')
-							FEN = FEN + "N";
-						else if (Character.toLowerCase(p) == 'b')
-							FEN = FEN + "B";
-						else if (Character.toLowerCase(p) == 'r')
-							FEN = FEN + "R";
-						else if (Character.toLowerCase(p) == 'q')
-							FEN = FEN + "Q";
-						else if (Character.toLowerCase(p) == 'k')
-							FEN = FEN + "K";
+						while (p == 0 && c < Definitions.NUMCOLS)
+						{
+							count++;
+							c++;
+							p = m_boards[board].getPiece(r, c);
+						}
+						c--; //we want to look at this piece in the next iteration
+						FEN = FEN + count;
 					}
 					else
 					{
-						if (Character.toLowerCase(p) == 'p')
-							FEN = FEN + "p";
-						else if (Character.toLowerCase(p) == 'n')
-							FEN = FEN + "n";
-						else if (Character.toLowerCase(p) == 'b')
-							FEN = FEN + "b";
-						else if (Character.toLowerCase(p) == 'r')
-							FEN = FEN + "r";
-						else if (Character.toLowerCase(p) == 'q')
-							FEN = FEN + "q";
-						else if (Character.toLowerCase(p) == 'k')
-							FEN = FEN + "k";
+						if (Character.isUpperCase(p)) //White
+						{
+							if (Character.toLowerCase(p) == 'p')
+								FEN = FEN + "P";
+							else if (Character.toLowerCase(p) == 'n')
+								FEN = FEN + "N";
+							else if (Character.toLowerCase(p) == 'b')
+								FEN = FEN + "B";
+							else if (Character.toLowerCase(p) == 'r')
+								FEN = FEN + "R";
+							else if (Character.toLowerCase(p) == 'q')
+								FEN = FEN + "Q";
+							else if (Character.toLowerCase(p) == 'k')
+								FEN = FEN + "K";
+						}
+						else
+						{
+							if (Character.toLowerCase(p) == 'p')
+								FEN = FEN + "p";
+							else if (Character.toLowerCase(p) == 'n')
+								FEN = FEN + "n";
+							else if (Character.toLowerCase(p) == 'b')
+								FEN = FEN + "b";
+							else if (Character.toLowerCase(p) == 'r')
+								FEN = FEN + "r";
+							else if (Character.toLowerCase(p) == 'q')
+								FEN = FEN + "q";
+							else if (Character.toLowerCase(p) == 'k')
+								FEN = FEN + "k";
+						}
 					}
 				}
+				if (r != 7) //last row doesn't need slash
+					FEN = FEN + "/";
+				else if (board == 0) //last row of board 0 should have an indicator; we'll use '$'
+					FEN = FEN + "=";
 			}
-			if (r != 7) //last row doesn't need slash
-				FEN = FEN + "/";
-		}
 
 		String tstr = "w";
 		if (whoseTurn() == Definitions.Color.BLACK)
@@ -1090,10 +1093,12 @@ public class AliceBoard //really a board pair
 		return FEN;
 	}
 
-	public void FENtoPosition(String srcFEN, int board)
+	public void FENtoPosition(String srcFEN)
 	{
-		String[] FEN = srcFEN.split("/");
-		String details = FEN[7].split(" ", 2)[1];
+		String[] boards = srcFEN.split("=");
+		String[] FEN0 = boards[0].split("/");
+		String[] FEN1 = boards[1].split("/");
+		String details = FEN1[7].split(" ", 2)[1];
 
 		m_data.m_whiteCanCastleQueenside = false;
 		m_data.m_whiteCanCastleKingside = false;
@@ -1137,29 +1142,39 @@ public class AliceBoard //really a board pair
 		m_data.m_fiftymoverulecount = Integer.parseInt(detailElems[3]);
 		m_data.m_turncount = Integer.parseInt(detailElems[4]);
 
-		clearBoard(board);
-		for (int r = 0; r < 8; r++)
+		clearBoard(0);
+		clearBoard(1);
+		for (int board = 0; board <= 1; board++)
 		{
-			String rFEN = FEN[r];
-			int index = 0;
-			for (int c = 0; c < 8; c++, index++)
+			String[] FEN;
+			if (board == 0)
+				FEN = FEN0;
+			else
+				FEN = FEN1;
+			
+			for (int r = 0; r < 8; r++)
 			{
-				char p = rFEN.charAt(index);
-
-				int emptysquares = p - '1';
-				if (emptysquares >= 0 && emptysquares <= 8)
+				String rFEN = FEN[r];
+				int index = 0;
+				for (int c = 0; c < 8; c++, index++)
 				{
-					c = c + emptysquares; //skip the empty squares, remember that the loop increments c by 1
-					continue;
+					char p = rFEN.charAt(index);
+					int emptysquares = p - '1';
+
+					if (emptysquares >= 0 && emptysquares <= 8)
+					{
+						c = c + emptysquares; //skip the empty squares, remember that the loop increments c by 1
+						continue;
+					}
+
+					Definitions.Color color = Definitions.Color.WHITE;
+					if (Character.isLowerCase(p))
+					{
+						color = Definitions.Color.BLACK;
+					}				
+
+					placePiece(p, color, r, c, board);
 				}
-
-				Definitions.Color color = Definitions.Color.WHITE;
-				if (Character.isLowerCase(p))
-				{
-					color = Definitions.Color.BLACK;
-				}				
-
-				placePiece(p, color, r, c, board);
 			}
 		}
 	}

@@ -99,7 +99,7 @@ public class AliceGame extends Game
 			if (!m_graphics.isAnimating() && cur.isDone())
 			{
 				m_canUndo = false;
-				//movesHistory.push(m_game_board.toFEN(true)); //TODO
+				movesHistory.push(m_game_board.toFEN(true));
 				Move m = cur.getMove();
 				int board = m_graphics.getActiveBoard();
 				AliceMove am = m_game_board.new AliceMove(m, board);
@@ -162,22 +162,15 @@ public class AliceGame extends Game
 		next.promptMove();
 	}
 
-	//TODO
-	public static Move algebraicToMove(Definitions.Color color, String algebraic) //STUB
-	{
-		return new Move(0, 0, 0, 0);
-	}
-
 	public void undo()
 	{
 		if (movesHistory.size() >= 2 && m_canUndo)
 		{
 			m_game_board.decrementTurncount();
-
 			movesHistory.pop();
 			String returnMove = movesHistory.pop();
 
-			//m_game_board.FENtoPosition(returnMove); //TODO
+			m_game_board.FENtoPosition(returnMove);
 		}
 	}
 

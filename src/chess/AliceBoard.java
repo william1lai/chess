@@ -374,7 +374,7 @@ public class AliceBoard //really a board pair
 		
 		if ((m_boards[board].getPawns() & (1L << orig)) != 0)
 		{
-			m_boards[board].setPawns(m_boards[board].getPawns() & origMask);
+			m_boards[board].setPawns(m_boards[board].getPawns() & origMask & ~(1L << dest)); //PxP now can't have pawn still exist on dest
 			m_boards[otherboard].setPawns(m_boards[otherboard].getPawns() | (1L << dest));
 			m_boards[board].setKnights(m_boards[board].getKnights() & ~(1L << dest));
 			m_boards[board].setBishops(m_boards[board].getBishops() & ~(1L << dest));
@@ -384,7 +384,7 @@ public class AliceBoard //really a board pair
 		}
 		else if ((m_boards[board].getKnights() & (1L << orig)) != 0)
 		{
-			m_boards[board].setKnights(m_boards[board].getKnights() & origMask);
+			m_boards[board].setKnights(m_boards[board].getKnights() & origMask & ~(1L << dest));
 			m_boards[otherboard].setKnights(m_boards[otherboard].getKnights() | (1L << dest));
 			m_boards[board].setPawns(m_boards[board].getPawns() & ~(1L << dest));
 			m_boards[board].setBishops(m_boards[board].getBishops() & ~(1L << dest));
@@ -394,7 +394,7 @@ public class AliceBoard //really a board pair
 		}
 		else if ((m_boards[board].getBishops() & (1L << orig)) != 0)
 		{
-			m_boards[board].setBishops(m_boards[board].getBishops() & origMask);
+			m_boards[board].setBishops(m_boards[board].getBishops() & origMask & ~(1L << dest));
 			m_boards[otherboard].setBishops(m_boards[otherboard].getBishops() | (1L << dest));
 			m_boards[board].setPawns(m_boards[board].getPawns() & ~(1L << dest));
 			m_boards[board].setKnights(m_boards[board].getKnights() & ~(1L << dest));
@@ -404,7 +404,7 @@ public class AliceBoard //really a board pair
 		}
 		else if ((m_boards[board].getRooks() & (1L << orig)) != 0)
 		{
-			m_boards[board].setRooks(m_boards[board].getRooks() & origMask);
+			m_boards[board].setRooks(m_boards[board].getRooks() & origMask & ~(1L << dest));
 			m_boards[otherboard].setRooks(m_boards[otherboard].getRooks() | (1L << dest));
 			m_boards[board].setPawns(m_boards[board].getPawns() & ~(1L << dest));
 			m_boards[board].setKnights(m_boards[board].getKnights() & ~(1L << dest));
@@ -414,7 +414,7 @@ public class AliceBoard //really a board pair
 		}
 		else if ((m_boards[board].getQueens() & (1L << orig)) != 0)
 		{
-			m_boards[board].setQueens(m_boards[board].getQueens() & origMask);
+			m_boards[board].setQueens(m_boards[board].getQueens() & origMask & ~(1L << dest));
 			m_boards[otherboard].setQueens(m_boards[otherboard].getQueens() | (1L << dest));
 			m_boards[board].setPawns(m_boards[board].getPawns() & ~(1L << dest));
 			m_boards[board].setKnights(m_boards[board].getKnights() & ~(1L << dest));
@@ -424,7 +424,7 @@ public class AliceBoard //really a board pair
 		}
 		else if ((m_boards[board].getKings() & (1L << orig)) != 0)
 		{
-			m_boards[board].setKings(m_boards[board].getKings() & origMask);
+			m_boards[board].setKings(m_boards[board].getKings() & origMask & ~(1L << dest));
 			m_boards[otherboard].setKings(m_boards[otherboard].getKings() | (1L << dest));
 			m_boards[board].setPawns(m_boards[board].getPawns() & ~(1L << dest));
 			m_boards[board].setKnights(m_boards[board].getKnights() & ~(1L << dest));

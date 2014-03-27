@@ -101,7 +101,7 @@ public class AliceGame extends Game
 				m_canUndo = false;
 				//movesHistory.push(m_game_board.toFEN(true)); //TODO
 				Move m = cur.getMove();
-				int board = 0; //replace
+				int board = m_graphics.getActiveBoard();
 				AliceMove am = m_game_board.new AliceMove(m, board);
 				if (am.m == null)
 					break;
@@ -187,6 +187,9 @@ public class AliceGame extends Game
 		int row = newMove.m.r0;
 		int col = newMove.m.c0;
 		int board = newMove.board;
+		int otherboard = 0;
+		if (board == 0)
+			otherboard = 1;
 		char movedPiece = getBoard().getPiece(row, col, board);
 		getBoard().getData().m_fiftymoverulecount++;
 
@@ -214,11 +217,11 @@ public class AliceGame extends Game
 			{
 				if (getBoard().whoseTurn() == Definitions.Color.WHITE)
 				{
-					getBoard().removePiece(3, newMove.m.cf, board); //not sure if this is best way, but "move" call will not erase piece
+					getBoard().removePiece(3, newMove.m.cf, otherboard); //not sure if this is best way, but "move" call will not erase piece
 				}
 				else
 				{
-					getBoard().removePiece(4, newMove.m.cf, board);
+					getBoard().removePiece(4, newMove.m.cf, otherboard);
 				}
 			}
 		}

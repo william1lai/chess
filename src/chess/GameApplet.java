@@ -1,11 +1,10 @@
 package chess;
 
-import java.awt.Graphics;
+import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 
-import javax.swing.JApplet;
-import javax.swing.JOptionPane;
+import javax.swing.*;
 
 @SuppressWarnings("serial")
 public class GameApplet extends JApplet implements Runnable, MouseListener
@@ -15,9 +14,11 @@ public class GameApplet extends JApplet implements Runnable, MouseListener
 	private GameGraphics m_graphics;
 	private GameGUI m_gui;
 	private boolean m_cancel;
+	private Dimension m_size;
 
 	public void init()
 	{
+		m_size = new Dimension(640, 480);
 		setFocusable(true);
 		
 		m_cancel = !chooseGame();
@@ -90,6 +91,10 @@ public class GameApplet extends JApplet implements Runnable, MouseListener
 		}
 	}
 
+	public Dimension getPreferredSize()
+	{
+		return m_size;
+	}
 	//Useless for now
 	public void mouseReleased(MouseEvent e) {}
 	public void mouseClicked(MouseEvent e) {}

@@ -9,7 +9,6 @@ public class Definitions
 {
 	public static final int HEIGHT = 480;
 	public static final int WIDTH = 640;
-	public static final int TICK = 30;
 	public static enum Color { WHITE, BLACK };
 	public static enum State { UNCHECKED, NORMAL, CHECKMATE, STALEMATE };
 	public static final int NUMROWS = 8;

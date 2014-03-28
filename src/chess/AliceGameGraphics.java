@@ -15,7 +15,7 @@ public class AliceGameGraphics extends GameGraphics
 	private Map<String, BufferedImage> m_gPieces;
 	private BufferedImage m_gMovable, m_gSelected;
 	private BufferedImage[] m_gBlocks = new BufferedImage[2];
-	private long m_movableBlocks, m_selectedBlocks;
+	private long[] m_movableBlocks = new long[2], m_selectedBlocks = new long[2];
 	private Thread m_moveAnimator;
 	private MoveAnimation m_moveAnimation;
 	private int m_activeBoard;
@@ -76,22 +76,24 @@ public class AliceGameGraphics extends GameGraphics
     
     public void updateGameState()
     {
-    	m_movableBlocks = 0;
-    	m_selectedBlocks = 0;
+    	m_movableBlocks[0] = 0;
+    	m_selectedBlocks[0] = 0;
+    	m_movableBlocks[1] = 0;
+    	m_selectedBlocks[1] = 0;
     	AliceBoard b = m_game.getBoard();
 		if (m_game.p1 instanceof AliceHumanPlayer)
 		{
 			AliceHumanPlayer p1 = (AliceHumanPlayer)m_game.p1;
 			int sq = p1.getSelected();
 			updateMovable(b.allMovesPiece(b.toRow(sq), b.toCol(sq)));
-			updateSelected(sq);
+			updateSelected(sq, p1.getSelectedBoard());
 		}
 		if (m_game.p2 instanceof AliceHumanPlayer)
 		{
 			AliceHumanPlayer p2 = (AliceHumanPlayer)m_game.p2;
 			int sq = p2.getSelected();
 			updateMovable(b.allMovesPiece(b.toRow(sq), b.toCol(sq)));
-			updateSelected(sq);
+			updateSelected(sq, p2.getSelectedBoard());
 		}
     }
 	
@@ -101,14 +103,14 @@ public class AliceGameGraphics extends GameGraphics
 			if (am.board == m_activeBoard)
 			{
 				int sq = m_game.getBoard().toSq(am.m.rf, am.m.cf);
-				m_movableBlocks |= (1L << sq);
+				m_movableBlocks[am.board] |= (1L << sq);
 			}
 		}
 	}
 	
-	private void updateSelected(int sq)
+	private void updateSelected(int sq, int board)
 	{
-		m_selectedBlocks |= (1L << sq);
+		m_selectedBlocks[board] |= (1L << sq);
 	}
 	
 	public void paintComponent(Graphics g)
@@ -178,17 +180,16 @@ public class AliceGameGraphics extends GameGraphics
 		int y = getY(row);
 		g.drawImage(m_gBlocks[(row+col)%2], x, y, m_blockSize, m_blockSize, null);
 		int sq = m_game.getBoard().toSq(row, col);
-		if ((m_selectedBlocks & (1L << sq)) > 0) {
+		if ((m_selectedBlocks[m_activeBoard] & (1L << sq)) > 0) {
 			g.drawImage(m_gSelected, x, y, m_blockSize, m_blockSize, null);
 		}
-		else if ((m_movableBlocks & (1L << sq)) > 0) {
+		else if ((m_movableBlocks[m_activeBoard] & (1L << sq)) > 0) {
 			g.drawImage(m_gMovable, x, y, m_blockSize, m_blockSize, null);
 		}
 	}
 	
 	public void drawPiece(Graphics g, char p, int x, int y, int board)
 	{
-		if (board != m_activeBoard) return;
 		String pstr;
 		if (Character.isUpperCase(p)) //White
 			pstr = "W" + p;
@@ -294,7 +295,8 @@ public class AliceGameGraphics extends GameGraphics
 		public double dX, dY;
 		public AliceMove move;
 		private BufferedImage m_frame;
-		public final int NUMTICKS = 10;
+		public final int NUMTICKS = 15;
+		public final int TICK = 25;
 		
 		public MoveAnimation(AliceMove m, Board b)
 		{
@@ -327,9 +329,17 @@ public class AliceGameGraphics extends GameGraphics
 					drawBlock(g, move.m.rf, move.m.cf);
 					if (incumbent != 0) drawPieceInBoard(g, incumbent, move.m.rf, move.m.cf, move.board);
 					drawBorders(g);
+					float alpha = 0;
+					if (m_activeBoard == move.board) {
+						alpha = (1 - (float)t / NUMTICKS);
+					}
+					else {
+						alpha = (float)t / NUMTICKS;
+					}
+					g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, alpha));
 					drawPiece(g, traveler, (int)curX, (int)curY, move.board);
 				}
-		 		try { Thread.sleep(Definitions.TICK); }
+		 		try { Thread.sleep(TICK); }
 		 		catch (InterruptedException ex) {}
 			}
 			
@@ -360,10 +370,18 @@ public class AliceGameGraphics extends GameGraphics
 					drawBlock(g, move.m.rf, move.m.cf);
 					drawBlock(g, rook.move.m.rf, rook.move.m.cf);
 					drawBorders(g);
+					float alpha = 0;
+					if (m_activeBoard == move.board) {
+						alpha = (1 - (float)t / NUMTICKS);
+					}
+					else {
+						alpha = (float)t / NUMTICKS;
+					}
+					g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, alpha));
 					drawPiece(g, traveler, (int)curX, (int)curY, move.board);
 					drawPiece(g, rook.traveler, (int)rook.curX, (int)rook.curY, rook.move.board);
 				}
-		 		try { Thread.sleep(Definitions.TICK); }
+		 		try { Thread.sleep(TICK); }
 		 		catch (InterruptedException ex) {}
 			}
 		}

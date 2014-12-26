@@ -1,5 +1,6 @@
 UI
 - Improve applet start-up menu
+- Move list in game
 
 Standard Chess
 - 50 move rule and threefold repetition (hash table of FEN's)
@@ -9,8 +10,10 @@ Standard Chess
 Loser's Chess
 - Threefold repetition (maybe 50 move rule too)
 
-Program Structure
-- Implement Alice Chess with BoardPair class?
+Alice Chess
+- check promotion and edge cases
+- create AI
 
 Miscellaneous
-- Implement new variants: Alice Chess, Maharajah, Fischer Random
+- Streamline repetitive code
+- Implement new variants: Maharajah, Fischer Random, Upside-down chess, Pre-chess, Extinction chess, Genesis Chess, Block chess

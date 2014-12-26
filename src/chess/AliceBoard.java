@@ -474,7 +474,7 @@ public class AliceBoard //really a board pair
 		ArrayList<AliceMove> legalMoves = new ArrayList<AliceMove>();
 		long turnpieces, allpieces, pawns, knights, bishops, rooks, queens, kings, oppkings;
 		int kingsq;
-		int oppkingsq;
+		int kboard;
 
 		for (int boardno = 0; boardno <= 1; boardno++) //two boards
 		{
@@ -502,11 +502,14 @@ public class AliceBoard //really a board pair
 			allpieces = m_boards[boardno].getWhite() | m_boards[boardno].getBlack();
 
 			kingsq = -1;
-			oppkingsq = -1;
+			kboard = 0;
 			if (kings != 0)
 				kingsq = (int)((Math.log(kings)/Math.log(2)) + 0.5);
 			if (oppkings != 0)
-				oppkingsq = (int)((Math.log(oppkings)/ Math.log(2)) + 0.5);
+			{
+				kingsq = (int)((Math.log(oppkings)/ Math.log(2)) + 0.5);
+				kboard = 1;
+			}
 
 			for (int r = 0; r < 8; r++)
 			{
@@ -542,7 +545,7 @@ public class AliceBoard //really a board pair
 											temp.m_boards[oppboard].getPiece(dr, dc) == 0)
 									{
 										temp.placePiece(temp.m_boards[boardno].getPiece(r, c), m_turn, dr, dc, oppboard);
-										if (!Definitions.isAttacked(temp.m_boards[oppboard], kingsq, Definitions.flip(m_turn)))
+										if (!Definitions.isAttacked(temp.m_boards[kboard], kingsq, Definitions.flip(m_turn)))
 										{
 											legalMoves.add(new AliceMove(new Move(r, c, dr, dc), boardno));
 										}
@@ -562,7 +565,7 @@ public class AliceBoard //really a board pair
 											temp.m_boards[oppboard].getPiece(dr, dc) == 0)
 									{
 										temp.placePiece(temp.m_boards[boardno].getPiece(r, c), m_turn, dr, dc, oppboard);
-										if (!Definitions.isAttacked(temp.m_boards[oppboard], kingsq, Definitions.flip(m_turn)))
+										if (!Definitions.isAttacked(temp.m_boards[kboard], kingsq, Definitions.flip(m_turn)))
 										{
 											legalMoves.add(new AliceMove(new Move(r, c, dr, dc), boardno));
 										}
@@ -581,7 +584,7 @@ public class AliceBoard //really a board pair
 											temp.m_boards[oppboard].getPiece(dr, dc) == 0)
 									{
 										temp.placePiece(temp.m_boards[boardno].getPiece(r, c), m_turn, dr, dc, oppboard);
-										if (!Definitions.isAttacked(temp.m_boards[oppboard], kingsq, Definitions.flip(m_turn)))
+										if (!Definitions.isAttacked(temp.m_boards[kboard], kingsq, Definitions.flip(m_turn)))
 										{
 											legalMoves.add(new AliceMove(new Move(r, c, dr, dc), boardno));
 										}
@@ -602,7 +605,7 @@ public class AliceBoard //really a board pair
 											temp.m_boards[oppboard].getPiece(dr, dc) == 0)
 									{
 										temp.placePiece(temp.m_boards[boardno].getPiece(r, c), m_turn, dr, dc, oppboard);
-										if (!Definitions.isAttacked(temp.m_boards[oppboard], kingsq, Definitions.flip(m_turn)))
+										if (!Definitions.isAttacked(temp.m_boards[kboard], kingsq, Definitions.flip(m_turn)))
 										{
 											legalMoves.add(new AliceMove(new Move(r, c, dr, dc), boardno));
 										}
@@ -628,7 +631,7 @@ public class AliceBoard //really a board pair
 											temp.m_boards[oppboard].getPiece(dr, dc) == 0)
 									{
 										temp.placePiece(temp.m_boards[boardno].getPiece(r, c), m_turn, dr, dc, oppboard);
-										if (!Definitions.isAttacked(temp.m_boards[oppboard], kingsq, Definitions.flip(m_turn)))
+										if (!Definitions.isAttacked(temp.m_boards[kboard], kingsq, Definitions.flip(m_turn)))
 										{
 											legalMoves.add(new AliceMove(new Move(r, c, dr, dc), boardno));
 										}
@@ -648,7 +651,7 @@ public class AliceBoard //really a board pair
 											temp.m_boards[oppboard].getPiece(dr, dc) == 0)
 									{
 										temp.placePiece(temp.m_boards[boardno].getPiece(r, c), m_turn, dr, dc, oppboard);
-										if (!Definitions.isAttacked(temp.m_boards[oppboard], kingsq, Definitions.flip(m_turn)))
+										if (!Definitions.isAttacked(temp.m_boards[kboard], kingsq, Definitions.flip(m_turn)))
 										{
 											legalMoves.add(new AliceMove(new Move(r, c, dr, dc), boardno));
 										}
@@ -667,7 +670,7 @@ public class AliceBoard //really a board pair
 											temp.m_boards[oppboard].getPiece(dr, dc) == 0)
 									{
 										temp.placePiece(temp.m_boards[boardno].getPiece(r, c), m_turn, dr, dc, oppboard);
-										if (!Definitions.isAttacked(temp.m_boards[oppboard], kingsq, Definitions.flip(m_turn)))
+										if (!Definitions.isAttacked(temp.m_boards[kboard], kingsq, Definitions.flip(m_turn)))
 										{
 											legalMoves.add(new AliceMove(new Move(r, c, dr, dc), boardno));
 										}
@@ -688,7 +691,7 @@ public class AliceBoard //really a board pair
 											temp.m_boards[oppboard].getPiece(dr, dc) == 0)
 									{
 										temp.placePiece(temp.m_boards[boardno].getPiece(r, c), m_turn, dr, dc, oppboard);
-										if (!Definitions.isAttacked(temp.m_boards[oppboard], kingsq, Definitions.flip(m_turn)))
+										if (!Definitions.isAttacked(temp.m_boards[kboard], kingsq, Definitions.flip(m_turn)))
 										{
 											legalMoves.add(new AliceMove(new Move(r, c, dr, dc), boardno));
 										}
@@ -713,7 +716,7 @@ public class AliceBoard //really a board pair
 											temp.m_boards[oppboard].getPiece(dr, dc) == 0)
 									{
 										temp.placePiece(temp.m_boards[boardno].getPiece(r, c), m_turn, dr, dc, oppboard);
-										if (!Definitions.isAttacked(temp.m_boards[oppboard], kingsq, Definitions.flip(m_turn)))
+										if (!Definitions.isAttacked(temp.m_boards[kboard], kingsq, Definitions.flip(m_turn)))
 										{
 											legalMoves.add(new AliceMove(new Move(r, c, dr, dc), boardno));
 										}
@@ -738,7 +741,7 @@ public class AliceBoard //really a board pair
 											temp.m_boards[oppboard].getPiece(dr, dc) == 0)
 									{
 										temp.placePiece(temp.m_boards[boardno].getPiece(r, c), m_turn, dr, dc, oppboard);
-										if (!Definitions.isAttacked(temp.m_boards[oppboard], kingsq, Definitions.flip(m_turn)))
+										if (!Definitions.isAttacked(temp.m_boards[kboard], kingsq, Definitions.flip(m_turn)))
 										{
 											legalMoves.add(new AliceMove(new Move(r, c, dr, dc), boardno));
 										}
@@ -763,7 +766,7 @@ public class AliceBoard //really a board pair
 											temp.m_boards[oppboard].getPiece(dr, dc) == 0)
 									{
 										temp.placePiece(temp.m_boards[boardno].getPiece(r, c), m_turn, dr, dc, oppboard);
-										if (!Definitions.isAttacked(temp.m_boards[oppboard], kingsq, Definitions.flip(m_turn)))
+										if (!Definitions.isAttacked(temp.m_boards[kboard], kingsq, Definitions.flip(m_turn)))
 										{
 											legalMoves.add(new AliceMove(new Move(r, c, dr, dc), boardno));
 										}
@@ -788,7 +791,7 @@ public class AliceBoard //really a board pair
 											temp.m_boards[oppboard].getPiece(dr, dc) == 0)
 									{
 										temp.placePiece(temp.m_boards[boardno].getPiece(r, c), m_turn, dr, dc, oppboard);
-										if (!Definitions.isAttacked(temp.m_boards[oppboard], kingsq, Definitions.flip(m_turn)))
+										if (!Definitions.isAttacked(temp.m_boards[kboard], kingsq, Definitions.flip(m_turn)))
 										{
 											legalMoves.add(new AliceMove(new Move(r, c, dr, dc), boardno));
 										}
@@ -814,7 +817,7 @@ public class AliceBoard //really a board pair
 									{ 
 										temp.placePiece(temp.m_boards[boardno].getPiece(r, c), m_turn, dr, dc, oppboard);
 										//note that i is the new king square
-										if (!Definitions.isAttacked(temp.m_boards[oppboard], i, Definitions.flip(m_turn)))
+										if (!Definitions.isAttacked(temp.m_boards[kboard], i, Definitions.flip(m_turn)))
 										{
 											legalMoves.add(new AliceMove(new Move(r, c, dr, dc), boardno));
 										}
@@ -836,7 +839,7 @@ public class AliceBoard //really a board pair
 							}
 
 							long king = (1L << (kingsq));
-							if (kingsq != -1)
+							if (kboard == 0)
 							{
 								if (canCastleKingside) //kingside castle
 								{
@@ -1051,7 +1054,7 @@ public class AliceBoard //really a board pair
 				}
 				if (r != 7) //last row doesn't need slash
 					FEN = FEN + "/";
-				else if (board == 0) //last row of board 0 should have an indicator; we'll use '$'
+				else if (board == 0) //last row of board 0 should have an indicator; we'll use '='
 					FEN = FEN + "=";
 			}
 

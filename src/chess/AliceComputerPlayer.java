@@ -3,6 +3,8 @@ package chess;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import chess.AliceBoard.AliceMove;
+
 public class AliceComputerPlayer extends ComputerPlayer 
 {
 	private double [][] PawnVals = {
@@ -62,9 +64,14 @@ public class AliceComputerPlayer extends ComputerPlayer
 
 	public void run()
 	{
-		Game g = getGame();
-		initOpeningBook();
-		m_move = evaluate(((StandardGame)g).getBoard(), Definitions.MAXDEPTH);
+		System.out.println("Here comes a random move...");
+		AliceGame ag = (AliceGame)getGame();
+		//initOpeningBook();
+		//m_move = evaluate(((StandardGame)g).getBoard(), Definitions.MAXDEPTH);
+		AliceMove am_move = ((AliceBoard)ag.getBoard()).allMoves().get(0);
+		ag.getGraphics().setActiveBoard(am_move.board);
+		m_move = am_move.m;
+		System.out.println(m_move);
 		m_done = true;
 	}
 

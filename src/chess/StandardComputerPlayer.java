@@ -600,5 +600,4 @@ public class StandardComputerPlayer extends ComputerPlayer
 	}
 
 
-
 }

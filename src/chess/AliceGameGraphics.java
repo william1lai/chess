@@ -108,7 +108,8 @@ public class AliceGameGraphics extends GameGraphics
 	
 	private void updateSelected(int sq)
 	{
-		m_selectedBlocks |= (1L << sq);
+		if (sq >= 0)
+			m_selectedBlocks |= (1L << sq);
 	}
 	
 	public void paintComponent(Graphics g)
@@ -178,10 +179,10 @@ public class AliceGameGraphics extends GameGraphics
 		int y = getY(row);
 		g.drawImage(m_gBlocks[(row+col)%2], x, y, m_blockSize, m_blockSize, null);
 		int sq = m_game.getBoard().toSq(row, col);
-		if ((m_selectedBlocks & (1L << sq)) > 0) {
+		if ((m_selectedBlocks & (1L << sq)) != 0) {
 			g.drawImage(m_gSelected, x, y, m_blockSize, m_blockSize, null);
 		}
-		else if ((m_movableBlocks & (1L << sq)) > 0) {
+		else if ((m_movableBlocks & (1L << sq)) != 0) {
 			g.drawImage(m_gMovable, x, y, m_blockSize, m_blockSize, null);
 		}
 	}

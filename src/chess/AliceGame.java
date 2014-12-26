@@ -33,14 +33,13 @@ public class AliceGame extends Game
 		Definitions.makeMaskR();
 		Definitions.makeRankR();
 
-		//String testFEN = "8/8/7P/8/8/8/8/k5K1 w - - 0 37"; //white to promote soon; tests promotion
-		//String testFEN = "6k1/8/5r2/6K1/8/8/8/5q2 w - - 0 37"; //losing badly, tests player 2 checkmate power
-		//String testFEN = "k7/7Q/K7/8/8/8/8/8 w - - 0 37"; //winning badly, can use to test checkmate/stalemate
-		//String testFEN = "r1b1k2B/1p5p/2p3p1/p4p2/2BK4/8/PPP1Q1PP/R6R b - - 0 37";
-		//String testFEN = "8/8/8/1Q6/8/8/8/k6K w - - 0 37"; //test queen movement on b file
-		//m_game_board.FENtoPosition(testFEN);
-
-		setupStandard();
+		String testFEN = "8/8/7P/8/8/8/8/k5K1=8/8/8/8/8/8/8/8 w - - 0 37"; //white to promote soon; tests promotion
+		//String testFEN = "6k1/8/5r2/6K1/8/8/8/5q2=8/8/8/8/8/8/8/8 w - - 0 37"; //losing badly, tests player 2 checkmate power
+		//String testFEN = "k7/7Q/K7/8/8/8/8/8=8/8/8/8/8/8/8/8 w - - 0 37"; //winning badly, can use to test checkmate/stalemate
+		//String testFEN = "r1b1k2B/1p5p/2p3p1/p4p2/2BK4/8/PPP1Q1PP/R6R=8/8/8/8/8/8/8/8 b - - 0 37";
+		//String testFEN = "8/8/8/1Q6/8/8/8/k6K=8/8/8/8/8/8/8/8 w - - 0 37"; //test queen movement on b file
+		m_game_board.FENtoPosition(testFEN);
+		//setupStandard();
 
 		String[] param = { "White vs AI", "Black vs AI", "Hotseat Game", "AI vs AI" };
 		String input = (String) JOptionPane.showInputDialog(null, "Game Mode?", "Choose your mode", JOptionPane.QUESTION_MESSAGE, null, param, param[0]);
@@ -101,11 +100,11 @@ public class AliceGame extends Game
 				m_canUndo = false;
 				movesHistory.push(m_game_board.toFEN(true));
 				Move m = cur.getMove();
+				if (m == null)
+					break;
 				int board = m_graphics.getActiveBoard();
 				AliceMove am = m_game_board.new AliceMove(m, board);
-				if (am.m == null)
-					break;
-
+				
 				processMove(am);
 				flipTurn();
 				state = m_game_board.getState();
@@ -197,26 +196,9 @@ public class AliceGame extends Game
 		}
 
 		AliceMove correspondingRookMove = null; //if we have castling
-		getBoard().getData().m_enpassantCol = -1; //default
 		if (Character.toLowerCase(movedPiece) == 'p')
 		{
 			getBoard().getData().m_fiftymoverulecount = 0; //pawn was moved
-			if (Math.abs(newMove.m.rf - newMove.m.r0) == 2)
-			{
-				getBoard().getData().m_enpassantCol = col; //enpassant now available on this column
-			}
-			else if ((Math.abs(newMove.m.cf - col) == 1) && (getBoard().getPiece(newMove.m.rf, newMove.m.cf, board) == 0))
-				//en passant
-			{
-				if (getBoard().whoseTurn() == Definitions.Color.WHITE)
-				{
-					getBoard().removePiece(3, newMove.m.cf, otherboard); //not sure if this is best way, but "move" call will not erase piece
-				}
-				else
-				{
-					getBoard().removePiece(4, newMove.m.cf, otherboard);
-				}
-			}
 		}
 		else if (Character.toLowerCase(movedPiece) == 'k')
 		{			
@@ -293,6 +275,9 @@ public class AliceGame extends Game
 					|| ((getBoard().whoseTurn() == Definitions.Color.WHITE) && (newMove.m.rf == 7))) //flipped by earlier move
 			{
 				getBoard().promotePawn(newMove.m.rf, newMove.m.cf, board);
+				getBoard().placePiece(getBoard().getPiece(newMove.m.rf, newMove.m.cf, board), 
+						Definitions.flip(getBoard().whoseTurn()), newMove.m.rf, newMove.m.cf, otherboard);
+				getBoard().removePiece(newMove.m.rf, newMove.m.cf, board);
 			}
 		}
 	}

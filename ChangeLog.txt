@@ -1,5 +1,13 @@
 Name: William Lai
 Date: 12-26-2014
+Description: Fixed more bugs
+    * Alice Chess promotion now works as intended
+    * Alice Chess now features really dumb AI
+    * Highlighting of square a8 is now correct
+    * Alice Chess FEN loading works
+
+Name: William Lai
+Date: 12-26-2014
 Description: Alice Chess mostly working; changing ChangeLog structure
     * Alice Chess is now mostly working, but still need to check for promotion and edge cases, as well as work on AI
     * ChangeLog will no longer follow file-by-file entries, as this is a bit too restrictive

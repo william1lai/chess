@@ -11,9 +11,10 @@ Loser's Chess
 - Threefold repetition (maybe 50 move rule too)
 
 Alice Chess
-- check promotion and edge cases
+- check edge cases
 - create AI
 
 Miscellaneous
+- Repackage into separate packages for each game type
 - Streamline repetitive code
 - Implement new variants: Maharajah, Fischer Random, Upside-down chess, Pre-chess, Extinction chess, Genesis Chess, Block chess

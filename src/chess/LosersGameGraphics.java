@@ -272,7 +272,6 @@ public class LosersGameGraphics extends GameGraphics
 		public Move move;
 		private BufferedImage m_frame;
 		public final int NUMTICKS = 10;
-		public final int TICK = 30;
 		
 		public MoveAnimation(Move m, Board b)
 		{
@@ -307,7 +306,7 @@ public class LosersGameGraphics extends GameGraphics
 					drawBorders(g);
 					drawPiece(g, traveler, (int)curX, (int)curY);
 				}
-		 		try { Thread.sleep(TICK); }
+		 		try { Thread.sleep(Definitions.TICK); }
 		 		catch (InterruptedException ex) {}
 			}
 		}

@@ -271,7 +271,6 @@ public class StandardGameGraphics extends GameGraphics
 		public Move move;
 		private BufferedImage m_frame;
 		public final int NUMTICKS = 10;
-		public final int TICK = 30;
 		
 		public MoveAnimation(Move m, Board b)
 		{
@@ -306,7 +305,7 @@ public class StandardGameGraphics extends GameGraphics
 					drawBorders(g);
 					drawPiece(g, traveler, (int)curX, (int)curY);
 				}
-		 		try { Thread.sleep(TICK); }
+		 		try { Thread.sleep(Definitions.TICK); }
 		 		catch (InterruptedException ex) {}
 			}
 		}
@@ -339,7 +338,7 @@ public class StandardGameGraphics extends GameGraphics
 					drawPiece(g, traveler, (int)curX, (int)curY);
 					drawPiece(g, rook.traveler, (int)rook.curX, (int)rook.curY);
 				}
-		 		try { Thread.sleep(TICK); }
+		 		try { Thread.sleep(Definitions.TICK); }
 		 		catch (InterruptedException ex) {}
 			}
 		}

@@ -1,5 +1,6 @@
 package chess;
 
+import java.awt.Container;
 import javax.swing.JFrame;
 
 public class Main 
@@ -11,10 +12,12 @@ public class Main
 		applet.start();
 		if (!applet.cancelled())
 		{
-			JFrame jf = new JFrame("Chess Applet");
-			jf.setContentPane(applet);
+			JFrame jf = new JFrame();
+			Container c = jf.getContentPane();
+			c.add(applet);
+			jf.setBounds(10, 10, 660, 520);
+			jf.setTitle("Chess Applet");
 			jf.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-			jf.pack();
 			jf.setVisible(true);
 		}
 	}

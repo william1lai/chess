@@ -542,7 +542,7 @@ public class AliceBoard //really a board pair
 											temp.m_boards[oppboard].getPiece(dr, dc) == 0)
 									{
 										temp.placePiece(temp.m_boards[boardno].getPiece(r, c), m_turn, dr, dc, oppboard);
-										if (!Definitions.isAttacked(temp.m_boards[oppboard], oppkingsq, Definitions.flip(m_turn)))
+										if (!Definitions.isAttacked(temp.m_boards[oppboard], kingsq, Definitions.flip(m_turn)))
 										{
 											legalMoves.add(new AliceMove(new Move(r, c, dr, dc), boardno));
 										}
@@ -562,7 +562,7 @@ public class AliceBoard //really a board pair
 											temp.m_boards[oppboard].getPiece(dr, dc) == 0)
 									{
 										temp.placePiece(temp.m_boards[boardno].getPiece(r, c), m_turn, dr, dc, oppboard);
-										if (!Definitions.isAttacked(temp.m_boards[oppboard], oppkingsq, Definitions.flip(m_turn)))
+										if (!Definitions.isAttacked(temp.m_boards[oppboard], kingsq, Definitions.flip(m_turn)))
 										{
 											legalMoves.add(new AliceMove(new Move(r, c, dr, dc), boardno));
 										}
@@ -581,7 +581,7 @@ public class AliceBoard //really a board pair
 											temp.m_boards[oppboard].getPiece(dr, dc) == 0)
 									{
 										temp.placePiece(temp.m_boards[boardno].getPiece(r, c), m_turn, dr, dc, oppboard);
-										if (!Definitions.isAttacked(temp.m_boards[oppboard], oppkingsq, Definitions.flip(m_turn)))
+										if (!Definitions.isAttacked(temp.m_boards[oppboard], kingsq, Definitions.flip(m_turn)))
 										{
 											legalMoves.add(new AliceMove(new Move(r, c, dr, dc), boardno));
 										}
@@ -602,7 +602,7 @@ public class AliceBoard //really a board pair
 											temp.m_boards[oppboard].getPiece(dr, dc) == 0)
 									{
 										temp.placePiece(temp.m_boards[boardno].getPiece(r, c), m_turn, dr, dc, oppboard);
-										if (!Definitions.isAttacked(temp.m_boards[oppboard], oppkingsq, Definitions.flip(m_turn)))
+										if (!Definitions.isAttacked(temp.m_boards[oppboard], kingsq, Definitions.flip(m_turn)))
 										{
 											legalMoves.add(new AliceMove(new Move(r, c, dr, dc), boardno));
 										}
@@ -628,7 +628,7 @@ public class AliceBoard //really a board pair
 											temp.m_boards[oppboard].getPiece(dr, dc) == 0)
 									{
 										temp.placePiece(temp.m_boards[boardno].getPiece(r, c), m_turn, dr, dc, oppboard);
-										if (!Definitions.isAttacked(temp.m_boards[oppboard], oppkingsq, Definitions.flip(m_turn)))
+										if (!Definitions.isAttacked(temp.m_boards[oppboard], kingsq, Definitions.flip(m_turn)))
 										{
 											legalMoves.add(new AliceMove(new Move(r, c, dr, dc), boardno));
 										}
@@ -648,7 +648,7 @@ public class AliceBoard //really a board pair
 											temp.m_boards[oppboard].getPiece(dr, dc) == 0)
 									{
 										temp.placePiece(temp.m_boards[boardno].getPiece(r, c), m_turn, dr, dc, oppboard);
-										if (!Definitions.isAttacked(temp.m_boards[oppboard], oppkingsq, Definitions.flip(m_turn)))
+										if (!Definitions.isAttacked(temp.m_boards[oppboard], kingsq, Definitions.flip(m_turn)))
 										{
 											legalMoves.add(new AliceMove(new Move(r, c, dr, dc), boardno));
 										}
@@ -667,7 +667,7 @@ public class AliceBoard //really a board pair
 											temp.m_boards[oppboard].getPiece(dr, dc) == 0)
 									{
 										temp.placePiece(temp.m_boards[boardno].getPiece(r, c), m_turn, dr, dc, oppboard);
-										if (!Definitions.isAttacked(temp.m_boards[oppboard], oppkingsq, Definitions.flip(m_turn)))
+										if (!Definitions.isAttacked(temp.m_boards[oppboard], kingsq, Definitions.flip(m_turn)))
 										{
 											legalMoves.add(new AliceMove(new Move(r, c, dr, dc), boardno));
 										}
@@ -688,7 +688,7 @@ public class AliceBoard //really a board pair
 											temp.m_boards[oppboard].getPiece(dr, dc) == 0)
 									{
 										temp.placePiece(temp.m_boards[boardno].getPiece(r, c), m_turn, dr, dc, oppboard);
-										if (!Definitions.isAttacked(temp.m_boards[oppboard], oppkingsq, Definitions.flip(m_turn)))
+										if (!Definitions.isAttacked(temp.m_boards[oppboard], kingsq, Definitions.flip(m_turn)))
 										{
 											legalMoves.add(new AliceMove(new Move(r, c, dr, dc), boardno));
 										}
@@ -713,7 +713,7 @@ public class AliceBoard //really a board pair
 											temp.m_boards[oppboard].getPiece(dr, dc) == 0)
 									{
 										temp.placePiece(temp.m_boards[boardno].getPiece(r, c), m_turn, dr, dc, oppboard);
-										if (!Definitions.isAttacked(temp.m_boards[oppboard], oppkingsq, Definitions.flip(m_turn)))
+										if (!Definitions.isAttacked(temp.m_boards[oppboard], kingsq, Definitions.flip(m_turn)))
 										{
 											legalMoves.add(new AliceMove(new Move(r, c, dr, dc), boardno));
 										}
@@ -738,7 +738,7 @@ public class AliceBoard //really a board pair
 											temp.m_boards[oppboard].getPiece(dr, dc) == 0)
 									{
 										temp.placePiece(temp.m_boards[boardno].getPiece(r, c), m_turn, dr, dc, oppboard);
-										if (!Definitions.isAttacked(temp.m_boards[oppboard], oppkingsq, Definitions.flip(m_turn)))
+										if (!Definitions.isAttacked(temp.m_boards[oppboard], kingsq, Definitions.flip(m_turn)))
 										{
 											legalMoves.add(new AliceMove(new Move(r, c, dr, dc), boardno));
 										}
@@ -763,7 +763,7 @@ public class AliceBoard //really a board pair
 											temp.m_boards[oppboard].getPiece(dr, dc) == 0)
 									{
 										temp.placePiece(temp.m_boards[boardno].getPiece(r, c), m_turn, dr, dc, oppboard);
-										if (!Definitions.isAttacked(temp.m_boards[oppboard], oppkingsq, Definitions.flip(m_turn)))
+										if (!Definitions.isAttacked(temp.m_boards[oppboard], kingsq, Definitions.flip(m_turn)))
 										{
 											legalMoves.add(new AliceMove(new Move(r, c, dr, dc), boardno));
 										}
@@ -788,7 +788,7 @@ public class AliceBoard //really a board pair
 											temp.m_boards[oppboard].getPiece(dr, dc) == 0)
 									{
 										temp.placePiece(temp.m_boards[boardno].getPiece(r, c), m_turn, dr, dc, oppboard);
-										if (!Definitions.isAttacked(temp.m_boards[oppboard], oppkingsq, Definitions.flip(m_turn)))
+										if (!Definitions.isAttacked(temp.m_boards[oppboard], kingsq, Definitions.flip(m_turn)))
 										{
 											legalMoves.add(new AliceMove(new Move(r, c, dr, dc), boardno));
 										}
@@ -811,9 +811,10 @@ public class AliceBoard //really a board pair
 
 									if (!Definitions.isAttacked(temp.m_boards[boardno], i, Definitions.flip(m_turn)) && 
 											temp.m_boards[oppboard].getPiece(dr, dc) == 0)
-									{
+									{ 
 										temp.placePiece(temp.m_boards[boardno].getPiece(r, c), m_turn, dr, dc, oppboard);
-										if (!Definitions.isAttacked(temp.m_boards[oppboard], oppkingsq, Definitions.flip(m_turn)))
+										//note that i is the new king square
+										if (!Definitions.isAttacked(temp.m_boards[oppboard], i, Definitions.flip(m_turn)))
 										{
 											legalMoves.add(new AliceMove(new Move(r, c, dr, dc), boardno));
 										}

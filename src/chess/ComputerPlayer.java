@@ -81,7 +81,7 @@ public abstract class ComputerPlayer extends Player
 
 	public void promptMove()
 	{		
-		if (getGame() instanceof StandardChessGame || getGame() instanceof LosersChessGame)
+		if (getGame() instanceof StandardGame || getGame() instanceof LosersGame)
 		{
 			m_done = false;
 			m_move = null;

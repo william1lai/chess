@@ -2,23 +2,28 @@ package chess;
 
 import java.awt.event.MouseEvent;
 import javax.swing.JOptionPane;
+
+import chess.AliceBoard.AliceMove;
+
 import java.util.Stack;
 
-public class StandardChessGame extends Game
+public class AliceGame extends Game
 {
-	private StandardChessGameGraphics m_graphics;
-	private StandardChessBoard m_game_board;
+	private AliceGameGraphics m_graphics;
+	private AliceGameGUI m_gui;
+	private AliceBoard m_game_board;
 	private boolean m_canUndo;
 	
-	public StandardChessGame(GameApplet applet)
+	public AliceGame(GameApplet applet)
 	{
 		m_applet = applet;
 	}
 
-	public void init(GameGraphics graphics)
+	public void init(GameGraphics graphics, GameGUI gui)
 	{
-		m_graphics = (StandardChessGameGraphics)graphics;
-		m_game_board = new StandardChessBoard(this);
+		m_graphics = (AliceGameGraphics)graphics;
+		m_gui = (AliceGameGUI)gui;
+		m_game_board = new AliceBoard(this);
 		m_canUndo = false;
 		movesHistory = new Stack<String>();
 		
@@ -42,23 +47,23 @@ public class StandardChessGame extends Game
 
 		if (input == "White vs AI")
 		{
-			p1 = new StandardHumanPlayer("Human WHITE", Definitions.Color.WHITE, this);
-			p2 = new StandardComputerPlayer("CPU BLACK", Definitions.Color.BLACK, this);
+			p1 = new AliceHumanPlayer("Human WHITE", Definitions.Color.WHITE, this);
+			p2 = new AliceComputerPlayer("CPU BLACK", Definitions.Color.BLACK, this);
 		}
 		else if (input == "Black vs AI")
 		{
-			p2 = new StandardHumanPlayer("Human BLACK", Definitions.Color.BLACK, this);
-			p1 = new StandardComputerPlayer("CPU WHITE", Definitions.Color.WHITE, this);
+			p2 = new AliceHumanPlayer("Human BLACK", Definitions.Color.BLACK, this);
+			p1 = new AliceComputerPlayer("CPU WHITE", Definitions.Color.WHITE, this);
 		}
 		else if (input == "Hotseat Game")
 		{
-			p1 = new StandardHumanPlayer("Human WHITE", Definitions.Color.WHITE, this);
-			p2 = new StandardHumanPlayer("Human BLACK", Definitions.Color.BLACK, this);
+			p1 = new AliceHumanPlayer("Human WHITE", Definitions.Color.WHITE, this);
+			p2 = new AliceHumanPlayer("Human BLACK", Definitions.Color.BLACK, this);
 		}
 		else if (input == "AI vs AI")
 		{
-			p1 = new StandardComputerPlayer("CPU WHITE", Definitions.Color.WHITE, this);
-			p2 = new StandardComputerPlayer("CPU BLACK", Definitions.Color.BLACK, this);
+			p1 = new AliceComputerPlayer("CPU WHITE", Definitions.Color.WHITE, this);
+			p2 = new AliceComputerPlayer("CPU BLACK", Definitions.Color.BLACK, this);
 		}
 		else
 		{
@@ -89,17 +94,19 @@ public class StandardChessGame extends Game
 			Player cur = (m_game_board.whoseTurn() == Definitions.Color.WHITE ? p1 : p2);
 			if (cur.getColor() == Definitions.Color.WHITE)
 				m_game_board.incrementTurncount();
-			if (cur instanceof HumanPlayer)
+			if (!m_graphics.isAnimating() && cur instanceof HumanPlayer)
 				m_canUndo = true;
 			if (!m_graphics.isAnimating() && cur.isDone())
 			{
 				m_canUndo = false;
 				movesHistory.push(m_game_board.toFEN(true));
 				Move m = cur.getMove();
-				if (m == null)
+				int board = m_graphics.getActiveBoard();
+				AliceMove am = m_game_board.new AliceMove(m, board);
+				if (am.m == null)
 					break;
 
-				processMove(m);
+				processMove(am);
 				flipTurn();
 				state = m_game_board.getState();
 			}
@@ -133,15 +140,20 @@ public class StandardChessGame extends Game
 		JOptionPane.showMessageDialog(null, reason, "Game has ended", JOptionPane.PLAIN_MESSAGE);
 		System.out.println("The game has ended.");
 	}
-
-	public StandardChessBoard getBoard()
+	
+	public AliceGameGraphics getGraphics()
 	{
-		return m_game_board;
+		return m_graphics;
+	}
+	
+	public AliceGameGUI getGUI()
+	{
+		return m_gui;
 	}
 
-	public boolean canUndo()
+	public AliceBoard getBoard()
 	{
-		return m_canUndo;
+		return m_game_board;
 	}
 	
 	private void flipTurn() //prompts next player's move; board does actual flipping of turns
@@ -150,42 +162,11 @@ public class StandardChessGame extends Game
 		next.promptMove();
 	}
 
-	//TODO
-	public static Move algebraicToMove(Definitions.Color color, String algebraic) //STUB
-	{
-		return new Move(0, 0, 0, 0);
-	}
-
-	public void interpretMoveList(String movelist) //does not work yet
-	{
-		//start with naive format of "1.e4 c5 2.Nc3 Nc6 3.f4 g6 4.Bb5 Nd4", with proper spacing and all
-		String[] moves = movelist.split(" ");
-
-		for (int i = 0; i < moves.length; i++)
-		{
-			String mv = moves[i];
-			if (Character.isDigit(mv.charAt(0)))
-			{
-				System.out.print(mv + " "); //print out moves
-				m_game_board.move(algebraicToMove(Definitions.Color.WHITE, mv.split(".")[1])); //want the part after the period
-			}
-			else
-			{
-				System.out.println(mv);
-				m_game_board.move(algebraicToMove(Definitions.Color.BLACK, mv));
-			}
-		}
-	}
-
 	public void undo()
 	{
-		if(movesHistory.size() < 2)
-			return;
-
-		if (m_canUndo)
+		if (movesHistory.size() >= 2 && m_canUndo)
 		{
 			m_game_board.decrementTurncount();
-
 			movesHistory.pop();
 			String returnMove = movesHistory.pop();
 
@@ -194,11 +175,15 @@ public class StandardChessGame extends Game
 	}
 
 	//TODO: Might need clean up
-	public void processMove(Move newMove)
+	public void processMove(AliceMove newMove)
 	{
-		int row = newMove.r0;
-		int col = newMove.c0;
-		char movedPiece = getBoard().getPiece(row, col);
+		int row = newMove.m.r0;
+		int col = newMove.m.c0;
+		int board = newMove.board;
+		int otherboard = 0;
+		if (board == 0)
+			otherboard = 1;
+		char movedPiece = getBoard().getPiece(row, col, board);
 		getBoard().getData().m_fiftymoverulecount++;
 
 		int castlingRow;
@@ -211,25 +196,25 @@ public class StandardChessGame extends Game
 			castlingRow = 0;
 		}
 
-		Move correspondingRookMove = null; //if we have castling
+		AliceMove correspondingRookMove = null; //if we have castling
 		getBoard().getData().m_enpassantCol = -1; //default
 		if (Character.toLowerCase(movedPiece) == 'p')
 		{
 			getBoard().getData().m_fiftymoverulecount = 0; //pawn was moved
-			if (Math.abs(newMove.rf - newMove.r0) == 2)
+			if (Math.abs(newMove.m.rf - newMove.m.r0) == 2)
 			{
-				getBoard().getData().m_enpassantCol = newMove.c0; //enpassant now available on this column
+				getBoard().getData().m_enpassantCol = col; //enpassant now available on this column
 			}
-			else if ((Math.abs(newMove.cf - newMove.c0) == 1) && (getBoard().getPiece(newMove.rf, newMove.cf) == 0))
+			else if ((Math.abs(newMove.m.cf - col) == 1) && (getBoard().getPiece(newMove.m.rf, newMove.m.cf, board) == 0))
 				//en passant
 			{
 				if (getBoard().whoseTurn() == Definitions.Color.WHITE)
 				{
-					getBoard().removePiece(3, newMove.cf); //not sure if this is best way, but "move" call will not erase piece
+					getBoard().removePiece(3, newMove.m.cf, otherboard); //not sure if this is best way, but "move" call will not erase piece
 				}
 				else
 				{
-					getBoard().removePiece(4, newMove.cf);
+					getBoard().removePiece(4, newMove.m.cf, otherboard);
 				}
 			}
 		}
@@ -246,16 +231,16 @@ public class StandardChessGame extends Game
 				getBoard().getData().m_blackCanCastleQueenside = false;
 			}
 
-			int kingMoveLength = newMove.cf - col; //should be 2 or -2, if the move was a castling move
+			int kingMoveLength = newMove.m.cf - col; //should be 2 or -2, if the move was a castling move
 			if (row == castlingRow)
 			{
 				if (kingMoveLength == 2) //kingside
 				{
-					correspondingRookMove = new Move(castlingRow, 7, castlingRow, 5);
+					correspondingRookMove = getBoard().new AliceMove(new Move(castlingRow, 7, castlingRow, 5), board);
 				}
 				else if (kingMoveLength == -2) //queenside
 				{
-					correspondingRookMove = new Move(castlingRow, 0, castlingRow, 3);
+					correspondingRookMove = getBoard().new AliceMove(new Move(castlingRow, 0, castlingRow, 3), board);
 				}
 			}
 		}
@@ -285,7 +270,7 @@ public class StandardChessGame extends Game
 			}
 		}
 
-		if (getBoard().getPiece(newMove.rf, newMove.cf) != 0) //capture was made
+		if (getBoard().getPiece(newMove.m.rf, newMove.m.cf, board) != 0) //capture was made
 		{
 			getBoard().getData().m_fiftymoverulecount = 0; //reset counter
 		}
@@ -293,21 +278,21 @@ public class StandardChessGame extends Game
 		if (correspondingRookMove == null)
 		{
 			m_graphics.animateMove(newMove, getBoard());
-			getBoard().move(newMove); //has to be down here for time being because en passant needs to know dest sq is empty; fix if you can
+			getBoard().move(newMove.m, board); //has to be down here for time being because en passant needs to know dest sq is empty; fix if you can
 		}
 		else {
 			m_graphics.animateCastlingMoves(newMove, correspondingRookMove, getBoard());
-			getBoard().move(newMove);
+			getBoard().move(newMove.m, board);
 			getBoard().setTurn(Definitions.flip(getBoard().whoseTurn())); //to undo double flipping of moving king and then rook
-			getBoard().move(correspondingRookMove);
+			getBoard().move(correspondingRookMove.m, board);
 		}
 
 		if (Character.toLowerCase(movedPiece) == 'p')
 		{
-			if (((getBoard().whoseTurn() == Definitions.Color.BLACK) && (newMove.rf == 0)) 
-					|| ((getBoard().whoseTurn() == Definitions.Color.WHITE) && (newMove.rf == 7))) //flipped by earlier move
+			if (((getBoard().whoseTurn() == Definitions.Color.BLACK) && (newMove.m.rf == 0)) 
+					|| ((getBoard().whoseTurn() == Definitions.Color.WHITE) && (newMove.m.rf == 7))) //flipped by earlier move
 			{
-				getBoard().promotePawn(newMove.rf, newMove.cf);
+				getBoard().promotePawn(newMove.m.rf, newMove.m.cf, board);
 			}
 		}
 	}

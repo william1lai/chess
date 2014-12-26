@@ -4,21 +4,23 @@ import java.util.Stack;
 
 import javax.swing.JOptionPane;
 
-public class LosersChessGame extends Game
+public class LosersGame extends Game
 {
-	private LosersChessGameGraphics m_graphics;
-	private LosersChessBoard m_game_board;
+	private LosersGameGraphics m_graphics;
+	private LosersGameGUI m_gui;
+	private LosersBoard m_game_board;
 	private boolean m_canUndo;
 	
-	public LosersChessGame(GameApplet applet)
+	public LosersGame(GameApplet applet)
 	{
 		m_applet = applet;
 	}
 
-	public void init(GameGraphics graphics)
+	public void init(GameGraphics graphics, GameGUI gui)
 	{
-		m_graphics = (LosersChessGameGraphics)graphics;
-		m_game_board = new LosersChessBoard(this);
+		m_graphics = (LosersGameGraphics)graphics;
+		m_gui = (LosersGameGUI)gui;
+		m_game_board = new LosersBoard(this);
 		m_canUndo = false;
 		movesHistory = new Stack<String>();
 		
@@ -84,7 +86,7 @@ public class LosersChessGame extends Game
 			Player cur = (m_game_board.whoseTurn() == Definitions.Color.WHITE ? p1 : p2);
 			if (cur.getColor() == Definitions.Color.WHITE)
 				m_game_board.incrementTurncount();
-			if (cur instanceof HumanPlayer)
+			if (!m_graphics.isAnimating() && cur instanceof HumanPlayer)
 				m_canUndo = true;
 			if (!m_graphics.isAnimating() && cur.isDone())
 			{
@@ -129,15 +131,20 @@ public class LosersChessGame extends Game
 		JOptionPane.showMessageDialog(null, reason, "Game has ended", JOptionPane.PLAIN_MESSAGE);
 		System.out.println("The game has ended.");
 	}
-
-	public LosersChessBoard getBoard()
+	
+	public LosersGameGraphics getGraphics()
+	{
+		return m_graphics;
+	}
+	
+	public LosersGameGUI getGUI()
+	{
+		return m_gui;
+	}
+	
+	public LosersBoard getBoard()
 	{
 		return m_game_board;
-	}
-
-	public boolean canUndo()
-	{
-		return m_canUndo;
 	}
 	
 	private void flipTurn() //prompts next player's move; board does actual flipping of turns
@@ -172,22 +179,19 @@ public class LosersChessGame extends Game
 			}
 		}
 	}
-
+	
 	public void undo()
 	{
-		if(movesHistory.size() < 2)
-			return;
-
-		if (m_canUndo)
+		if (movesHistory.size() >= 2 && m_canUndo)
 		{
 			m_game_board.decrementTurncount();
-
+			
 			movesHistory.pop();
 			String returnMove = movesHistory.pop();
-
+			
 			m_game_board.FENtoPosition(returnMove);
 		}
-	}	
+	}
 	
 	//TODO: Might need clean up
 	public void processMove(Move newMove)

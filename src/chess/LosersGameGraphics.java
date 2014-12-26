@@ -6,11 +6,10 @@ import java.awt.image.BufferedImage;
 import javax.imageio.ImageIO;
 
 @SuppressWarnings("serial")
-public class LosersChessGameGraphics extends GameGraphics
+public class LosersGameGraphics extends GameGraphics
 {
-	private LosersChessGame m_game;
-	private LosersChessGameGUI m_gui;
-	private static int m_boardOffsetX, m_boardOffsetY, m_blockSize;
+	private LosersGame m_game;
+	private int m_boardOffsetX, m_boardOffsetY, m_blockSize;
 	private Map<String, BufferedImage> m_gPieces;
 	private BufferedImage m_gMovable, m_gSelected;
 	private BufferedImage[] m_gBlocks = new BufferedImage[2];
@@ -18,15 +17,14 @@ public class LosersChessGameGraphics extends GameGraphics
 	private Thread m_moveAnimator;
 	private MoveAnimation m_moveAnimation;
 	
-	public LosersChessGameGraphics(GameApplet applet)
+	public LosersGameGraphics(GameApplet applet)
 	{
 		m_applet = applet;
 	}
 	
 	public void init(Game game)
 	{
-		m_game = (LosersChessGame)game;
-		m_gui = new LosersChessGameGUI();
+		m_game = (LosersGame)game;
 		m_boardOffsetY = Definitions.HEIGHT/8;
 		m_boardOffsetX = Definitions.HEIGHT/8;
 		m_blockSize = Definitions.HEIGHT*3/4 / Definitions.NUMROWS;
@@ -55,11 +53,7 @@ public class LosersChessGameGraphics extends GameGraphics
 		catch (Exception ex) {
 			System.out.println("Error loading fonts!");
 		}
-	}
-	
-	public GameGUI getGUI()
-	{
-		return m_gui;
+
 	}
 	
     public Dimension getPreferredSize()
@@ -71,7 +65,7 @@ public class LosersChessGameGraphics extends GameGraphics
     {
     	m_movableBlocks = 0;
     	m_selectedBlocks = 0;
-    	LosersChessBoard b = m_game.getBoard();
+    	LosersBoard b = m_game.getBoard();
 		if (m_game.p1 instanceof LosersHumanPlayer)
 		{
 			int sq = ((LosersHumanPlayer)m_game.p1).getSelected();
@@ -183,8 +177,8 @@ public class LosersChessGameGraphics extends GameGraphics
 	
 	public void drawPieceInBoard(Graphics g, char p, int r, int c)
 	{
-		int y = LosersChessGameGraphics.getY(r);
-		int x = LosersChessGameGraphics.getX(c);
+		int y = getY(r);
+		int x = getX(c);
 		drawPiece(g, p, x, y);
 	}
 	
@@ -234,13 +228,13 @@ public class LosersChessGameGraphics extends GameGraphics
 	
 	public void drawGUI(Graphics g)
 	{
-		for (EasyButton b : m_gui.getButtons()) {
+		for (EasyButton b : m_game.getGUI().getButtons()) {
 			BufferedImage img = (b.isPressed() ? b.getPressedImg() : b.getReleasedImg());
 			g.drawImage(img, b.getX(), b.getY(), b.getW(), b.getH(), null);
 		}
 	}
 	
-	public static int getRow(int y)
+	public int getRow(int y)
 	{
 		int relativeY = y - m_boardOffsetY;
 		if (relativeY < 0 || relativeY >= Definitions.NUMROWS*m_blockSize) {
@@ -249,7 +243,7 @@ public class LosersChessGameGraphics extends GameGraphics
 		return relativeY / m_blockSize;
 	}
 	
-	public static int getCol(int x)
+	public int getCol(int x)
 	{
 		int relativeX = x - m_boardOffsetX;
 		if (relativeX < 0 || relativeX >= Definitions.NUMCOLS*m_blockSize) {
@@ -258,13 +252,13 @@ public class LosersChessGameGraphics extends GameGraphics
 		return relativeX / m_blockSize;
 	}
 	
-	public static int getY(int row)
+	public int getY(int row)
 	{
 		if (row < 0 || row >= Definitions.NUMROWS) return -1;
 		return m_boardOffsetY + row*m_blockSize;
 	}
 	
-	public static int getX(int col)
+	public int getX(int col)
 	{
 		if (col < 0 || col >= Definitions.NUMCOLS) return -1;
 		return m_boardOffsetX + col*m_blockSize;
@@ -285,10 +279,10 @@ public class LosersChessGameGraphics extends GameGraphics
 			move = m;
 			traveler = b.getPiece(m.r0, m.c0);
 			incumbent = b.getPiece(m.rf, m.cf);
-			curY = LosersChessGameGraphics.getY(m.r0);
-			curX = LosersChessGameGraphics.getX(m.c0);
-			dY = ((double)LosersChessGameGraphics.getY(m.rf) - curY) / NUMTICKS;
-			dX = ((double)LosersChessGameGraphics.getX(m.cf) - curX) / NUMTICKS;
+			curY = getY(m.r0);
+			curX = getX(m.c0);
+			dY = ((double)getY(m.rf) - curY) / NUMTICKS;
+			dX = ((double)getX(m.cf) - curX) / NUMTICKS;
 		}
 		
 		public BufferedImage getFrame()

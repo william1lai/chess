@@ -5,7 +5,7 @@ import java.util.ArrayList;
 
 import javax.swing.JOptionPane;
 
-public class StandardChessBoard extends Board 
+public class StandardBoard extends Board 
 {
 	public class GameData
 	{
@@ -16,10 +16,10 @@ public class StandardChessBoard extends Board
 		public boolean m_blackCanCastleQueenside;
 		public int m_fiftymoverulecount;
 		public int m_turncount;
-		public StandardChessGame m_game;
+		public StandardGame m_game;
 		//public HashMap<String, Integer> positionTable;
 
-		public GameData(StandardChessGame scg)
+		public GameData(StandardGame scg)
 		{
 			m_enpassantCol = -1;
 			m_whiteCanCastleKingside = true;
@@ -47,8 +47,11 @@ public class StandardChessBoard extends Board
 	
 	private Definitions.Color m_turn;
 
+	public StandardBoard() //STUB for AliceBoard
+	{
+	}
 	
-	public StandardChessBoard(StandardChessGame scg) //standard setup
+	public StandardBoard(StandardGame scg) //standard setup
 	{
 		m_turn = Definitions.Color.WHITE;
 		m_data = new GameData(scg);
@@ -63,7 +66,7 @@ public class StandardChessBoard extends Board
 		setKings(0x0800000000000008L);
 	}
 
-	public StandardChessBoard(StandardChessBoard other)
+	public StandardBoard(StandardBoard other)
 	{
 		m_turn = other.m_turn;
 		m_data = new GameData(other.m_data);
@@ -440,7 +443,7 @@ public class StandardChessBoard extends Board
 									(((bitsq << 7) & getBlack()) != 0 || (epcol >= 0 && epcol == c+1 && r == 3)))
 							{
 								int dsq = sq + 7;
-								StandardChessBoard temp = this.clone();
+								StandardBoard temp = this.clone();
 								temp.move(new Move(r, c, 7 - (dsq / 8), 7 - (dsq % 8)));
 
 								if (!Definitions.isAttacked(temp, kingsq, Definitions.flip(m_turn)))
@@ -452,7 +455,7 @@ public class StandardChessBoard extends Board
 									((bitsq << 9) & getBlack()) != 0 || (epcol >= 0 && epcol == c-1 && r == 3))
 							{
 								int dsq = sq + 9;
-								StandardChessBoard temp = this.clone();
+								StandardBoard temp = this.clone();
 								temp.move(new Move(r, c, 7 - (dsq / 8), 7 - (dsq % 8)));
 
 								if (!Definitions.isAttacked(temp, kingsq, Definitions.flip(m_turn)))
@@ -463,7 +466,7 @@ public class StandardChessBoard extends Board
 							if (((bitsq << 8) & moves) != 0 && ((bitsq << 8) & allpieces) == 0)
 							{
 								int dsq = sq + 8;
-								StandardChessBoard temp = this.clone();
+								StandardBoard temp = this.clone();
 								temp.move(new Move(r, c, 7 - (dsq / 8), 7 - (dsq % 8)));
 
 								if (!Definitions.isAttacked(temp, kingsq, Definitions.flip(m_turn)))
@@ -476,7 +479,7 @@ public class StandardChessBoard extends Board
 									&& ((bitsq << 8) & allpieces) == 0)
 							{
 								int dsq = sq + 16;
-								StandardChessBoard temp = this.clone();
+								StandardBoard temp = this.clone();
 								temp.move(new Move(r, c, 7 - (dsq / 8), 7 - (dsq % 8)));
 
 								if (!Definitions.isAttacked(temp, kingsq, Definitions.flip(m_turn)))
@@ -494,7 +497,7 @@ public class StandardChessBoard extends Board
 									((bitsq >>> 7) & getWhite()) != 0 || (epcol >= 0 && epcol == c-1 && r == 4))
 							{
 								int dsq = sq - 7;
-								StandardChessBoard temp = this.clone();
+								StandardBoard temp = this.clone();
 								temp.move(new Move(r, c, 7 - (dsq / 8), 7 - (dsq % 8)));
 
 								if (!Definitions.isAttacked(temp, kingsq, Definitions.flip(m_turn)))
@@ -506,7 +509,7 @@ public class StandardChessBoard extends Board
 									((bitsq >>> 9) & getWhite()) != 0 || (epcol >= 0 && epcol == c+1 && r == 4))
 							{
 								int dsq = sq - 9;
-								StandardChessBoard temp = this.clone();
+								StandardBoard temp = this.clone();
 								temp.move(new Move(r, c, 7 - (dsq / 8), 7 - (dsq % 8)));
 
 								if (!Definitions.isAttacked(temp, kingsq, Definitions.flip(m_turn)))
@@ -517,7 +520,7 @@ public class StandardChessBoard extends Board
 							if (((bitsq >>> 8) & moves) != 0 && ((bitsq >>> 8) & allpieces) == 0)
 							{
 								int dsq = sq - 8;
-								StandardChessBoard temp = this.clone();
+								StandardBoard temp = this.clone();
 								temp.move(new Move(r, c, 7 - (dsq / 8), 7 - (dsq % 8)));
 
 								if (!Definitions.isAttacked(temp, kingsq, Definitions.flip(m_turn)))
@@ -530,7 +533,7 @@ public class StandardChessBoard extends Board
 									&& ((bitsq >>> 8) & allpieces) == 0)
 							{
 								int dsq = sq - 16;
-								StandardChessBoard temp = this.clone();
+								StandardBoard temp = this.clone();
 								temp.move(new Move(r, c, 7 - (dsq / 8), 7 - (dsq % 8)));
 
 								if (!Definitions.isAttacked(temp, kingsq, Definitions.flip(m_turn)))
@@ -547,7 +550,7 @@ public class StandardChessBoard extends Board
 						{
 							if (((moves >>> i) & 1L) == 1)
 							{
-								StandardChessBoard temp = this.clone();
+								StandardBoard temp = this.clone();
 								temp.move(new Move(r, c, 7 - (i / 8), 7 - (i % 8)));
 
 								if (!Definitions.isAttacked(temp, kingsq, Definitions.flip(m_turn)))
@@ -564,7 +567,7 @@ public class StandardChessBoard extends Board
 						{
 							if (((moves >>> i) & 1L) == 1)
 							{
-								StandardChessBoard temp = this.clone();
+								StandardBoard temp = this.clone();
 								temp.move(new Move(r, c, 7 - (i / 8), 7 - (i % 8)));
 
 								if (!Definitions.isAttacked(temp, kingsq, Definitions.flip(m_turn)))
@@ -581,7 +584,7 @@ public class StandardChessBoard extends Board
 						{
 							if (((moves >>> i) & 1L) == 1)
 							{
-								StandardChessBoard temp = this.clone();
+								StandardBoard temp = this.clone();
 								temp.move(new Move(r, c, 7 - (i / 8), 7 - (i % 8)));
 
 								if (!Definitions.isAttacked(temp, kingsq, Definitions.flip(m_turn)))
@@ -598,7 +601,7 @@ public class StandardChessBoard extends Board
 						{
 							if (((moves >>> i) & 1L) == 1)
 							{
-								StandardChessBoard temp = this.clone();
+								StandardBoard temp = this.clone();
 								temp.move(new Move(r, c, 7 - (i / 8), 7 - (i % 8)));
 
 								if (!Definitions.isAttacked(temp, kingsq, Definitions.flip(m_turn)))
@@ -615,7 +618,7 @@ public class StandardChessBoard extends Board
 						{
 							if (((moves >>> i) & 1L) == 1)
 							{
-								StandardChessBoard temp = this.clone();
+								StandardBoard temp = this.clone();
 								temp.move(new Move(r, c, 7 - (i / 8), 7 - (i % 8)));
 
 								if (!Definitions.isAttacked(temp, i, Definitions.flip(m_turn)))
@@ -656,8 +659,8 @@ public class StandardChessBoard extends Board
 						if (canCastleQueenside) //queenside castle
 						{
 							//not in check at original, intermediate, or final squares
-							if (!(Definitions.isAttacked(this, kingsq, Definitions.flip(whoseTurn())) |
-									Definitions.isAttacked(this, kingsq + 1, Definitions.flip(whoseTurn())) |
+							if (!(Definitions.isAttacked(this, kingsq, Definitions.flip(whoseTurn())) ||
+									Definitions.isAttacked(this, kingsq + 1, Definitions.flip(whoseTurn())) ||
 									Definitions.isAttacked(this, kingsq + 2, Definitions.flip(whoseTurn()))))
 							{
 								if ((((king << 1) & ~allpieces) != 0) &&
@@ -700,7 +703,7 @@ public class StandardChessBoard extends Board
 
 	public void promotePawn(int r, int c)
 	{
-		Player cur = (whoseTurn() == Definitions.Color.WHITE ? m_data.m_game.p1 : m_data.m_game.p2);
+		Player cur = (Definitions.flip(whoseTurn()) == Definitions.Color.WHITE ? m_data.m_game.p1 : m_data.m_game.p2);
 
 		if (cur instanceof HumanPlayer)
 		{
@@ -734,9 +737,9 @@ public class StandardChessBoard extends Board
 		}
 	}
 	
-	public StandardChessBoard clone()
+	public StandardBoard clone()
 	{
-		return new StandardChessBoard(this);
+		return new StandardBoard(this);
 	}
 
 	public String toString()

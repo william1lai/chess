@@ -2,7 +2,7 @@ package chess;
 
 import java.util.Stack;
 
-public abstract class Game
+public abstract class Game implements Runnable
 {
 	protected GameApplet m_applet;
 	
@@ -10,5 +10,5 @@ public abstract class Game
 	protected Player p2;	
 	protected Stack<String> movesHistory;
 	
-	abstract public void init(GameGraphics graphics);
+	abstract public void init(GameGraphics graphics, GameGUI gui);
 }

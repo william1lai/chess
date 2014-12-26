@@ -5,31 +5,32 @@ import java.util.*;
 import java.awt.image.BufferedImage;
 import javax.imageio.ImageIO;
 
+import chess.AliceBoard.AliceMove;
+
 @SuppressWarnings("serial")
-public class StandardChessGameGraphics extends GameGraphics
+public class AliceGameGraphics extends GameGraphics
 {
-	private StandardChessGame m_game;
-	private StandardChessGameGUI m_gui;
-	private static int m_boardOffsetX, m_boardOffsetY, m_blockSize;
+	private AliceGame m_game;
+	private int m_boardOffsetX, m_boardOffsetY, m_blockSize;
 	private Map<String, BufferedImage> m_gPieces;
 	private BufferedImage m_gMovable, m_gSelected;
 	private BufferedImage[] m_gBlocks = new BufferedImage[2];
 	private long m_movableBlocks, m_selectedBlocks;
 	private Thread m_moveAnimator;
 	private MoveAnimation m_moveAnimation;
+	private int m_activeBoard;
 	
-	public StandardChessGameGraphics(GameApplet applet)
+	public AliceGameGraphics(GameApplet applet)
 	{
 		m_applet = applet;
 	}
 	
 	public void init(Game game)
 	{
-		m_game = (StandardChessGame)game;
-		m_gui = new StandardChessGameGUI();
-		m_boardOffsetY = Definitions.HEIGHT/8;
+		m_game = (AliceGame)game;
 		m_boardOffsetX = Definitions.HEIGHT/8;
-		m_blockSize = Definitions.HEIGHT*3/4 / Definitions.NUMROWS;
+		m_boardOffsetY = Definitions.HEIGHT/8;
+		m_blockSize = Definitions.HEIGHT *3/4 / Definitions.NUMROWS;
 		
 		m_gPieces = new HashMap<String, BufferedImage>();
 		try {
@@ -57,40 +58,51 @@ public class StandardChessGameGraphics extends GameGraphics
 		}
 	}
 	
-	public GameGUI getGUI()
-	{
-		return m_gui;
-	}
-	
     public Dimension getPreferredSize()
     {
         return new Dimension(640, 480);
+    }
+    
+    public void setActiveBoard(int board)
+    {
+    	if (board != 0 && board != 1) return;
+    	m_activeBoard = board;
+    }
+    
+    public int getActiveBoard()
+    {
+    	return m_activeBoard;
     }
     
     public void updateGameState()
     {
     	m_movableBlocks = 0;
     	m_selectedBlocks = 0;
-    	StandardChessBoard b = m_game.getBoard();
-		if (m_game.p1 instanceof StandardHumanPlayer)
+    	AliceBoard b = m_game.getBoard();
+		if (m_game.p1 instanceof AliceHumanPlayer)
 		{
-			int sq = ((StandardHumanPlayer)m_game.p1).getSelected();
+			AliceHumanPlayer p1 = (AliceHumanPlayer)m_game.p1;
+			int sq = p1.getSelected();
 			updateMovable(b.allMovesPiece(b.toRow(sq), b.toCol(sq)));
 			updateSelected(sq);
 		}
-		if (m_game.p2 instanceof StandardHumanPlayer)
+		if (m_game.p2 instanceof AliceHumanPlayer)
 		{
-			int sq = ((StandardHumanPlayer)m_game.p2).getSelected();
+			AliceHumanPlayer p2 = (AliceHumanPlayer)m_game.p2;
+			int sq = p2.getSelected();
 			updateMovable(b.allMovesPiece(b.toRow(sq), b.toCol(sq)));
 			updateSelected(sq);
 		}
     }
 	
-	private void updateMovable(ArrayList<Move> moves)
+	private void updateMovable(ArrayList<AliceMove> moves)
 	{
-		for (Move m : moves) {
-			int sq = m_game.getBoard().toSq(m.rf, m.cf);
-			m_movableBlocks |= (1L << sq);
+		for (AliceMove am : moves) {
+			if (am.board == m_activeBoard)
+			{
+				int sq = m_game.getBoard().toSq(am.m.rf, am.m.cf);
+				m_movableBlocks |= (1L << sq);
+			}
 		}
 	}
 	
@@ -122,7 +134,10 @@ public class StandardChessGameGraphics extends GameGraphics
 	
 	public void drawBackground(Graphics g)
 	{
-		g.setColor(new Color(238, 238, 238));
+		if (m_activeBoard == 0)
+			g.setColor(new Color(238, 238, 238));
+		else
+			g.setColor(new Color(0xE6E6FF));
 		g.fillRect(0, 0, Definitions.WIDTH, Definitions.HEIGHT);
 	}
 	
@@ -171,8 +186,9 @@ public class StandardChessGameGraphics extends GameGraphics
 		}
 	}
 	
-	public void drawPiece(Graphics g, char p, int x, int y)
+	public void drawPiece(Graphics g, char p, int x, int y, int board)
 	{
+		if (board != m_activeBoard) return;
 		String pstr;
 		if (Character.isUpperCase(p)) //White
 			pstr = "W" + p;
@@ -181,11 +197,12 @@ public class StandardChessGameGraphics extends GameGraphics
 		g.drawImage(m_gPieces.get(pstr), x, y, m_blockSize, m_blockSize, null);
 	}
 	
-	public void drawPieceInBoard(Graphics g, char p, int r, int c)
+	public void drawPieceInBoard(Graphics g, char p, int r, int c, int board)
 	{
-		int y = StandardChessGameGraphics.getY(r);
-		int x = StandardChessGameGraphics.getX(c);
-		drawPiece(g, p, x, y);
+		if (board != m_activeBoard) return;
+		int y = getY(r);
+		int x = getX(c);
+		drawPiece(g, p, x, y, board);
 	}
 	
 	public void drawMarkers(Graphics g)
@@ -212,12 +229,12 @@ public class StandardChessGameGraphics extends GameGraphics
 		}
 	}
 	
-	public void drawPieces(Graphics g, Board b)
+	public void drawPieces(Graphics g, AliceBoard b)
 	{
 		for (int r = 0, y = m_boardOffsetY; r < Definitions.NUMROWS; r++, y += m_blockSize) {
 			for (int c = 0, x = m_boardOffsetX; c < Definitions.NUMCOLS; c++, x += m_blockSize) {
-				if (b.getPiece(r, c) != 0) {
-					drawPiece(g, b.getPiece(r, c), x, y);
+				if (b.getPiece(r, c, m_activeBoard) != 0) {
+					drawPiece(g, b.getPiece(r, c, m_activeBoard), x, y, m_activeBoard);
 				}
 			}
 		}
@@ -234,13 +251,13 @@ public class StandardChessGameGraphics extends GameGraphics
 	
 	public void drawGUI(Graphics g)
 	{
-		for (EasyButton b : m_gui.getButtons()) {
+		for (EasyButton b : m_game.getGUI().getButtons()) {
 			BufferedImage img = (b.isPressed() ? b.getPressedImg() : b.getReleasedImg());
 			g.drawImage(img, b.getX(), b.getY(), b.getW(), b.getH(), null);
 		}
 	}
 	
-	public static int getRow(int y)
+	public int getRow(int y)
 	{
 		int relativeY = y - m_boardOffsetY;
 		if (relativeY < 0 || relativeY >= Definitions.NUMROWS*m_blockSize) {
@@ -249,7 +266,7 @@ public class StandardChessGameGraphics extends GameGraphics
 		return relativeY / m_blockSize;
 	}
 	
-	public static int getCol(int x)
+	public int getCol(int x)
 	{
 		int relativeX = x - m_boardOffsetX;
 		if (relativeX < 0 || relativeX >= Definitions.NUMCOLS*m_blockSize) {
@@ -258,13 +275,13 @@ public class StandardChessGameGraphics extends GameGraphics
 		return relativeX / m_blockSize;
 	}
 	
-	public static int getY(int row)
+	public int getY(int row)
 	{
 		if (row < 0 || row >= Definitions.NUMROWS) return -1;
 		return m_boardOffsetY + row*m_blockSize;
 	}
 	
-	public static int getX(int col)
+	public int getX(int col)
 	{
 		if (col < 0 || col >= Definitions.NUMCOLS) return -1;
 		return m_boardOffsetX + col*m_blockSize;
@@ -275,20 +292,20 @@ public class StandardChessGameGraphics extends GameGraphics
 		public char traveler, incumbent;
 		public double curX, curY;
 		public double dX, dY;
-		public Move move;
+		public AliceMove move;
 		private BufferedImage m_frame;
 		public final int NUMTICKS = 10;
 		
-		public MoveAnimation(Move m, Board b)
+		public MoveAnimation(AliceMove m, Board b)
 		{
 			m_frame = new BufferedImage(Definitions.WIDTH, Definitions.HEIGHT, BufferedImage.TYPE_INT_ARGB);
 			move = m;
-			traveler = b.getPiece(m.r0, m.c0);
-			incumbent = b.getPiece(m.rf, m.cf);
-			curY = StandardChessGameGraphics.getY(m.r0);
-			curX = StandardChessGameGraphics.getX(m.c0);
-			dY = ((double)StandardChessGameGraphics.getY(m.rf) - curY) / NUMTICKS;
-			dX = ((double)StandardChessGameGraphics.getX(m.cf) - curX) / NUMTICKS;
+			traveler = b.getPiece(m.m.r0, m.m.c0);
+			incumbent = b.getPiece(m.m.rf, m.m.cf);
+			curY = getY(m.m.r0);
+			curX = getX(m.m.c0);
+			dY = ((double)getY(m.m.rf) - curY) / NUMTICKS;
+			dX = ((double)getX(m.m.cf) - curX) / NUMTICKS;
 		}
 		
 		public BufferedImage getFrame()
@@ -307,14 +324,15 @@ public class StandardChessGameGraphics extends GameGraphics
 					Graphics2D g = (Graphics2D)m_frame.getGraphics();
 					g.setBackground(new Color(255, 255, 255, 0));
 					g.clearRect(0, 0, Definitions.WIDTH, Definitions.HEIGHT);
-					drawBlock(g, move.rf, move.cf);
-					if (incumbent != 0) drawPieceInBoard(g, incumbent, move.rf, move.cf);
+					drawBlock(g, move.m.rf, move.m.cf);
+					if (incumbent != 0) drawPieceInBoard(g, incumbent, move.m.rf, move.m.cf, move.board);
 					drawBorders(g);
-					drawPiece(g, traveler, (int)curX, (int)curY);
+					drawPiece(g, traveler, (int)curX, (int)curY, move.board);
 				}
 		 		try { Thread.sleep(Definitions.TICK); }
 		 		catch (InterruptedException ex) {}
 			}
+			
 		}
 	};
 	
@@ -322,7 +340,7 @@ public class StandardChessGameGraphics extends GameGraphics
 	{
 		MoveAnimation rook;
 		
-		public CastleMoveAnimation(Move kingMove, Move rookMove, Board b)
+		public CastleMoveAnimation(AliceMove kingMove, AliceMove rookMove, Board b)
 		{
 			super(kingMove, b);
 			rook = new MoveAnimation(rookMove, b);
@@ -339,11 +357,11 @@ public class StandardChessGameGraphics extends GameGraphics
 					Graphics2D g = (Graphics2D)getFrame().getGraphics();
 					g.setBackground(new Color(255, 255, 255, 0));
 					g.clearRect(0, 0, Definitions.WIDTH, Definitions.HEIGHT);
-					drawBlock(g, move.rf, move.cf);
-					drawBlock(g, rook.move.rf, rook.move.cf);
+					drawBlock(g, move.m.rf, move.m.cf);
+					drawBlock(g, rook.move.m.rf, rook.move.m.cf);
 					drawBorders(g);
-					drawPiece(g, traveler, (int)curX, (int)curY);
-					drawPiece(g, rook.traveler, (int)rook.curX, (int)rook.curY);
+					drawPiece(g, traveler, (int)curX, (int)curY, move.board);
+					drawPiece(g, rook.traveler, (int)rook.curX, (int)rook.curY, rook.move.board);
 				}
 		 		try { Thread.sleep(Definitions.TICK); }
 		 		catch (InterruptedException ex) {}
@@ -360,19 +378,19 @@ public class StandardChessGameGraphics extends GameGraphics
 		m_moveAnimator.start();
 	}
 
-	public void animateMove(Move m, Board b)
+	public void animateMove(AliceMove am, AliceBoard ab)
 	{
-		if (m == null || b == null)
+		if (am == null || ab == null)
 			return;
-		m_moveAnimation = new MoveAnimation(m, b);
+		m_moveAnimation = new MoveAnimation(am, ab.getBoard(am.board));
 		startAnimation();
 	}
 	
-	public void animateCastlingMoves(Move kingMove, Move rookMove, Board b)
+	public void animateCastlingMoves(AliceMove kingMove, AliceMove rookMove, AliceBoard ab)
 	{
-		if (kingMove == null || rookMove == null || b == null)
+		if (kingMove == null || rookMove == null || ab == null)
 			return;
-		m_moveAnimation = new CastleMoveAnimation(kingMove, rookMove, b);
+		m_moveAnimation = new CastleMoveAnimation(kingMove, rookMove, ab.getBoard(kingMove.board));
 		startAnimation();
 	}
 

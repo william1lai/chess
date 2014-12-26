@@ -3,7 +3,7 @@ package chess;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class StandardComputerPlayer extends ComputerPlayer 
+public class AliceComputerPlayer extends ComputerPlayer 
 {
 	private double [][] PawnVals = {
 			{ 800, 800, 800, 800, 800, 800, 800, 800, },
@@ -55,7 +55,7 @@ public class StandardComputerPlayer extends ComputerPlayer
 	private Move killer2;
 
 
-	public StandardComputerPlayer(String name, Definitions.Color c, Game g) 
+	public AliceComputerPlayer(String name, Definitions.Color c, Game g) 
 	{
 		super(name, c, g);
 	}
@@ -598,7 +598,5 @@ public class StandardComputerPlayer extends ComputerPlayer
 		m_book.put("r1bqkbnr/pppp1ppp/2n5/1B2p3/4P3/5N2/PPPP1PPP/RNBQK2R b KQkq -", new Move(1, 5, 3, 5)); //1.e4 e5 2.Nf3 Nc6 3.Bb5 f5
 		m_book.put("rnbqkbnr/pppppppp/8/8/3P4/8/PPP1PPPP/RNBQKBNR b KQkq d3", new Move(1, 5, 3, 5)); //1.d4 f5
 	}
-
-
 
 }

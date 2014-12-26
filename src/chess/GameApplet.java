@@ -13,72 +13,57 @@ public class GameApplet extends JApplet implements Runnable, MouseListener
 	private Thread m_thread;
 	private Game m_game;
 	private GameGraphics m_graphics;
+	private GameGUI m_gui;
 	private boolean m_cancel;
 
 	public void init()
 	{
-		m_cancel = true;
-		chooseGame();
+		setFocusable(true);
+		
+		m_cancel = !chooseGame();
 		if (m_cancel)
-		{
 			return;
-		}
-		m_game.init(m_graphics);
+		
+		m_game.init(m_graphics, m_gui);
 		m_graphics.init(m_game);
+		m_gui.init(m_game);
 		
 		add(m_graphics);
-		addMouseListener(m_graphics.getGUI());
-		addFocusListener(m_graphics.getGUI());
+		addMouseListener(m_gui);
+		addFocusListener(m_gui);
+		addKeyListener(m_gui);
 		
 		m_thread = new Thread(this);
 		m_thread.start();
-
-		try {
-			EasyButton b = new EasyButton("buttonUndo", 480, 220, 90, 30, new EasyButtonAction() {
-				public void on_press()
-				{
-					undo();
-				}
-			});
-			if (m_game instanceof StandardChessGame)
-			{
-				((StandardChessGameGUI)m_graphics.getGUI()).addButton(b);
-			}
-			else if (m_game instanceof LosersChessGame)
-			{
-				((LosersChessGameGUI)m_graphics.getGUI()).addButton(b);	
-			}
-		}
-		catch (Exception ex) {}
 	}
 
-	public void chooseGame()
+	public boolean chooseGame()
 	{
-		String[] param = { "Standard Chess", "Loser's Chess" };
+		String[] param = { "Standard Chess", "Loser's Chess", "Alice Chess" };
 		String input = (String) JOptionPane.showInputDialog(null, "Game Type?", "Choose your game", JOptionPane.QUESTION_MESSAGE, null, param, param[0]);
 
 		if (input == "Standard Chess")
 		{
-			m_game = new StandardChessGame(this);
-			m_graphics = new StandardChessGameGraphics(this);
-			m_cancel = false;
+			m_game = new StandardGame(this);
+			m_graphics = new StandardGameGraphics(this);
+			m_gui = new StandardGameGUI(this);
+			return true;
 		}
-		else if (input == "Loser's Chess")
+		if (input == "Loser's Chess")
 		{
-			m_game = new LosersChessGame(this);
-			m_graphics = new LosersChessGameGraphics(this);
-			m_cancel = false;
+			m_game = new LosersGame(this);
+			m_graphics = new LosersGameGraphics(this);
+			m_gui = new LosersGameGUI(this);
+			return true;
 		}
-	}
-
-	public Game getGame()
-	{
-		return m_game;
-	}
-	
-	public GameGraphics getGameGraphics()
-	{
-		return m_graphics;
+		if (input == "Alice Chess")
+		{
+			m_game = new AliceGame(this);
+			m_graphics = new AliceGameGraphics(this);
+			m_gui = new AliceGameGUI(this);
+			return true;
+		}
+		return false;
 	}
 
 	public boolean cancelled()
@@ -88,56 +73,7 @@ public class GameApplet extends JApplet implements Runnable, MouseListener
 
 	public void run()
 	{		
-		if (getGame() instanceof StandardChessGame)
-		{
-			((StandardChessGame)getGame()).run();
-		}
-		else if (getGame() instanceof LosersChessGame)
-		{
-			((LosersChessGame)getGame()).run();
-		}
-	}
-
-	public void paintComponent(Graphics g)
-	{
-		super.paintComponents(g);
-		if (m_cancel)
-			return;
-	}
-
-	public void undo()
-	{
-		if (m_game.movesHistory.size() < 2)
-			return;
-
-		if (m_game instanceof StandardChessGame)
-		{
-			StandardChessGame scg = (StandardChessGame)m_game;
-			if (scg.canUndo())
-			{
-				scg.getBoard().decrementTurncount();
-
-				m_game.movesHistory.pop();
-				String returnMove = m_game.movesHistory.pop();
-
-				scg.getBoard().FENtoPosition(returnMove);
-			}			
-		}
-		else if (m_game instanceof LosersChessGame)
-		{
-			LosersChessGame lcg = (LosersChessGame)m_game;
-			if (lcg.canUndo())
-			{
-				lcg.getBoard().decrementTurncount();
-
-				m_game.movesHistory.pop();
-				String returnMove = m_game.movesHistory.pop();
-
-				lcg.getBoard().FENtoPosition(returnMove);
-			}
-		}
-
-
+		m_game.run();
 	}
 
 	//Prevents flickering when repainting
@@ -148,11 +84,7 @@ public class GameApplet extends JApplet implements Runnable, MouseListener
 
 	public void stop()
 	{
-		if (m_thread == null)
-		{
-			super.stop();
-		}
-		else if (m_thread.isAlive()) 
+		if (m_thread != null && m_thread.isAlive()) 
 		{
 			m_thread.interrupt();
 		}

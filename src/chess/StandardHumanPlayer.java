@@ -28,17 +28,17 @@ public class StandardHumanPlayer extends HumanPlayer
 
 	public void mousePressed(MouseEvent e)
 	{		
-		int row = StandardChessGameGraphics.getRow(e.getY());
-		int col = StandardChessGameGraphics.getCol(e.getX());
+		StandardGame g = ((StandardGame)getGame());
+		int row = g.getGraphics().getRow(e.getY());
+		int col = g.getGraphics().getCol(e.getX());
 		//Right-click to deselect
 		if (e.getButton() == MouseEvent.BUTTON3)
 			deselect();
 		//Left-click to select
 		else if (e.getButton() == MouseEvent.BUTTON1 && row >= 0 && col >= 0) 
 		{
-			StandardChessGame g = ((StandardChessGame)getGame());
 			int sq = (7-row)*8 + (7-col);
-			StandardChessBoard scb = g.getBoard();
+			StandardBoard scb = g.getBoard();
 			char p = scb.getPiece(row, col);
 			if (p != 0 && ((Character.isUpperCase(p)) ^ (scb.whoseTurn() == Definitions.Color.BLACK))) //colors match
 			{

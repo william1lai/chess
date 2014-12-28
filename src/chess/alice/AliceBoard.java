@@ -1,9 +1,15 @@
-package chess;
+package chess.alice;
 
 import java.util.ArrayList;
 //import java.util.HashMap;
 
 import javax.swing.JOptionPane;
+
+import chess.Definitions;
+import chess.HumanPlayer;
+import chess.Move;
+import chess.Player;
+import chess.standard.StandardBoard;
 
 public class AliceBoard //really a board pair
 {
@@ -908,7 +914,7 @@ public class AliceBoard //really a board pair
 
 	public void promotePawn(int r, int c, int board)
 	{
-		Player cur = (Definitions.flip(whoseTurn()) == Definitions.Color.WHITE ? m_data.m_game.p1 : m_data.m_game.p2);
+		Player cur = (Definitions.flip(whoseTurn()) == Definitions.Color.WHITE ? m_data.m_game.getP1() : m_data.m_game.getP2());
 
 		if (cur instanceof HumanPlayer)
 		{

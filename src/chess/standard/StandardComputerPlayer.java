@@ -1,7 +1,12 @@
-package chess;
+package chess.standard;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+
+import chess.ComputerPlayer;
+import chess.Definitions;
+import chess.Game;
+import chess.Move;
 
 public class StandardComputerPlayer extends ComputerPlayer 
 {

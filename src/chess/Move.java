@@ -7,7 +7,7 @@ public class Move
 	public int rf;
 	public int cf;
 
-	Move(int rr0, int cc0, int rrf, int ccf)
+	public Move(int rr0, int cc0, int rrf, int ccf)
 	{
 		r0 = rr0;
 		c0 = cc0;
@@ -15,7 +15,7 @@ public class Move
 		cf = ccf;
 	}
 	
-	Move(Move other)
+	public Move(Move other)
 	{
 		r0 = other.r0;
 		c0 = other.c0;

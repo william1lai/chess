@@ -1,9 +1,18 @@
-package chess;
+package chess.losers;
 
 import java.awt.*;
 import java.util.*;
 import java.awt.image.BufferedImage;
 import javax.imageio.ImageIO;
+
+import chess.Board;
+import chess.Definitions;
+import chess.EasyButton;
+import chess.Game;
+import chess.GameApplet;
+import chess.GameGraphics;
+import chess.Move;
+import chess.Player;
 
 @SuppressWarnings("serial")
 public class LosersGameGraphics extends GameGraphics
@@ -66,15 +75,15 @@ public class LosersGameGraphics extends GameGraphics
     	m_movableBlocks = 0;
     	m_selectedBlocks = 0;
     	LosersBoard b = m_game.getBoard();
-		if (m_game.p1 instanceof LosersHumanPlayer)
+		if (m_game.getP1() instanceof LosersHumanPlayer)
 		{
-			int sq = ((LosersHumanPlayer)m_game.p1).getSelected();
+			int sq = ((LosersHumanPlayer)m_game.getP1()).getSelected();
 			updateMovable(b.allMovesPiece(b.toRow(sq), b.toCol(sq)));
 			updateSelected(sq);
 		}
-		if (m_game.p2 instanceof LosersHumanPlayer)
+		if (m_game.getP2() instanceof LosersHumanPlayer)
 		{
-			int sq = ((LosersHumanPlayer)m_game.p2).getSelected();
+			int sq = ((LosersHumanPlayer)m_game.getP2()).getSelected();
 			updateMovable(b.allMovesPiece(b.toRow(sq), b.toCol(sq)));
 			updateSelected(sq);
 		}
@@ -104,7 +113,7 @@ public class LosersGameGraphics extends GameGraphics
 		drawBoard(backg);
 		drawBorders(backg);
 		drawMarkers(backg);
-		drawNames(backg, m_game.p1, m_game.p2, m_game.getBoard().whoseTurn());
+		drawNames(backg, m_game.getP2(), m_game.getP2(), m_game.getBoard().whoseTurn());
 		drawPieces(backg, m_game.getBoard());
 		drawGUI(backg);	
 		

@@ -1,18 +1,25 @@
-package chess;
+package chess.alice;
 
 import java.awt.event.MouseEvent;
 
+import chess.Definitions;
+import chess.Game;
+import chess.HumanPlayer;
+import chess.Move;
 import chess.Definitions.Color;
 
-public class StandardHumanPlayer extends HumanPlayer 
+public class AliceHumanPlayer extends HumanPlayer 
 {
-	public StandardHumanPlayer(String name, Color c, Game g) 
+	private int m_selectedBoard;
+	
+	public AliceHumanPlayer(String name, Color c, Game g) 
 	{
 		super(name, c, g);
 	}
 
-	private void select(int sq)
+	private void select(int board, int sq)
 	{
+		m_selectedBoard = board;
 		m_selected = sq;
 	}
 
@@ -25,10 +32,16 @@ public class StandardHumanPlayer extends HumanPlayer
 	{
 		return m_selected;
 	}
+	
+	public int getSelectedBoard()
+	{
+		return m_selectedBoard;
+	}
 
 	public void mousePressed(MouseEvent e)
-	{		
-		StandardGame g = ((StandardGame)getGame());
+	{
+		AliceGame g = ((AliceGame)getGame());
+		int board = g.getGraphics().getActiveBoard();
 		int row = g.getGraphics().getRow(e.getY());
 		int col = g.getGraphics().getCol(e.getX());
 		//Right-click to deselect
@@ -38,16 +51,16 @@ public class StandardHumanPlayer extends HumanPlayer
 		else if (e.getButton() == MouseEvent.BUTTON1 && row >= 0 && col >= 0) 
 		{
 			int sq = (7-row)*8 + (7-col);
-			StandardBoard scb = g.getBoard();
-			char p = scb.getPiece(row, col);
-			if (p != 0 && ((Character.isUpperCase(p)) ^ (scb.whoseTurn() == Definitions.Color.BLACK))) //colors match
+			AliceBoard acb = g.getBoard();
+			char p = acb.getPiece(row, col, board);
+			if (p != 0 && ((Character.isUpperCase(p)) ^ (acb.whoseTurn() == Definitions.Color.BLACK))) //colors match
 			{
-				select(sq);
+				select(g.getGraphics().getActiveBoard(), sq);
 			}
 			else if (m_selected != -1)
 			{
 				m_move = new Move(7 - (m_selected / 8), 7 - (m_selected % 8), row, col);
-				if (g.getBoard().isLegalMove(m_move)) {
+				if (g.getBoard().isLegalMove(m_move, board)) {
 					m_selected = -1;
 					m_done = true;
 					getGame().m_applet.removeMouseListener(this);

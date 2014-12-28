@@ -4,10 +4,6 @@ import java.awt.image.BufferedImage;
 
 import javax.imageio.ImageIO;
 
-interface EasyButtonAction
-{
-	public void on_press();
-}
 
 public class EasyButton
 {

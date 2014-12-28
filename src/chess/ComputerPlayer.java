@@ -2,11 +2,15 @@ package chess;
 
 import java.util.ArrayList;
 
+import chess.alice.AliceGame;
+import chess.losers.LosersGame;
+import chess.standard.StandardGame;
+
 public abstract class ComputerPlayer extends Player
 {
 	protected static final double MATE_SCORE = 9999.9999;
 
-	final class MovelistScore
+	public final class MovelistScore
 	{
 		private ArrayList<Move> m_movelist;
 		private double m_score;

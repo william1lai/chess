@@ -1,9 +1,15 @@
-package chess;
+package chess.standard;
 
 import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
+
+import chess.EasyButton;
+import chess.EasyButtonAction;
+import chess.Game;
+import chess.GameApplet;
+import chess.GameGUI;
 
 public class StandardGameGUI extends GameGUI
 {

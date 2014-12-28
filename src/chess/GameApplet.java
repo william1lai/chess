@@ -7,6 +7,16 @@ import java.awt.event.MouseListener;
 import javax.swing.JApplet;
 import javax.swing.JOptionPane;
 
+import chess.alice.AliceGame;
+import chess.alice.AliceGameGUI;
+import chess.alice.AliceGameGraphics;
+import chess.losers.LosersGame;
+import chess.losers.LosersGameGUI;
+import chess.losers.LosersGameGraphics;
+import chess.standard.StandardGame;
+import chess.standard.StandardGameGUI;
+import chess.standard.StandardGameGraphics;
+
 @SuppressWarnings("serial")
 public class GameApplet extends JApplet implements Runnable, MouseListener
 {

@@ -1,36 +1,48 @@
-package chess;
+package chess.standard;
 
 import java.util.ArrayList;
 //import java.util.HashMap;
-
 import javax.swing.JOptionPane;
 
-/* Rules: No castling, no checks, no checkmate
- * 	Pawns may promote to Kings also
- * 	Stalemate is won by the player who is stalemated
- * 	En passant is legal
- */
-public class LosersBoard extends Board 
+import chess.Board;
+import chess.Definitions;
+import chess.HumanPlayer;
+import chess.Move;
+import chess.Player;
+
+public class StandardBoard extends Board 
 {
 	public class GameData
 	{
 		public int m_enpassantCol; //the column (0-7) of the pawn to move two spaces last turn, -1 if no pawn moved two spaces
+		public boolean m_whiteCanCastleKingside; //false if king's rook or king have moved
+		public boolean m_whiteCanCastleQueenside; //false if queen's rook or king have moved
+		public boolean m_blackCanCastleKingside;
+		public boolean m_blackCanCastleQueenside;
 		public int m_fiftymoverulecount;
 		public int m_turncount;
-		public LosersGame m_game;
+		public StandardGame m_game;
 		//public HashMap<String, Integer> positionTable;
 
-		public GameData(LosersGame lcg)
+		public GameData(StandardGame scg)
 		{
 			m_enpassantCol = -1;
+			m_whiteCanCastleKingside = true;
+			m_whiteCanCastleQueenside = true;
+			m_blackCanCastleKingside = true;
+			m_blackCanCastleQueenside = true;
 			m_fiftymoverulecount = 0;
 			m_turncount = 0;
-			m_game = lcg;
+			m_game = scg;
 		}
 
 		public GameData(GameData other)
 		{
 			m_enpassantCol = other.m_enpassantCol;
+			m_whiteCanCastleKingside = other.m_whiteCanCastleKingside;
+			m_whiteCanCastleQueenside = other.m_whiteCanCastleQueenside;
+			m_blackCanCastleKingside = other.m_blackCanCastleKingside;
+			m_blackCanCastleQueenside = other.m_blackCanCastleQueenside;
 			m_fiftymoverulecount = other.m_fiftymoverulecount;
 			m_turncount = other.m_turncount;
 			m_game = other.m_game;
@@ -39,12 +51,15 @@ public class LosersBoard extends Board
 	private GameData m_data;
 	
 	private Definitions.Color m_turn;
+
+	public StandardBoard() //STUB for AliceBoard
+	{
+	}
 	
-	
-	public LosersBoard(LosersGame lcg) //standard setup
+	public StandardBoard(StandardGame scg) //standard setup
 	{
 		m_turn = Definitions.Color.WHITE;
-		m_data = new GameData(lcg);
+		m_data = new GameData(scg);
 
 		setWhite(0x000000000000FFFFL);
 		setBlack(0xFFFF000000000000L);
@@ -56,11 +71,11 @@ public class LosersBoard extends Board
 		setKings(0x0800000000000008L);
 	}
 
-	public LosersBoard(LosersBoard other)
+	public StandardBoard(StandardBoard other)
 	{
 		m_turn = other.m_turn;
 		m_data = new GameData(other.m_data);
-
+		
 		setWhite(other.getWhite());
 		setBlack(other.getBlack());
 		setPawns(other.getPawns());
@@ -136,7 +151,7 @@ public class LosersBoard extends Board
 		int sq = (7-r)*8 + (7-c);
 		long s = (1L << sq);
 		long mask = ~s;
-
+		
 		setWhite(getWhite() & mask);
 		setBlack(getBlack() & mask);
 		setPawns(getPawns() & mask);
@@ -145,7 +160,7 @@ public class LosersBoard extends Board
 		setRooks(getRooks() & mask);
 		setQueens(getQueens() & mask);
 		setKings(getKings() & mask);
-
+		
 		if (color == Definitions.Color.WHITE)
 		{
 			setWhite(getWhite() | s);
@@ -154,7 +169,7 @@ public class LosersBoard extends Board
 		{
 			setBlack(getBlack() | s);
 		}
-
+		
 		switch (piece)
 		{
 		case 'p':
@@ -183,7 +198,7 @@ public class LosersBoard extends Board
 			break;
 		}
 	}
-
+	
 	public void removePiece(int r, int c)
 	{
 		int sq = (7-r)*8 + (7-c);
@@ -198,7 +213,7 @@ public class LosersBoard extends Board
 		setQueens(getQueens() & mask);
 		setKings(getKings() & mask);
 	}
-
+	
 	public void clearBoard()
 	{
 		setWhite(0);
@@ -210,7 +225,7 @@ public class LosersBoard extends Board
 		setQueens(0);
 		setKings(0);
 	}
-
+	
 	public void incrementFiftymoverulecount()
 	{
 		m_data.m_fiftymoverulecount++;
@@ -225,7 +240,7 @@ public class LosersBoard extends Board
 	{
 		m_data.m_turncount++;
 	}
-
+	
 	public void decrementTurncount()
 	{
 		m_data.m_turncount--;
@@ -263,21 +278,18 @@ public class LosersBoard extends Board
 
 	public Definitions.State getState()
 	{
-		if (allMoves().size() == 0)
+		boolean isInCheck = inCheck();
+		int moves = allMoves().size();
+
+		if (moves == 0)
 		{
-			if (whoseTurn() == Definitions.Color.WHITE)
+			if (isInCheck)
 			{
-				if (getWhite() != 0)
-					return Definitions.State.STALEMATE; //remember that in Loser's chess, stalemate is a win
-				else
-					return Definitions.State.CHECKMATE;
+				return Definitions.State.CHECKMATE;
 			}
 			else
 			{
-				if (getBlack() != 0)
-					return Definitions.State.STALEMATE;
-				else
-					return Definitions.State.CHECKMATE;
+				return Definitions.State.STALEMATE;
 			}
 		}
 		else
@@ -301,7 +313,7 @@ public class LosersBoard extends Board
 			setBishops(getBishops() & ~(1L << dest));
 			setRooks(getRooks() & ~(1L << dest));
 			setQueens(getQueens() & ~(1L << dest));
-			setKings(getKings() & ~(1L << dest));
+			//no king because it shouldn't be able to be captured
 		}
 		else if ((getKnights() & (1L << orig)) != 0)
 		{
@@ -311,7 +323,7 @@ public class LosersBoard extends Board
 			setBishops(getBishops() & ~(1L << dest));
 			setRooks(getRooks() & ~(1L << dest));
 			setQueens(getQueens() & ~(1L << dest));
-			setKings(getKings() & ~(1L << dest));
+			//no king because it shouldn't be able to be captured
 		}
 		else if ((getBishops() & (1L << orig)) != 0)
 		{
@@ -321,7 +333,7 @@ public class LosersBoard extends Board
 			setKnights(getKnights() & ~(1L << dest));
 			setRooks(getRooks() & ~(1L << dest));
 			setQueens(getQueens() & ~(1L << dest));
-			setKings(getKings() & ~(1L << dest));
+			//no king because it shouldn't be able to be captured
 		}
 		else if ((getRooks() & (1L << orig)) != 0)
 		{
@@ -331,7 +343,7 @@ public class LosersBoard extends Board
 			setKnights(getKnights() & ~(1L << dest));
 			setBishops(getBishops() & ~(1L << dest));
 			setQueens(getQueens() & ~(1L << dest));
-			setKings(getKings() & ~(1L << dest));
+			//no king because it shouldn't be able to be captured
 		}
 		else if ((getQueens() & (1L << orig)) != 0)
 		{
@@ -341,7 +353,7 @@ public class LosersBoard extends Board
 			setKnights(getKnights() & ~(1L << dest));
 			setBishops(getBishops() & ~(1L << dest));
 			setRooks(getRooks() & ~(1L << dest));
-			setKings(getKings() & ~(1L << dest));
+			//no king because it shouldn't be able to be captured
 		}
 		else if ((getKings() & (1L << orig)) != 0)
 		{
@@ -390,10 +402,9 @@ public class LosersBoard extends Board
 
 	public ArrayList<Move> allMoves()
 	{
-		ArrayList<Move> captures = new ArrayList<Move>();
-		ArrayList<Move> mvs = new ArrayList<Move>();
-
+		ArrayList<Move> legalMoves = new ArrayList<Move>();
 		long turnpieces, allpieces, pawns, knights, bishops, rooks, queens, kings;
+		int kingsq;
 
 		if (m_turn == Definitions.Color.WHITE)
 		{
@@ -410,6 +421,8 @@ public class LosersBoard extends Board
 		queens = turnpieces & getQueens();
 		kings = turnpieces & getKings();
 		allpieces = getWhite() | getBlack();
+		
+		kingsq = (int)((Math.log(kings)/Math.log(2)) + 0.5);
 
 		for (int r = 0; r < 8; r++)
 		{
@@ -435,59 +448,106 @@ public class LosersBoard extends Board
 									(((bitsq << 7) & getBlack()) != 0 || (epcol >= 0 && epcol == c+1 && r == 3)))
 							{
 								int dsq = sq + 7;
-								captures.add(new Move(r, c, 7 - (dsq / 8), 7 - (dsq % 8)));
+								StandardBoard temp = this.clone();
+								temp.move(new Move(r, c, 7 - (dsq / 8), 7 - (dsq % 8)));
+
+								if (!Definitions.isAttacked(temp, kingsq, Definitions.flip(m_turn)))
+								{
+									legalMoves.add(new Move(r, c, 7 - (dsq / 8), 7 - (dsq % 8)));
+								}
 							}
 							if (((bitsq << 9) & attacks & ~Definitions.allH) != 0 && 
 									((bitsq << 9) & getBlack()) != 0 || (epcol >= 0 && epcol == c-1 && r == 3))
 							{
 								int dsq = sq + 9;
-								captures.add(new Move(r, c, 7 - (dsq / 8), 7 - (dsq % 8)));
+								StandardBoard temp = this.clone();
+								temp.move(new Move(r, c, 7 - (dsq / 8), 7 - (dsq % 8)));
+
+								if (!Definitions.isAttacked(temp, kingsq, Definitions.flip(m_turn)))
+								{
+									legalMoves.add(new Move(r, c, 7 - (dsq / 8), 7 - (dsq % 8)));
+								}
 							}
 							if (((bitsq << 8) & moves) != 0 && ((bitsq << 8) & allpieces) == 0)
 							{
 								int dsq = sq + 8;
-								mvs.add(new Move(r, c, 7 - (dsq / 8), 7 - (dsq % 8)));
+								StandardBoard temp = this.clone();
+								temp.move(new Move(r, c, 7 - (dsq / 8), 7 - (dsq % 8)));
+
+								if (!Definitions.isAttacked(temp, kingsq, Definitions.flip(m_turn)))
+								{
+									legalMoves.add(new Move(r, c, 7 - (dsq / 8), 7 - (dsq % 8)));
+								}
 							}
 
 							if (((bitsq << 16) & moves) != 0 && ((bitsq << 16) & allpieces) == 0
 									&& ((bitsq << 8) & allpieces) == 0)
 							{
 								int dsq = sq + 16;
-								mvs.add(new Move(r, c, 7 - (dsq / 8), 7 - (dsq % 8)));
+								StandardBoard temp = this.clone();
+								temp.move(new Move(r, c, 7 - (dsq / 8), 7 - (dsq % 8)));
+
+								if (!Definitions.isAttacked(temp, kingsq, Definitions.flip(m_turn)))
+								{
+									legalMoves.add(new Move(r, c, 7 - (dsq / 8), 7 - (dsq % 8)));
+								}
 							}
 						}
 						else
 						{
 							attacks = Definitions.bpawnAttacks(pawns);
 							moves = Definitions.bpawnMoves(pawns, ~allpieces);
-
+									
 							if (((bitsq >>> 7) & attacks & ~Definitions.allH) != 0 && 
 									((bitsq >>> 7) & getWhite()) != 0 || (epcol >= 0 && epcol == c-1 && r == 4))
 							{
 								int dsq = sq - 7;
-								captures.add(new Move(r, c, 7 - (dsq / 8), 7 - (dsq % 8)));
+								StandardBoard temp = this.clone();
+								temp.move(new Move(r, c, 7 - (dsq / 8), 7 - (dsq % 8)));
+
+								if (!Definitions.isAttacked(temp, kingsq, Definitions.flip(m_turn)))
+								{
+									legalMoves.add(new Move(r, c, 7 - (dsq / 8), 7 - (dsq % 8)));
+								}
 							}
 							if (((bitsq >>> 9) & attacks & ~Definitions.allA) != 0 && 
 									((bitsq >>> 9) & getWhite()) != 0 || (epcol >= 0 && epcol == c+1 && r == 4))
 							{
 								int dsq = sq - 9;
-								captures.add(new Move(r, c, 7 - (dsq / 8), 7 - (dsq % 8)));
+								StandardBoard temp = this.clone();
+								temp.move(new Move(r, c, 7 - (dsq / 8), 7 - (dsq % 8)));
+
+								if (!Definitions.isAttacked(temp, kingsq, Definitions.flip(m_turn)))
+								{
+									legalMoves.add(new Move(r, c, 7 - (dsq / 8), 7 - (dsq % 8)));
+								}
 							}
 							if (((bitsq >>> 8) & moves) != 0 && ((bitsq >>> 8) & allpieces) == 0)
 							{
 								int dsq = sq - 8;
-								mvs.add(new Move(r, c, 7 - (dsq / 8), 7 - (dsq % 8)));
+								StandardBoard temp = this.clone();
+								temp.move(new Move(r, c, 7 - (dsq / 8), 7 - (dsq % 8)));
+
+								if (!Definitions.isAttacked(temp, kingsq, Definitions.flip(m_turn)))
+								{
+									legalMoves.add(new Move(r, c, 7 - (dsq / 8), 7 - (dsq % 8)));
+								}
 							}
 
 							if (((bitsq >>> 16) & moves) != 0 && ((bitsq >>> 16) & allpieces) == 0
 									&& ((bitsq >>> 8) & allpieces) == 0)
 							{
 								int dsq = sq - 16;
-								mvs.add(new Move(r, c, 7 - (dsq / 8), 7 - (dsq % 8)));
+								StandardBoard temp = this.clone();
+								temp.move(new Move(r, c, 7 - (dsq / 8), 7 - (dsq % 8)));
+
+								if (!Definitions.isAttacked(temp, kingsq, Definitions.flip(m_turn)))
+								{
+									legalMoves.add(new Move(r, c, 7 - (dsq / 8), 7 - (dsq % 8)));
+								}
 							}
 						}
 					}
-
 					else if (((knights >>> sq) & 1L) == 1) //knight
 					{
 						long moves = Definitions.knightAttacks(1L << sq) & ~turnpieces;
@@ -495,13 +555,12 @@ public class LosersBoard extends Board
 						{
 							if (((moves >>> i) & 1L) == 1)
 							{
-								if (((1L << i) & allpieces) != 0)
+								StandardBoard temp = this.clone();
+								temp.move(new Move(r, c, 7 - (i / 8), 7 - (i % 8)));
+
+								if (!Definitions.isAttacked(temp, kingsq, Definitions.flip(m_turn)))
 								{
-									captures.add(new Move(r, c, 7 - (i / 8), 7 - (i % 8)));										
-								}
-								else
-								{
-									mvs.add(new Move(r, c, 7 - (i / 8), 7 - (i % 8)));
+									legalMoves.add(new Move(r, c, 7 - (i / 8), 7 - (i % 8)));
 								}
 							}
 						}
@@ -513,13 +572,12 @@ public class LosersBoard extends Board
 						{
 							if (((moves >>> i) & 1L) == 1)
 							{
-								if (((1L << i) & allpieces) != 0)
+								StandardBoard temp = this.clone();
+								temp.move(new Move(r, c, 7 - (i / 8), 7 - (i % 8)));
+
+								if (!Definitions.isAttacked(temp, kingsq, Definitions.flip(m_turn)))
 								{
-									captures.add(new Move(r, c, 7 - (i / 8), 7 - (i % 8)));										
-								}
-								else
-								{
-									mvs.add(new Move(r, c, 7 - (i / 8), 7 - (i % 8)));
+									legalMoves.add(new Move(r, c, 7 - (i / 8), 7 - (i % 8)));
 								}
 							}
 						}
@@ -531,13 +589,12 @@ public class LosersBoard extends Board
 						{
 							if (((moves >>> i) & 1L) == 1)
 							{
-								if (((1L << i) & allpieces) != 0)
+								StandardBoard temp = this.clone();
+								temp.move(new Move(r, c, 7 - (i / 8), 7 - (i % 8)));
+
+								if (!Definitions.isAttacked(temp, kingsq, Definitions.flip(m_turn)))
 								{
-									captures.add(new Move(r, c, 7 - (i / 8), 7 - (i % 8)));										
-								}
-								else
-								{
-									mvs.add(new Move(r, c, 7 - (i / 8), 7 - (i % 8)));
+									legalMoves.add(new Move(r, c, 7 - (i / 8), 7 - (i % 8)));
 								}
 							}
 						}
@@ -549,56 +606,113 @@ public class LosersBoard extends Board
 						{
 							if (((moves >>> i) & 1L) == 1)
 							{
-								if (((1L << i) & allpieces) != 0)
+								StandardBoard temp = this.clone();
+								temp.move(new Move(r, c, 7 - (i / 8), 7 - (i % 8)));
+
+								if (!Definitions.isAttacked(temp, kingsq, Definitions.flip(m_turn)))
 								{
-									captures.add(new Move(r, c, 7 - (i / 8), 7 - (i % 8)));										
-								}
-								else
-								{
-									mvs.add(new Move(r, c, 7 - (i / 8), 7 - (i % 8)));
+									legalMoves.add(new Move(r, c, 7 - (i / 8), 7 - (i % 8)));
 								}
 							}
 						}
 					}
 					else //king
 					{
-						long moves = Definitions.kingAttacks(kings) & ~turnpieces;
+						long moves = Definitions.kingAttacks(1L << sq) & ~turnpieces;
 						for (int i = 0; i < 64; i++)
 						{
 							if (((moves >>> i) & 1L) == 1)
 							{
-								if (((1L << i) & allpieces) != 0)
+								StandardBoard temp = this.clone();
+								temp.move(new Move(r, c, 7 - (i / 8), 7 - (i % 8)));
+
+								if (!Definitions.isAttacked(temp, i, Definitions.flip(m_turn)))
 								{
-									captures.add(new Move(r, c, 7 - (i / 8), 7 - (i % 8)));										
-								}
-								else
-								{
-									mvs.add(new Move(r, c, 7 - (i / 8), 7 - (i % 8)));
+									legalMoves.add(new Move(r, c, 7 - (i / 8), 7 - (i % 8)));
 								}
 							}
 						}
+
+						boolean canCastleKingside;
+						boolean canCastleQueenside;
+						if (whoseTurn() == Definitions.Color.WHITE)
+						{
+							canCastleKingside = m_data.m_whiteCanCastleKingside;
+							canCastleQueenside = m_data.m_whiteCanCastleQueenside;
+						}
+						else
+						{
+							canCastleKingside = m_data.m_blackCanCastleKingside;
+							canCastleQueenside = m_data.m_blackCanCastleQueenside;
+						}
+
+						long king = (1L << (kingsq));
+						if (canCastleKingside) //kingside castle
+						{
+							//not in check at original, intermediate, or final squares
+							if (!(Definitions.isAttacked(this, kingsq, Definitions.flip(whoseTurn())) ||
+									Definitions.isAttacked(this, kingsq - 1, Definitions.flip(whoseTurn())) ||
+									Definitions.isAttacked(this, kingsq - 2, Definitions.flip(whoseTurn()))))
+							{
+								if ((((king >>> 1) & ~allpieces) != 0) &&
+										(((king >>> 2) & ~allpieces) != 0))
+								{
+									legalMoves.add(new Move(r, c, r, c + 2));
+								}
+							}
+						}
+						if (canCastleQueenside) //queenside castle
+						{
+							//not in check at original, intermediate, or final squares
+							if (!(Definitions.isAttacked(this, kingsq, Definitions.flip(whoseTurn())) ||
+									Definitions.isAttacked(this, kingsq + 1, Definitions.flip(whoseTurn())) ||
+									Definitions.isAttacked(this, kingsq + 2, Definitions.flip(whoseTurn()))))
+							{
+								if ((((king << 1) & ~allpieces) != 0) &&
+										(((king << 2) & ~allpieces) != 0))
+								{
+									legalMoves.add(new Move(r, c, r, c - 2));
+								}	
+							}
+						}						
 					}
 				}
 			}
 		}
+		return legalMoves;
+	}
 
-		if (captures.size() > 0)
-		{	
-			return captures;
-		}
+	public boolean inCheck()
+	{
+		long king;
+		if (whoseTurn() == Definitions.Color.WHITE)
+			king = getWhite() & getKings();
 		else
-		{
-			return mvs;
-		}
+			king = getBlack() & getKings();
+		int kingsq = (int)((Math.log(king)/Math.log(2)) + 0.5);
+		return Definitions.isAttacked(this, kingsq, Definitions.flip(whoseTurn()));
+	}
+
+	public boolean inCheckmate()
+	{		
+		boolean check = inCheck();
+		return (check && allMoves().size() == 0);
+	}
+
+	public boolean inStalemate()
+	{		
+		boolean check = inCheck();
+		ArrayList<Move> mvs = allMoves();
+		return (!check && mvs.size() == 0);
 	}
 
 	public void promotePawn(int r, int c)
 	{
-		Player cur = (Definitions.flip(whoseTurn()) == Definitions.Color.WHITE ? m_data.m_game.p1 : m_data.m_game.p2);
+		Player cur = (Definitions.flip(whoseTurn()) == Definitions.Color.WHITE ? m_data.m_game.getP1() : m_data.m_game.getP2());
 
 		if (cur instanceof HumanPlayer)
 		{
-			String[] param = { "Queen", "Rook", "Knight", "Bishop", "King" };
+			String[] param = { "Queen", "Rook", "Knight", "Bishop" };
 			String input = (String) JOptionPane.showInputDialog(null, "Which piece do you want to promote to?", "Pawn Promotion", JOptionPane.QUESTION_MESSAGE, null, param, param[0]);
 
 			int sq = (7-r)*8 + (7-c);
@@ -615,26 +729,22 @@ public class LosersBoard extends Board
 			{
 				setKnights(getKnights() | (1L << sq));		
 			}
-			else if (input == "Bishop")
+			else //Bishop
 			{
 				setBishops(getBishops() | (1L << sq));
 			}
-			else //King
-			{
-				setKings(getKings() | (1L << sq));
-			}
 		}
-		else //AI chooses knight for now
+		else //AI chooses queen for now
 		{
 			int sq = (7-r)*8 + (7-c);
 			setPawns(getPawns() & ~(1L << sq));
-			setKnights(getKnights() | (1L << sq));
+			setQueens(getQueens() | (1L << sq));
 		}
 	}
-
-	public LosersBoard clone()
+	
+	public StandardBoard clone()
 	{
-		return new LosersBoard(this);
+		return new StandardBoard(this);
 	}
 
 	public String toString()
@@ -675,14 +785,14 @@ public class LosersBoard extends Board
 			}
 			else
 				str = str + "-";
-
+			
 			if (i % 8 == 0)
 				str = str + '\n';
 		}
-
+		
 		return str;
 	}
-
+	
 	public String toFEN(boolean complete)
 	{
 		String FEN = "";
@@ -750,7 +860,17 @@ public class LosersBoard extends Board
 			tstr = "b";
 		FEN = FEN + " " + tstr + " ";
 
-		String cstr = "-";
+		String cstr = "";
+		if (m_data.m_whiteCanCastleKingside)
+			cstr = cstr + "K";
+		if (m_data.m_whiteCanCastleQueenside)
+			cstr = cstr + "Q";
+		if (m_data.m_blackCanCastleKingside)
+			cstr = cstr + "k";
+		if (m_data.m_blackCanCastleQueenside)
+			cstr = cstr + "q";
+		if (cstr.length() == 0)
+			cstr = "-";
 		FEN = FEN + cstr + " ";
 
 		String epstr = "";
@@ -779,6 +899,11 @@ public class LosersBoard extends Board
 		String[] FEN = srcFEN.split("/");
 		String details = FEN[7].split(" ", 2)[1];
 
+		m_data.m_whiteCanCastleQueenside = false;
+		m_data.m_whiteCanCastleKingside = false;
+		m_data.m_blackCanCastleQueenside = false;
+		m_data.m_blackCanCastleKingside = false;
+
 		String[] detailElems = details.split(" "); //[0]=turn, [1]=castling, [2]=enpassant, [3]=50-move count, [4]=turn num
 		String turn = detailElems[0];
 		if (turn.charAt(0) == 'w')
@@ -790,7 +915,23 @@ public class LosersBoard extends Board
 			m_turn = Definitions.Color.BLACK;
 		}
 
-		//String castling = detailElems[1]; //hold '-' because no castling in Loser's Chess
+		String castling = detailElems[1];
+		if (castling.contains("Q"))
+		{
+			m_data.m_whiteCanCastleQueenside = true;
+		}
+		if (castling.contains("K"))
+		{
+			m_data.m_whiteCanCastleKingside = true;
+		}
+		if (castling.contains("q"))
+		{
+			m_data.m_blackCanCastleQueenside = true;
+		}
+		if (castling.contains("k"))
+		{
+			m_data.m_blackCanCastleKingside = true;
+		}
 
 		int epcol = detailElems[2].charAt(0) - 'a';
 		if (epcol >= 0 && epcol < 8)
@@ -799,7 +940,7 @@ public class LosersBoard extends Board
 			m_data.m_enpassantCol = -1;
 		m_data.m_fiftymoverulecount = Integer.parseInt(detailElems[3]);
 		m_data.m_turncount = Integer.parseInt(detailElems[4]);
-
+		
 		clearBoard();
 		for (int r = 0; r < 8; r++)
 		{
@@ -821,7 +962,7 @@ public class LosersBoard extends Board
 				{
 					color = Definitions.Color.BLACK;
 				}				
-
+				
 				placePiece(p, color, r, c);
 			}
 		}

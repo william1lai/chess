@@ -1,16 +1,22 @@
-package chess;
+package chess.alice;
 
 import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 
-public class LosersGameGUI extends GameGUI
+import chess.EasyButton;
+import chess.EasyButtonAction;
+import chess.Game;
+import chess.GameApplet;
+import chess.GameGUI;
+
+public class AliceGameGUI extends GameGUI
 {
-	LosersGame m_game;
+	AliceGame m_game;
 	ArrayList<EasyButton> m_buttons;
 	
-	public LosersGameGUI(GameApplet applet)
+	public AliceGameGUI(GameApplet applet)
 	{
 		m_applet = applet;
 		m_buttons = new ArrayList<EasyButton>();
@@ -18,7 +24,7 @@ public class LosersGameGUI extends GameGUI
 
 	public void init(Game game)
 	{
-		m_game = (LosersGame)game;
+		m_game = (AliceGame)game;
 		
 		try {
 			EasyButton b = new EasyButton("buttonUndo", 480, 220, 90, 30, new EasyButtonAction() {
@@ -76,11 +82,17 @@ public class LosersGameGUI extends GameGUI
 			m_buttons.get(i).release(false);
 	}
 
+	public void keyPressed(KeyEvent e)
+	{
+		if (e.getKeyCode() == KeyEvent.VK_RIGHT) m_game.getGraphics().setActiveBoard(1);
+		if (e.getKeyCode() == KeyEvent.VK_LEFT) m_game.getGraphics().setActiveBoard(0); 
+	}
+
 	public void mouseClicked(MouseEvent e) {}
 	public void mouseEntered(MouseEvent e) {}
 	public void mouseExited(MouseEvent e) {}
 	public void focusGained(FocusEvent e) {}
-	public void keyReleased(KeyEvent arg0) {}
-	public void keyTyped(KeyEvent arg0) {}
-	public void keyPressed(KeyEvent arg0) {}
+	public void keyReleased(KeyEvent e) {}
+	public void keyTyped(KeyEvent e) {}
+	
 }

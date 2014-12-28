@@ -1,7 +1,11 @@
-package chess;
+package chess.losers;
 
 import java.awt.event.MouseEvent;
 
+import chess.Definitions;
+import chess.Game;
+import chess.HumanPlayer;
+import chess.Move;
 import chess.Definitions.Color;
 
 public class LosersHumanPlayer extends HumanPlayer 

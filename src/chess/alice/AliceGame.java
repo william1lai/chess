@@ -1,9 +1,17 @@
-package chess;
+package chess.alice;
 
 import java.awt.event.MouseEvent;
 import javax.swing.JOptionPane;
 
-import chess.AliceBoard.AliceMove;
+import chess.Definitions;
+import chess.Game;
+import chess.GameApplet;
+import chess.GameGUI;
+import chess.GameGraphics;
+import chess.HumanPlayer;
+import chess.Move;
+import chess.Player;
+import chess.alice.AliceBoard.AliceMove;
 
 import java.util.Stack;
 

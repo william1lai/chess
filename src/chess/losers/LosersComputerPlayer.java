@@ -1,7 +1,13 @@
-package chess;
+package chess.losers;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+
+import chess.ComputerPlayer;
+import chess.Definitions;
+import chess.Game;
+import chess.Move;
+import chess.standard.StandardGame;
 
 public class LosersComputerPlayer extends ComputerPlayer 
 {

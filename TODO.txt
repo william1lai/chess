@@ -15,6 +15,5 @@ Alice Chess
 - create AI
 
 Miscellaneous
-- Repackage into separate packages for each game type
 - Streamline repetitive code
 - Implement new variants: Maharajah, Fischer Random, Upside-down chess, Pre-chess, Extinction chess, Genesis Chess, Block chess

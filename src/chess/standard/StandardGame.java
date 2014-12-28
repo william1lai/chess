@@ -1,26 +1,36 @@
-package chess;
+package chess.standard;
+
+import java.awt.event.MouseEvent;
+import javax.swing.JOptionPane;
+
+import chess.Definitions;
+import chess.Game;
+import chess.GameApplet;
+import chess.GameGUI;
+import chess.GameGraphics;
+import chess.HumanPlayer;
+import chess.Move;
+import chess.Player;
 
 import java.util.Stack;
 
-import javax.swing.JOptionPane;
-
-public class LosersGame extends Game
+public class StandardGame extends Game
 {
-	private LosersGameGraphics m_graphics;
-	private LosersGameGUI m_gui;
-	private LosersBoard m_game_board;
+	private StandardGameGraphics m_graphics;
+	private StandardGameGUI m_gui;
+	private StandardBoard m_game_board;
 	private boolean m_canUndo;
 	
-	public LosersGame(GameApplet applet)
+	public StandardGame(GameApplet applet)
 	{
 		m_applet = applet;
 	}
 
 	public void init(GameGraphics graphics, GameGUI gui)
 	{
-		m_graphics = (LosersGameGraphics)graphics;
-		m_gui = (LosersGameGUI)gui;
-		m_game_board = new LosersBoard(this);
+		m_graphics = (StandardGameGraphics)graphics;
+		m_gui = (StandardGameGUI)gui;
+		m_game_board = new StandardBoard(this);
 		m_canUndo = false;
 		movesHistory = new Stack<String>();
 		
@@ -30,46 +40,52 @@ public class LosersGame extends Game
 		Definitions.makeMaskR();
 		Definitions.makeRankR();
 
-		//String testFEN = "8/8/7P/8/8/8/8/k5K1 w - - 0 37"; //white to promote soon; tests promotion
+		String testFEN = "8/8/7P/8/8/8/8/k5K1 w - - 0 37"; //white to promote soon; tests promotion
 		//String testFEN = "6k1/8/5r2/6K1/8/8/8/5q2 w - - 0 37"; //losing badly, tests player 2 checkmate power
 		//String testFEN = "k7/7Q/K7/8/8/8/8/8 w - - 0 37"; //winning badly, can use to test checkmate/stalemate
 		//String testFEN = "r1b1k2B/1p5p/2p3p1/p4p2/2BK4/8/PPP1Q1PP/R6R b - - 0 37";
-		//m_game_board.FENtoPosition(testFEN);
+		//String testFEN = "8/8/8/1Q6/8/8/8/k6K w - - 0 37"; //test queen movement on b file
+		m_game_board.FENtoPosition(testFEN);
 
-		setupStandard();
+		//setupStandard();
 
 		String[] param = { "White vs AI", "Black vs AI", "Hotseat Game", "AI vs AI" };
 		String input = (String) JOptionPane.showInputDialog(null, "Game Mode?", "Choose your mode", JOptionPane.QUESTION_MESSAGE, null, param, param[0]);
 
 		if (input == "White vs AI")
 		{
-			p1 = new LosersHumanPlayer("Human WHITE", Definitions.Color.WHITE, this);
-			p2 = new LosersComputerPlayer("CPU BLACK", Definitions.Color.BLACK, this);
+			p1 = new StandardHumanPlayer("Human WHITE", Definitions.Color.WHITE, this);
+			p2 = new StandardComputerPlayer("CPU BLACK", Definitions.Color.BLACK, this);
 		}
 		else if (input == "Black vs AI")
 		{
-			p2 = new LosersHumanPlayer("Human BLACK", Definitions.Color.BLACK, this);
-			p1 = new LosersComputerPlayer("CPU WHITE", Definitions.Color.WHITE, this);
+			p2 = new StandardHumanPlayer("Human BLACK", Definitions.Color.BLACK, this);
+			p1 = new StandardComputerPlayer("CPU WHITE", Definitions.Color.WHITE, this);
 		}
 		else if (input == "Hotseat Game")
 		{
-			p1 = new LosersHumanPlayer("Human WHITE", Definitions.Color.WHITE, this);
-			p2 = new LosersHumanPlayer("Human BLACK", Definitions.Color.BLACK, this);
+			p1 = new StandardHumanPlayer("Human WHITE", Definitions.Color.WHITE, this);
+			p2 = new StandardHumanPlayer("Human BLACK", Definitions.Color.BLACK, this);
 		}
 		else if (input == "AI vs AI")
 		{
-			p1 = new LosersComputerPlayer("CPU WHITE", Definitions.Color.WHITE, this);
-			p2 = new LosersComputerPlayer("CPU BLACK", Definitions.Color.BLACK, this);
+			p1 = new StandardComputerPlayer("CPU WHITE", Definitions.Color.WHITE, this);
+			p2 = new StandardComputerPlayer("CPU BLACK", Definitions.Color.BLACK, this);
 		}
 		else
 		{
 			return;
 		}
-
+		
 		if (m_game_board.whoseTurn() == Definitions.Color.WHITE)
+		{
 			p1.promptMove();
+		}
 		else
+		{
 			p2.promptMove();
+		}
+
 	}
 
 	public void setupStandard()
@@ -115,13 +131,12 @@ public class LosersGame extends Game
 		Definitions.Color winner = null; //indicating stalemate by default
 		if (state == Definitions.State.CHECKMATE)
 		{
-			winner = m_game_board.whoseTurn();
-			reason = winner.toString() + " won by lack of pieces!";
+			winner = Definitions.flip(m_game_board.whoseTurn());
+			reason = winner.toString() + " won by Checkmate!";
 		}
 		else if (state == Definitions.State.STALEMATE)
 		{
-			winner = m_game_board.whoseTurn();
-			reason = winner.toString() + " won by Stalemate!";
+			reason = "Drawn by Stalemate!";
 		}
 		else if (m_game_board.getFiftymoverulecount() >= 100)
 		{
@@ -132,17 +147,17 @@ public class LosersGame extends Game
 		System.out.println("The game has ended.");
 	}
 	
-	public LosersGameGraphics getGraphics()
+	public StandardGameGraphics getGraphics()
 	{
 		return m_graphics;
 	}
 	
-	public LosersGameGUI getGUI()
+	public StandardGameGUI getGUI()
 	{
 		return m_gui;
 	}
-	
-	public LosersBoard getBoard()
+
+	public StandardBoard getBoard()
 	{
 		return m_game_board;
 	}
@@ -179,30 +194,39 @@ public class LosersGame extends Game
 			}
 		}
 	}
-	
+
 	public void undo()
 	{
 		if (movesHistory.size() >= 2 && m_canUndo)
 		{
 			m_game_board.decrementTurncount();
-			
+
 			movesHistory.pop();
 			String returnMove = movesHistory.pop();
-			
+
 			m_game_board.FENtoPosition(returnMove);
 		}
 	}
-	
+
 	//TODO: Might need clean up
 	public void processMove(Move newMove)
 	{
-		m_graphics.animateMove(newMove, getBoard());
-		
 		int row = newMove.r0;
 		int col = newMove.c0;
 		char movedPiece = getBoard().getPiece(row, col);
 		getBoard().getData().m_fiftymoverulecount++;
 
+		int castlingRow;
+		if (getBoard().whoseTurn() == Definitions.Color.WHITE)
+		{
+			castlingRow = 7;
+		}
+		else //Black
+		{
+			castlingRow = 0;
+		}
+
+		Move correspondingRookMove = null; //if we have castling
 		getBoard().getData().m_enpassantCol = -1; //default
 		if (Character.toLowerCase(movedPiece) == 'p')
 		{
@@ -224,21 +248,88 @@ public class LosersGame extends Game
 				}
 			}
 		}
+		else if (Character.toLowerCase(movedPiece) == 'k')
+		{			
+			if (getBoard().whoseTurn() == Definitions.Color.WHITE)
+			{
+				getBoard().getData().m_whiteCanCastleKingside = false;
+				getBoard().getData().m_whiteCanCastleQueenside = false;
+			}
+			else
+			{
+				getBoard().getData().m_blackCanCastleKingside = false;
+				getBoard().getData().m_blackCanCastleQueenside = false;
+			}
+
+			int kingMoveLength = newMove.cf - col; //should be 2 or -2, if the move was a castling move
+			if (row == castlingRow)
+			{
+				if (kingMoveLength == 2) //kingside
+				{
+					correspondingRookMove = new Move(castlingRow, 7, castlingRow, 5);
+				}
+				else if (kingMoveLength == -2) //queenside
+				{
+					correspondingRookMove = new Move(castlingRow, 0, castlingRow, 3);
+				}
+			}
+		}
+		else if (row == castlingRow)
+		{
+			if (col == 0) //queen's rook
+			{
+				if (getBoard().whoseTurn() == Definitions.Color.WHITE)
+				{
+					getBoard().getData().m_whiteCanCastleQueenside = false;
+				}
+				else
+				{
+					getBoard().getData().m_blackCanCastleQueenside = false;
+				}
+			}
+			else if (col == 7) //king's rook
+			{			
+				if (getBoard().whoseTurn() == Definitions.Color.WHITE)
+				{
+					getBoard().getData().m_whiteCanCastleKingside = false;
+				}
+				else
+				{
+					getBoard().getData().m_blackCanCastleKingside = false;
+				}
+			}
+		}
 
 		if (getBoard().getPiece(newMove.rf, newMove.cf) != 0) //capture was made
 		{
 			getBoard().getData().m_fiftymoverulecount = 0; //reset counter
 		}
+		if (correspondingRookMove == null)
+		{
+			m_graphics.animateMove(newMove, getBoard());
+			getBoard().move(newMove); //has to be down here for time being because en passant needs to know dest sq is empty; fix if you can
+		}
+		else {
+			m_graphics.animateCastlingMoves(newMove, correspondingRookMove, getBoard());
+			getBoard().move(newMove);
+			getBoard().setTurn(Definitions.flip(getBoard().whoseTurn())); //to undo double flipping of moving king and then rook
+			getBoard().move(correspondingRookMove);
+		}
 
-		getBoard().move(newMove); //has to be down here for time being because en passant needs to know dest sq is empty; fix if you can
 		if (Character.toLowerCase(movedPiece) == 'p')
 		{
 			if (((getBoard().whoseTurn() == Definitions.Color.BLACK) && (newMove.rf == 0)) 
-					|| ((getBoard().whoseTurn() == Definitions.Color.WHITE) && (newMove.rf == 7)))
+					|| ((getBoard().whoseTurn() == Definitions.Color.WHITE) && (newMove.rf == 7))) //flipped by earlier move
 			{
 				getBoard().promotePawn(newMove.rf, newMove.cf);
 			}
 		}
-		
 	}
+	
+	//Useless for now
+	public void mouseReleased(MouseEvent e) {}
+	public void mouseClicked(MouseEvent e) {}
+	public void mouseEntered(MouseEvent e) {}
+	public void mouseExited(MouseEvent e) {}
+	public void mousePressed(MouseEvent e) {}
 }

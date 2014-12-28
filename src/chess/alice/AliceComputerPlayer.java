@@ -1,9 +1,15 @@
-package chess;
+package chess.alice;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import chess.AliceBoard.AliceMove;
+import chess.ComputerPlayer;
+import chess.Definitions;
+import chess.Game;
+import chess.Move;
+import chess.alice.AliceBoard.AliceMove;
+import chess.standard.StandardBoard;
+import chess.standard.StandardGame;
 
 public class AliceComputerPlayer extends ComputerPlayer 
 {

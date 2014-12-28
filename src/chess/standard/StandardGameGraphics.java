@@ -1,16 +1,23 @@
-package chess;
+package chess.standard;
 
 import java.awt.*;
 import java.util.*;
 import java.awt.image.BufferedImage;
 import javax.imageio.ImageIO;
 
-import chess.AliceBoard.AliceMove;
+import chess.Board;
+import chess.Definitions;
+import chess.EasyButton;
+import chess.Game;
+import chess.GameApplet;
+import chess.GameGraphics;
+import chess.Move;
+import chess.Player;
 
 @SuppressWarnings("serial")
-public class AliceGameGraphics extends GameGraphics
+public class StandardGameGraphics extends GameGraphics
 {
-	private AliceGame m_game;
+	private StandardGame m_game;
 	private int m_boardOffsetX, m_boardOffsetY, m_blockSize;
 	private Map<String, BufferedImage> m_gPieces;
 	private BufferedImage m_gMovable, m_gSelected;
@@ -18,19 +25,18 @@ public class AliceGameGraphics extends GameGraphics
 	private long m_movableBlocks, m_selectedBlocks;
 	private Thread m_moveAnimator;
 	private MoveAnimation m_moveAnimation;
-	private int m_activeBoard;
 	
-	public AliceGameGraphics(GameApplet applet)
+	public StandardGameGraphics(GameApplet applet)
 	{
 		m_applet = applet;
 	}
 	
 	public void init(Game game)
 	{
-		m_game = (AliceGame)game;
-		m_boardOffsetX = Definitions.HEIGHT/8;
+		m_game = (StandardGame)game;
 		m_boardOffsetY = Definitions.HEIGHT/8;
-		m_blockSize = Definitions.HEIGHT *3/4 / Definitions.NUMROWS;
+		m_boardOffsetX = Definitions.HEIGHT/8;
+		m_blockSize = Definitions.HEIGHT*3/4 / Definitions.NUMROWS;
 		
 		m_gPieces = new HashMap<String, BufferedImage>();
 		try {
@@ -63,46 +69,30 @@ public class AliceGameGraphics extends GameGraphics
         return new Dimension(640, 480);
     }
     
-    public void setActiveBoard(int board)
-    {
-    	if (board != 0 && board != 1) return;
-    	m_activeBoard = board;
-    }
-    
-    public int getActiveBoard()
-    {
-    	return m_activeBoard;
-    }
-    
     public void updateGameState()
     {
     	m_movableBlocks = 0;
     	m_selectedBlocks = 0;
-    	AliceBoard b = m_game.getBoard();
-		if (m_game.p1 instanceof AliceHumanPlayer)
+    	StandardBoard b = m_game.getBoard();
+		if (m_game.getP1() instanceof StandardHumanPlayer)
 		{
-			AliceHumanPlayer p1 = (AliceHumanPlayer)m_game.p1;
-			int sq = p1.getSelected();
+			int sq = ((StandardHumanPlayer)m_game.getP1()).getSelected();
 			updateMovable(b.allMovesPiece(b.toRow(sq), b.toCol(sq)));
 			updateSelected(sq);
 		}
-		if (m_game.p2 instanceof AliceHumanPlayer)
+		if (m_game.getP2() instanceof StandardHumanPlayer)
 		{
-			AliceHumanPlayer p2 = (AliceHumanPlayer)m_game.p2;
-			int sq = p2.getSelected();
+			int sq = ((StandardHumanPlayer)m_game.getP2()).getSelected();
 			updateMovable(b.allMovesPiece(b.toRow(sq), b.toCol(sq)));
 			updateSelected(sq);
 		}
     }
 	
-	private void updateMovable(ArrayList<AliceMove> moves)
+	private void updateMovable(ArrayList<Move> moves)
 	{
-		for (AliceMove am : moves) {
-			if (am.board == m_activeBoard)
-			{
-				int sq = m_game.getBoard().toSq(am.m.rf, am.m.cf);
-				m_movableBlocks |= (1L << sq);
-			}
+		for (Move m : moves) {
+			int sq = m_game.getBoard().toSq(m.rf, m.cf);
+			m_movableBlocks |= (1L << sq);
 		}
 	}
 	
@@ -122,7 +112,7 @@ public class AliceGameGraphics extends GameGraphics
 		drawBoard(backg);
 		drawBorders(backg);
 		drawMarkers(backg);
-		drawNames(backg, m_game.p1, m_game.p2, m_game.getBoard().whoseTurn());
+		drawNames(backg, m_game.getP1(), m_game.getP2(), m_game.getBoard().whoseTurn());
 		drawPieces(backg, m_game.getBoard());
 		drawGUI(backg);	
 		
@@ -135,10 +125,7 @@ public class AliceGameGraphics extends GameGraphics
 	
 	public void drawBackground(Graphics g)
 	{
-		if (m_activeBoard == 0)
-			g.setColor(new Color(238, 238, 238));
-		else
-			g.setColor(new Color(0xE6E6FF));
+		g.setColor(new Color(238, 238, 238));
 		g.fillRect(0, 0, Definitions.WIDTH, Definitions.HEIGHT);
 	}
 	
@@ -187,9 +174,8 @@ public class AliceGameGraphics extends GameGraphics
 		}
 	}
 	
-	public void drawPiece(Graphics g, char p, int x, int y, int board)
+	public void drawPiece(Graphics g, char p, int x, int y)
 	{
-		if (board != m_activeBoard) return;
 		String pstr;
 		if (Character.isUpperCase(p)) //White
 			pstr = "W" + p;
@@ -198,12 +184,11 @@ public class AliceGameGraphics extends GameGraphics
 		g.drawImage(m_gPieces.get(pstr), x, y, m_blockSize, m_blockSize, null);
 	}
 	
-	public void drawPieceInBoard(Graphics g, char p, int r, int c, int board)
+	public void drawPieceInBoard(Graphics g, char p, int r, int c)
 	{
-		if (board != m_activeBoard) return;
 		int y = getY(r);
 		int x = getX(c);
-		drawPiece(g, p, x, y, board);
+		drawPiece(g, p, x, y);
 	}
 	
 	public void drawMarkers(Graphics g)
@@ -230,12 +215,12 @@ public class AliceGameGraphics extends GameGraphics
 		}
 	}
 	
-	public void drawPieces(Graphics g, AliceBoard b)
+	public void drawPieces(Graphics g, Board b)
 	{
 		for (int r = 0, y = m_boardOffsetY; r < Definitions.NUMROWS; r++, y += m_blockSize) {
 			for (int c = 0, x = m_boardOffsetX; c < Definitions.NUMCOLS; c++, x += m_blockSize) {
-				if (b.getPiece(r, c, m_activeBoard) != 0) {
-					drawPiece(g, b.getPiece(r, c, m_activeBoard), x, y, m_activeBoard);
+				if (b.getPiece(r, c) != 0) {
+					drawPiece(g, b.getPiece(r, c), x, y);
 				}
 			}
 		}
@@ -293,20 +278,20 @@ public class AliceGameGraphics extends GameGraphics
 		public char traveler, incumbent;
 		public double curX, curY;
 		public double dX, dY;
-		public AliceMove move;
+		public Move move;
 		private BufferedImage m_frame;
 		public final int NUMTICKS = 10;
 		
-		public MoveAnimation(AliceMove m, Board b)
+		public MoveAnimation(Move m, Board b)
 		{
 			m_frame = new BufferedImage(Definitions.WIDTH, Definitions.HEIGHT, BufferedImage.TYPE_INT_ARGB);
 			move = m;
-			traveler = b.getPiece(m.m.r0, m.m.c0);
-			incumbent = b.getPiece(m.m.rf, m.m.cf);
-			curY = getY(m.m.r0);
-			curX = getX(m.m.c0);
-			dY = ((double)getY(m.m.rf) - curY) / NUMTICKS;
-			dX = ((double)getX(m.m.cf) - curX) / NUMTICKS;
+			traveler = b.getPiece(m.r0, m.c0);
+			incumbent = b.getPiece(m.rf, m.cf);
+			curY = getY(m.r0);
+			curX = getX(m.c0);
+			dY = ((double)getY(m.rf) - curY) / NUMTICKS;
+			dX = ((double)getX(m.cf) - curX) / NUMTICKS;
 		}
 		
 		public BufferedImage getFrame()
@@ -325,15 +310,14 @@ public class AliceGameGraphics extends GameGraphics
 					Graphics2D g = (Graphics2D)m_frame.getGraphics();
 					g.setBackground(new Color(255, 255, 255, 0));
 					g.clearRect(0, 0, Definitions.WIDTH, Definitions.HEIGHT);
-					drawBlock(g, move.m.rf, move.m.cf);
-					if (incumbent != 0) drawPieceInBoard(g, incumbent, move.m.rf, move.m.cf, move.board);
+					drawBlock(g, move.rf, move.cf);
+					if (incumbent != 0) drawPieceInBoard(g, incumbent, move.rf, move.cf);
 					drawBorders(g);
-					drawPiece(g, traveler, (int)curX, (int)curY, move.board);
+					drawPiece(g, traveler, (int)curX, (int)curY);
 				}
 		 		try { Thread.sleep(Definitions.TICK); }
 		 		catch (InterruptedException ex) {}
 			}
-			
 		}
 	};
 	
@@ -341,7 +325,7 @@ public class AliceGameGraphics extends GameGraphics
 	{
 		MoveAnimation rook;
 		
-		public CastleMoveAnimation(AliceMove kingMove, AliceMove rookMove, Board b)
+		public CastleMoveAnimation(Move kingMove, Move rookMove, Board b)
 		{
 			super(kingMove, b);
 			rook = new MoveAnimation(rookMove, b);
@@ -358,11 +342,11 @@ public class AliceGameGraphics extends GameGraphics
 					Graphics2D g = (Graphics2D)getFrame().getGraphics();
 					g.setBackground(new Color(255, 255, 255, 0));
 					g.clearRect(0, 0, Definitions.WIDTH, Definitions.HEIGHT);
-					drawBlock(g, move.m.rf, move.m.cf);
-					drawBlock(g, rook.move.m.rf, rook.move.m.cf);
+					drawBlock(g, move.rf, move.cf);
+					drawBlock(g, rook.move.rf, rook.move.cf);
 					drawBorders(g);
-					drawPiece(g, traveler, (int)curX, (int)curY, move.board);
-					drawPiece(g, rook.traveler, (int)rook.curX, (int)rook.curY, rook.move.board);
+					drawPiece(g, traveler, (int)curX, (int)curY);
+					drawPiece(g, rook.traveler, (int)rook.curX, (int)rook.curY);
 				}
 		 		try { Thread.sleep(Definitions.TICK); }
 		 		catch (InterruptedException ex) {}
@@ -379,19 +363,19 @@ public class AliceGameGraphics extends GameGraphics
 		m_moveAnimator.start();
 	}
 
-	public void animateMove(AliceMove am, AliceBoard ab)
+	public void animateMove(Move m, Board b)
 	{
-		if (am == null || ab == null)
+		if (m == null || b == null)
 			return;
-		m_moveAnimation = new MoveAnimation(am, ab.getBoard(am.board));
+		m_moveAnimation = new MoveAnimation(m, b);
 		startAnimation();
 	}
 	
-	public void animateCastlingMoves(AliceMove kingMove, AliceMove rookMove, AliceBoard ab)
+	public void animateCastlingMoves(Move kingMove, Move rookMove, Board b)
 	{
-		if (kingMove == null || rookMove == null || ab == null)
+		if (kingMove == null || rookMove == null || b == null)
 			return;
-		m_moveAnimation = new CastleMoveAnimation(kingMove, rookMove, ab.getBoard(kingMove.board));
+		m_moveAnimation = new CastleMoveAnimation(kingMove, rookMove, b);
 		startAnimation();
 	}
 

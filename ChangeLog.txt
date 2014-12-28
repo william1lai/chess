@@ -1,4 +1,10 @@
 Name: William Lai
+Date: 12-27-2014
+Description: Repackaging
+    * Each game type now has its own package
+    * Some changes to superclasses were made to accommodate this new packaging structure
+
+Name: William Lai
 Date: 12-26-2014
 Description: Fixed more bugs
     * Alice Chess promotion now works as intended

@@ -1,4 +1,10 @@
 Name: William Lai
+Date: 12-29-2014
+Description: Threefold repetition
+    * Threefold repetition check now implemented via HashMap (so far in StandardGame only)
+    * Still need testing for both 50 move rule and threefold repetition
+
+Name: William Lai
 Date: 12-27-2014
 Description: Repackaging
     * Each game type now has its own package

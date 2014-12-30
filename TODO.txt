@@ -3,7 +3,7 @@ UI
 - Move list in game
 
 Standard Chess
-- 50 move rule and threefold repetition (hash table of FEN's)
+- Test 50 move rule and threefold repetition
 - Different level AI's
 - Algebraic to Move function
 

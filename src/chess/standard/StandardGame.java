@@ -12,6 +12,7 @@ import chess.HumanPlayer;
 import chess.Move;
 import chess.Player;
 
+import java.util.HashMap;
 import java.util.Stack;
 
 public class StandardGame extends Game
@@ -20,6 +21,7 @@ public class StandardGame extends Game
 	private StandardGameGUI m_gui;
 	private StandardBoard m_game_board;
 	private boolean m_canUndo;
+	private HashMap<String, Integer> repeats;
 	
 	public StandardGame(GameApplet applet)
 	{
@@ -33,7 +35,8 @@ public class StandardGame extends Game
 		m_game_board = new StandardBoard(this);
 		m_canUndo = false;
 		movesHistory = new Stack<String>();
-		
+		repeats = new HashMap<String, Integer>();
+
 		Definitions.makeInitB();
 		Definitions.makeMaskB();
 		Definitions.makeInitR();
@@ -106,6 +109,19 @@ public class StandardGame extends Game
 				m_canUndo = true;
 			if (!m_graphics.isAnimating() && cur.isDone())
 			{
+				String FEN = m_game_board.toFEN(false); //we don't want turncounts making each position unique
+				if (!repeats.containsKey(FEN))
+					repeats.put(FEN, 1);
+				else
+				{
+					if (repeats.get(FEN) == 2)
+						break;
+					else
+					{
+						System.out.println("This position has repeated itself. One more and game will be drawn.");
+						repeats.put(FEN, 2);
+					}
+				}
 				m_canUndo = false;
 				movesHistory.push(m_game_board.toFEN(true));
 				Move m = cur.getMove();
@@ -141,6 +157,10 @@ public class StandardGame extends Game
 		else if (m_game_board.getFiftymoverulecount() >= 100)
 		{
 			reason = "Drawn by 50-move rule!";
+		}
+		else
+		{
+			reason = "Drawn by threefold repetition!";
 		}
 
 		JOptionPane.showMessageDialog(null, reason, "Game has ended", JOptionPane.PLAIN_MESSAGE);

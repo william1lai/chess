@@ -399,7 +399,7 @@ public class StandardBoard extends Board
 		}
 		return pmoves;
 	}
-
+	
 	public ArrayList<Move> allMoves()
 	{
 		ArrayList<Move> legalMoves = new ArrayList<Move>();
@@ -407,13 +407,10 @@ public class StandardBoard extends Board
 		int kingsq;
 
 		if (m_turn == Definitions.Color.WHITE)
-		{
 			turnpieces = getWhite();
-		}
 		else
-		{
 			turnpieces = getBlack();
-		}
+		
 		pawns = turnpieces & getPawns();
 		knights = turnpieces & getKnights();
 		bishops = turnpieces & getBishops();
@@ -440,7 +437,7 @@ public class StandardBoard extends Board
 						int epcol = m_data.m_enpassantCol;
 
 						if (m_turn == Definitions.Color.WHITE)
-						{							
+						{
 							attacks = Definitions.wpawnAttacks(pawns);
 							moves = Definitions.wpawnMoves(pawns, ~allpieces);
 
@@ -551,70 +548,26 @@ public class StandardBoard extends Board
 					else if (((knights >>> sq) & 1L) == 1) //knight
 					{
 						long moves = Definitions.knightAttacks(1L << sq) & ~turnpieces;
-						for (int i = 0; i < 64; i++)
-						{
-							if (((moves >>> i) & 1L) == 1)
-							{
-								StandardBoard temp = this.clone();
-								temp.move(new Move(r, c, 7 - (i / 8), 7 - (i % 8)));
-
-								if (!Definitions.isAttacked(temp, kingsq, Definitions.flip(m_turn)))
-								{
-									legalMoves.add(new Move(r, c, 7 - (i / 8), 7 - (i % 8)));
-								}
-							}
-						}
+						ArrayList<Move> hmvs = allMovesHelper(r, c, moves, kingsq);
+						legalMoves.addAll(hmvs);
 					}
 					else if (((bishops >>> sq) & 1L) == 1) //bishop
 					{
 						long moves = Definitions.bishopAttacks(sq, ~allpieces) & ~turnpieces;
-						for (int i = 0; i < 64; i++)
-						{
-							if (((moves >>> i) & 1L) == 1)
-							{
-								StandardBoard temp = this.clone();
-								temp.move(new Move(r, c, 7 - (i / 8), 7 - (i % 8)));
-
-								if (!Definitions.isAttacked(temp, kingsq, Definitions.flip(m_turn)))
-								{
-									legalMoves.add(new Move(r, c, 7 - (i / 8), 7 - (i % 8)));
-								}
-							}
-						}
+						ArrayList<Move> hmvs = allMovesHelper(r, c, moves, kingsq);
+						legalMoves.addAll(hmvs);
 					}
 					else if (((rooks >>> sq) & 1L) == 1) //rook
 					{
 						long moves = Definitions.rookAttacks(sq, ~allpieces) & ~turnpieces;
-						for (int i = 0; i < 64; i++)
-						{
-							if (((moves >>> i) & 1L) == 1)
-							{
-								StandardBoard temp = this.clone();
-								temp.move(new Move(r, c, 7 - (i / 8), 7 - (i % 8)));
-
-								if (!Definitions.isAttacked(temp, kingsq, Definitions.flip(m_turn)))
-								{
-									legalMoves.add(new Move(r, c, 7 - (i / 8), 7 - (i % 8)));
-								}
-							}
-						}
+						ArrayList<Move> hmvs = allMovesHelper(r, c, moves, kingsq);
+						legalMoves.addAll(hmvs);
 					}
 					else if (((queens >>> sq) & 1L) == 1) //queen
 					{
 						long moves = Definitions.queenAttacks(sq, ~allpieces) & ~turnpieces;
-						for (int i = 0; i < 64; i++)
-						{
-							if (((moves >>> i) & 1L) == 1)
-							{
-								StandardBoard temp = this.clone();
-								temp.move(new Move(r, c, 7 - (i / 8), 7 - (i % 8)));
-
-								if (!Definitions.isAttacked(temp, kingsq, Definitions.flip(m_turn)))
-								{
-									legalMoves.add(new Move(r, c, 7 - (i / 8), 7 - (i % 8)));
-								}
-							}
-						}
+						ArrayList<Move> hmvs = allMovesHelper(r, c, moves, kingsq);
+						legalMoves.addAll(hmvs);
 					}
 					else //king
 					{
@@ -682,6 +635,25 @@ public class StandardBoard extends Board
 		return legalMoves;
 	}
 
+	private ArrayList<Move> allMovesHelper(int r, int c, long moves, int kingsq)
+	{
+		ArrayList<Move> mvs = new ArrayList<Move>();
+		for (int i = 0; i < 64; i++)
+		{
+			if (((moves >>> i) & 1L) == 1)
+			{
+				StandardBoard temp = this.clone();
+				temp.move(new Move(r, c, 7 - (i / 8), 7 - (i % 8)));
+
+				if (!Definitions.isAttacked(temp, kingsq, Definitions.flip(m_turn)))
+				{
+					mvs.add(new Move(r, c, 7 - (i / 8), 7 - (i % 8)));
+				}
+			}
+		}
+		return mvs;
+	}
+	
 	public boolean inCheck()
 	{
 		long king;

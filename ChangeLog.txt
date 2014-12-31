@@ -1,4 +1,13 @@
 Name: William Lai
+Date: 12-30-2014
+Description: Upgraded Move class; documenting; algebraic
+    * Move class now allows for pawn promotion field (still needs incorporation)
+    * Now reads algebraic notation (still needs testing and incorporation)
+    * Added crucial documentation (e.g. how squares are represented)
+    * Threefold repetition currently conflicts with undo, so need to fix that
+    * Would be nice if we could decouple graphics, board, and game, but might not be possible
+
+Name: William Lai
 Date: 12-29-2014
 Description: Threefold repetition
     * Threefold repetition check now implemented via HashMap (so far in StandardGame only)

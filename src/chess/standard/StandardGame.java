@@ -77,6 +77,7 @@ public class StandardGame extends Game
 		}
 		else
 		{
+			System.exit(0);
 			return;
 		}
 		
@@ -188,13 +189,191 @@ public class StandardGame extends Game
 		next.promptMove();
 	}
 
-	//TODO
-	public static Move algebraicToMove(Definitions.Color color, String algebraic) //STUB
+	public static Move algebraicHelper(long possorig, int orow, int ocol, int drow, int dcol)
 	{
-		return new Move(0, 0, 0, 0);
+		//by default, go from 0 to 63 and check
+		int count = 0;
+		int start = 0;
+		int end = 64;
+		int inc = 1;
+		if (orow != -1) //if we know the origin row
+		{
+			start = (7 - orow)*8;
+			end = start + 8;
+		}
+		else if (ocol != -1) //if we know the origin column
+		{
+			start = 7 - ocol;
+			inc = 8;
+		}
+		
+		for (int i = start; i < end; i = i + inc)
+		{
+			if (((possorig >>> i) & 1L) == 1)
+			{
+				orow = i / 8;
+				ocol = i % 8;
+				count++;
+			}
+		}
+		
+		if (count > 1 || count == 0)
+			return null; //not specific enough or no choices
+		return new Move(7 - orow, 7 - ocol, drow, dcol);
+	}
+	
+	//input not entirely sanitized yet
+	public static Move algebraicToMove(StandardBoard b, Definitions.Color color, String algebraic)
+	{
+		//e4 Ne2 Nge2 Bxc6 Bxc6+ O-O O-O-O a8=Q+ Qxg7# are some cases
+		//we don't check for legality here, so no fear of en passant or checks/checkmates etc.
+		boolean isWhite = (color == Definitions.Color.WHITE);
+		int len = algebraic.length();
+		if (algebraic.endsWith("+") || algebraic.endsWith("#")) //remove check/checkmate, as they're irrelevant to actual move
+		{
+			algebraic = algebraic.substring(0, len - 1);
+		}
+		if (len < 2)
+			return null;
+		if (algebraic.equals("O-O"))
+		{
+			if (isWhite)
+				return new Move(7, 4, 7, 6);
+			else
+				return new Move(0, 4, 0, 6);
+		}
+		if (algebraic.equals("O-O-O") && color == Definitions.Color.BLACK)
+		{
+			if (isWhite)
+				return new Move(7, 4, 7, 2);
+			else
+				return new Move(0, 4, 0, 2);
+		}
+		
+		char first = algebraic.charAt(0);
+		if (Character.isLowerCase(first)) //pawn move
+		{
+			long allpieces = b.getWhite() | b.getBlack();
+			int col = first - 'a';
+			if (Character.isDigit(algebraic.charAt(1))) //e4 or e8=Q cases
+			{
+				int row = algebraic.charAt(1) - '1';
+				int dsq = row*8 + col;
+				if (isWhite)
+				{
+					if (dsq < 16)
+						return null;
+					if (row == 3 && (((allpieces >>> (dsq - 8)) & 1L) != 1))
+					{
+						return new Move(6, col, 4, col);
+					}
+					return new Move(8 - row, col, 7 - row, col);
+				}
+				else //black
+				{
+					if (dsq >= 48)
+						return null;
+					if (row == 4 && (((allpieces >>> (dsq + 8)) & 1L) != 1))
+					{
+						return new Move(1, col, 3, col);
+					}
+					return new Move(6 - row, col, 7 - row, col);					
+				}
+			}
+			else if (algebraic.charAt(1) == 'x') //exf6 or exf8=Q cases
+			{
+				if (len < 4)
+					return null;
+				
+				int othercol = (algebraic.charAt(2) - 'a');
+				int row = (algebraic.charAt(3) - '1');
+				if (isWhite)
+				{
+					if (row < 2)
+						return null;
+					
+					char promo = 0;
+					if (len == 6)
+						promo = algebraic.charAt(5);
+					return new Move(8 - row, col, 7 - row, othercol, promo);
+				}
+				else //black
+				{
+					if (row > 5)
+						return null;
+					
+					char promo = 0;
+					if (len == 6)
+						promo = algebraic.charAt(5);
+					return new Move(6 - row, col, 7 - row, othercol, promo);
+				}
+			}
+		}
+		
+		//for nonpawns, cases are Ne2, Nge2, N1e2, Nxe2, Ngxe2, N1xe2
+		//note it's never necessary to need both row and column
+		long piecesofinterest;
+		long free = ~(b.getWhite() | b.getBlack());
+		char second = algebraic.charAt(1);
+		int drow = 7 - (algebraic.charAt(len - 1) - '1');
+		int dcol = algebraic.charAt(len - 2) - 'a';
+		int dsq = (7 - drow)*8 + (7 - dcol);
+		long possorigin = 0; //1 bits represent possible origins
+		
+		if (first == 'N')
+		{
+			piecesofinterest = b.getKnights() & b.getBlack();
+			if (isWhite)
+				piecesofinterest = b.getKnights() & b.getWhite();
+			possorigin = Definitions.knightAttacks(1L << dsq) & piecesofinterest;
+		}
+		else if (first == 'B')
+		{
+			piecesofinterest = b.getBishops() & b.getBlack();
+			if (isWhite)
+				piecesofinterest = b.getBishops() & b.getWhite();
+			possorigin = Definitions.bishopAttacks(dsq, free) & piecesofinterest;
+			//System.out.println(String.format("0x%16s", Long.toHexString(possorigin)).replace(' ', '0'));
+		}
+		else if (first == 'R')
+		{
+			piecesofinterest = b.getRooks() & b.getBlack();
+			if (isWhite)
+				piecesofinterest = b.getRooks() & b.getWhite();
+			possorigin = Definitions.rookAttacks(1L << dsq, free) & piecesofinterest;
+		}
+		else if (first == 'Q')
+		{
+			piecesofinterest = b.getQueens() & b.getBlack();
+			if (isWhite)
+				piecesofinterest = b.getQueens() & b.getWhite();
+			possorigin = Definitions.queenAttacks(1L << dsq, free) & piecesofinterest;
+		}
+		else if (first == 'K')
+		{
+			piecesofinterest = b.getKings() & b.getBlack();
+			if (isWhite)
+				piecesofinterest = b.getKings() & b.getWhite();
+			possorigin = Definitions.kingAttacks(1L << dsq) & piecesofinterest;
+		}
+		
+		if (possorigin == 0)
+			return null;
+		if (len < 3)
+			return null;
+		int orow = -1;
+		int ocol = -1;
+		if ((len == 4 && second != 'x') || len > 4)
+		{
+			if (Character.isDigit(second))
+				orow = second - '1';
+			else
+				ocol = second - 'a';
+		}
+		return algebraicHelper(possorigin, orow, ocol, drow, dcol);
 	}
 
-	public void interpretMoveList(String movelist) //does not work yet
+	public void interpretMoveList(String movelist) //needs testing
 	{
 		//start with naive format of "1.e4 c5 2.Nc3 Nc6 3.f4 g6 4.Bb5 Nd4", with proper spacing and all
 		String[] moves = movelist.split(" ");
@@ -202,16 +381,25 @@ public class StandardGame extends Game
 		for (int i = 0; i < moves.length; i++)
 		{
 			String mv = moves[i];
+			Move nextmove = null;
 			if (Character.isDigit(mv.charAt(0)))
 			{
 				System.out.print(mv + " "); //print out moves
-				m_game_board.move(algebraicToMove(Definitions.Color.WHITE, mv.split(".")[1])); //want the part after the period
+				//we want the part after the period
+				nextmove = algebraicToMove(getBoard(), Definitions.Color.WHITE, mv.split("\\.")[1]); //freaking regexes
 			}
 			else
 			{
 				System.out.println(mv);
-				m_game_board.move(algebraicToMove(Definitions.Color.BLACK, mv));
+				nextmove = (algebraicToMove(getBoard(), Definitions.Color.BLACK, mv));
 			}
+			if (nextmove == null)
+			{
+				System.out.println("Invalid movelist.");
+				break;
+			}
+			//System.out.println(nextmove);
+			processMove(nextmove);
 		}
 	}
 
@@ -326,11 +514,14 @@ public class StandardGame extends Game
 		}
 		if (correspondingRookMove == null)
 		{
-			m_graphics.animateMove(newMove, getBoard());
+			if (m_graphics != null)
+				m_graphics.animateMove(newMove, getBoard());
 			getBoard().move(newMove); //has to be down here for time being because en passant needs to know dest sq is empty; fix if you can
 		}
-		else {
-			m_graphics.animateCastlingMoves(newMove, correspondingRookMove, getBoard());
+		else 
+		{
+			if (m_graphics != null)
+				m_graphics.animateCastlingMoves(newMove, correspondingRookMove, getBoard());
 			getBoard().move(newMove);
 			getBoard().setTurn(Definitions.flip(getBoard().whoseTurn())); //to undo double flipping of moving king and then rook
 			getBoard().move(correspondingRookMove);

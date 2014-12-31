@@ -5,6 +5,8 @@ package chess;
  *   found at http://chessprogramming.wikispaces.com/Exploding+Bitboards
  */
 
+//in bitvector, square 63 is a8 and square 0 is h1
+
 public class Definitions
 {
 	public static final int HEIGHT = 480;
@@ -82,6 +84,7 @@ public class Definitions
 		}
 	}
 
+	//free is bit-vector where there is a 1 bit for each square that is empty and 0 otherwise
 	public static long bishopAttacks(int sq, long free)
 	{
 		long msk = maskB[sq];

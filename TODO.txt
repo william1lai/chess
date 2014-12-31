@@ -3,6 +3,7 @@ UI
 - Move list in game
 
 Standard Chess
+- Threefold repetition doesn't work well with undo (fix asap)
 - Test 50 move rule and threefold repetition
 - Different level AI's
 - Algebraic to Move function
@@ -15,5 +16,7 @@ Alice Chess
 - create AI
 
 Miscellaneous
+- Make a human-readable Move notation (e.g. g1-f3)
+- Decouple graphics-game-board triad (painful)
 - Streamline repetitive code
 - Implement new variants: Maharajah, Fischer Random, Upside-down chess, Pre-chess, Extinction chess, Genesis Chess, Block chess

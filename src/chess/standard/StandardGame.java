@@ -81,6 +81,8 @@ public class StandardGame extends Game
 			return;
 		}
 		
+		interpretMoveList("1.e4 e5 2.Nf3 Nc6 3.Bb5 a6 4.Bxc6+ dxc6 5.O-O Nf6");
+		
 		if (m_game_board.whoseTurn() == Definitions.Color.WHITE)
 		{
 			p1.promptMove();
@@ -89,7 +91,6 @@ public class StandardGame extends Game
 		{
 			p2.promptMove();
 		}
-
 	}
 
 	public void setupStandard()
@@ -99,6 +100,11 @@ public class StandardGame extends Game
 	}
 
 	public void run()
+	{
+		mainGameLoop();		
+	}
+	
+	private void mainGameLoop()
 	{
 		Definitions.State state = m_game_board.getState();
 		while (state == Definitions.State.NORMAL && m_game_board.getFiftymoverulecount() < 100) //50 moves for each side
@@ -115,7 +121,7 @@ public class StandardGame extends Game
 					repeats.put(FEN, 1);
 				else
 				{
-					if (repeats.get(FEN) == 2)
+					if (repeats.get(FEN) >= 2)
 						break;
 					else
 					{
@@ -129,7 +135,7 @@ public class StandardGame extends Game
 				if (m == null)
 					break;
 
-				processMove(m);
+				processMove(m, true);
 				flipTurn();
 				state = m_game_board.getState();
 			}
@@ -166,6 +172,32 @@ public class StandardGame extends Game
 
 		JOptionPane.showMessageDialog(null, reason, "Game has ended", JOptionPane.PLAIN_MESSAGE);
 		System.out.println("The game has ended.");
+	}
+
+	private void inputOneMove(Move mv)
+	{
+		Player cur = (m_game_board.whoseTurn() == Definitions.Color.WHITE ? p1 : p2);
+		if (cur.getColor() == Definitions.Color.WHITE)
+			m_game_board.incrementTurncount();
+		//while (m_graphics.isAnimating()); //wait until animation stops
+		String FEN = m_game_board.toFEN(false); //we don't want turncounts making each position unique
+		if (!repeats.containsKey(FEN))
+			repeats.put(FEN, 1);
+		else
+		{
+			if (repeats.get(FEN) >= 2)
+				repeats.put(FEN, repeats.get(FEN) + 1);
+			else
+			{
+				System.out.println("This position has repeated itself. One more and game will be drawn.");
+				repeats.put(FEN, 2);
+			}
+		}
+		m_canUndo = false;
+		movesHistory.push(m_game_board.toFEN(true));
+		
+		processMove(mv, false);
+		flipTurn();
 	}
 	
 	public StandardGameGraphics getGraphics()
@@ -232,6 +264,7 @@ public class StandardGame extends Game
 		if (algebraic.endsWith("+") || algebraic.endsWith("#")) //remove check/checkmate, as they're irrelevant to actual move
 		{
 			algebraic = algebraic.substring(0, len - 1);
+			len = len - 1;
 		}
 		if (len < 2)
 			return null;
@@ -399,7 +432,7 @@ public class StandardGame extends Game
 				break;
 			}
 			//System.out.println(nextmove);
-			processMove(nextmove);
+			inputOneMove(nextmove);
 		}
 	}
 
@@ -417,7 +450,7 @@ public class StandardGame extends Game
 	}
 
 	//TODO: Might need clean up
-	public void processMove(Move newMove)
+	public void processMove(Move newMove, boolean animatePlease)
 	{
 		int row = newMove.r0;
 		int col = newMove.c0;
@@ -514,13 +547,13 @@ public class StandardGame extends Game
 		}
 		if (correspondingRookMove == null)
 		{
-			if (m_graphics != null)
+			if (animatePlease)
 				m_graphics.animateMove(newMove, getBoard());
 			getBoard().move(newMove); //has to be down here for time being because en passant needs to know dest sq is empty; fix if you can
 		}
 		else 
 		{
-			if (m_graphics != null)
+			if (animatePlease)
 				m_graphics.animateCastlingMoves(newMove, correspondingRookMove, getBoard());
 			getBoard().move(newMove);
 			getBoard().setTurn(Definitions.flip(getBoard().whoseTurn())); //to undo double flipping of moving king and then rook

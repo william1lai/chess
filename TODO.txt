@@ -6,7 +6,6 @@ Standard Chess
 - Threefold repetition doesn't work well with undo (fix asap)
 - Test 50 move rule and threefold repetition
 - Different level AI's
-- Algebraic to Move function
 
 Loser's Chess
 - Threefold repetition (maybe 50 move rule too)

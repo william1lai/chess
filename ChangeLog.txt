@@ -1,4 +1,10 @@
 Name: William Lai
+Date: 12-31-2014
+Description: Incorporated algebraic
+    * StandardGame now supports reading in an algebraic movelist to setup a position (algebraic parsing still requires testing)
+    * processMove now takes in bool to control animation or not
+
+Name: William Lai
 Date: 12-30-2014
 Description: Upgraded Move class; documenting; algebraic
     * Move class now allows for pawn promotion field (still needs incorporation)

@@ -5,12 +5,14 @@ package chess;
  *   found at http://chessprogramming.wikispaces.com/Exploding+Bitboards
  */
 
-//in bitvector, square 63 is a8 and square 0 is h1
+//in bitvector, square 63 is a8 (top-left corner) and square 0 is h1 (bottom-right corner)
 
 public class Definitions
 {
+	//applet window dimensions
 	public static final int HEIGHT = 480;
 	public static final int WIDTH = 640;
+	
 	public static final int TICK = 30;
 	public static enum Color { WHITE, BLACK };
 	public static enum State { UNCHECKED, NORMAL, CHECKMATE, STALEMATE };
@@ -20,6 +22,8 @@ public class Definitions
 	public static final String PIECENAMES[] = {"BK","BQ","BN","BB","BR","BP","WK","WQ","WN","WB","WR","WP"};
 	public static final String RMARKERS[] = {"8","7","6","5","4","3","2","1"};
 	public static final String CMARKERS[] = {"a","b","c","d","e","f","g","h"};
+	
+	//computer player controls: limits on thinking depth and time
 	public static final int MAXDEPTH = 2; //PLY = 2 * DEPTH
 	public static final double MAXTHINKINGTIME = 2; //in seconds
 
@@ -416,4 +420,3 @@ public class Definitions
 		return Color.WHITE;
 	}
 }
-

@@ -8,7 +8,7 @@ import chess.standard.StandardGame;
 
 public abstract class ComputerPlayer extends Player
 {
-	protected static final double MATE_SCORE = 9999.9999;
+	protected static final double MATE_SCORE = 9999.9999; //arbitrarily high number indicating +infinity
 
 	public final class MovelistScore
 	{
@@ -50,9 +50,9 @@ public abstract class ComputerPlayer extends Player
 			return m_score;
 		}
 
+		//replace first move in list with m (to be honest, I forget why this function is needed
 		public void replaceMove(Move m)
 		{
-			//m_movelist.remove(m_movelist.size() - 1);
 			m_movelist.remove(0);
 			m_movelist.add(0, m);
 		}
@@ -84,7 +84,7 @@ public abstract class ComputerPlayer extends Player
 	}
 
 	public void promptMove()
-	{		
+	{	
 		if (getGame() instanceof StandardGame || getGame() instanceof LosersGame || getGame() instanceof AliceGame)
 		{
 			m_done = false;

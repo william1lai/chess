@@ -611,12 +611,10 @@ public class LosersBoard extends Board
 		}
 	}
 	
-
 	public LosersBoard clone()
 	{
 		return new LosersBoard(this);
 	}
-
 	
 	public String toString()
 	{
@@ -663,7 +661,6 @@ public class LosersBoard extends Board
 
 		return str;
 	}
-
 	
 	public String toFEN(boolean complete)
 	{
@@ -755,7 +752,6 @@ public class LosersBoard extends Board
 
 		return FEN;
 	}
-
 	
 	public void FENtoPosition(String srcFEN)
 	{

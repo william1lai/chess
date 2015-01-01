@@ -5,7 +5,7 @@ import java.awt.event.MouseListener;
 
 public abstract class HumanPlayer extends Player implements MouseListener
 {	
-	protected int m_selected;
+	protected int m_selected; //the square that has been clicked; -1 if none
 
 	public HumanPlayer(String name, Definitions.Color c, Game g)
 	{
@@ -28,5 +28,4 @@ public abstract class HumanPlayer extends Player implements MouseListener
 	public void mouseEntered(MouseEvent arg0) {}
 	public void mouseExited(MouseEvent arg0) {}
 	public void mouseReleased(MouseEvent arg0) {}
-
 }

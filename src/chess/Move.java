@@ -1,13 +1,15 @@
 package chess;
 
+//TODO: Add a constructor based off coordinate notation (e.g. g1-f3)
+
 public class Move
 {
-	//a8 is row 0 column 0
+	//a8 (top-left corner) is row 0 column 0; h1 (bottom-right corner) is row 7 column 7
 	public int r0;
 	public int c0;
 	public int rf;
 	public int cf;
-	public char promo; //what piece to promote to, 0 if not applicable
+	public char promo; //what piece to promote to (e.g. 'Q' for queen and 'N' for knight), 0 if not applicable
 
 	public Move(int rr0, int cc0, int rrf, int ccf)
 	{

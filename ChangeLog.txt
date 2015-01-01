@@ -1,5 +1,10 @@
 Name: William Lai
 Date: 01-01-2015
+Description: Documentation Part 1
+    * Did some easy documentation (superclass stuff mostly)
+
+Name: William Lai
+Date: 01-01-2015
 Description: Some of previous few commits applied to Losers and Alice
     * Some of changes to code in previous three commits applied to Losers and Alice
 

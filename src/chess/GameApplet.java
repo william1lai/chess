@@ -47,6 +47,7 @@ public class GameApplet extends JApplet implements Runnable, MouseListener
 		m_thread.start();
 	}
 
+	//Simple menu to select the game of choice; returns true if a game mode is selected and false otherwise
 	public boolean chooseGame()
 	{
 		String[] param = { "Standard Chess", "Loser's Chess", "Alice Chess" };
@@ -100,7 +101,7 @@ public class GameApplet extends JApplet implements Runnable, MouseListener
 		}
 	}
 
-	//Useless for now
+	//Useless for now, but we're forced to implement because we implement MouseListener
 	public void mouseReleased(MouseEvent e) {}
 	public void mouseClicked(MouseEvent e) {}
 	public void mouseEntered(MouseEvent e) {}

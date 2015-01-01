@@ -49,9 +49,5 @@ public abstract class Player implements Runnable
 		return m_move;
 	}
 	
-	public abstract void promptMove();
-	
-	//what else do all players need?
-	//remember that human players and computer players are two different kinds of players
-
+	public abstract void promptMove();	
 }

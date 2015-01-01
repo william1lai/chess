@@ -4,7 +4,11 @@ import java.awt.image.BufferedImage;
 
 import javax.imageio.ImageIO;
 
-
+/*
+  A simple click-able button
+  - requires two images named ___0.png and ___1.png; the former is for when button is unclicked, the latter for when held down
+  - action to take when clicked is determined by m_action (see EasyButtonAction)
+*/
 public class EasyButton
 {
 	private int m_posX, m_posY;
@@ -15,11 +19,13 @@ public class EasyButton
 	
 	public EasyButton(String name, int x, int y, int w, int h, EasyButtonAction action)
 	{
-		try {
+		try
+		{
 			m_releasedImg = ImageIO.read(getClass().getResourceAsStream("/Images/" + name + "0.png"));
 			m_pressedImg = ImageIO.read(getClass().getResourceAsStream("/Images/" + name + "1.png"));
 		}
-		catch (Exception ex) {
+		catch (Exception ex)
+		{
 			System.out.println("Warning: " + name + " not found");
 			m_releasedImg = null;
 			m_pressedImg = null;

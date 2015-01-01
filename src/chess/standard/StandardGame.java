@@ -104,7 +104,7 @@ public class StandardGame extends Game
 		mainGameLoop();		
 	}
 	
-	private void mainGameLoop()
+	public void mainGameLoop()
 	{
 		Definitions.State state = m_game_board.getState();
 		while (state == Definitions.State.NORMAL && m_game_board.getFiftymoverulecount() < 100) //50 moves for each side

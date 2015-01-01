@@ -402,13 +402,10 @@ public class LosersBoard extends Board
 		long turnpieces, allpieces, pawns, knights, bishops, rooks, queens, kings;
 
 		if (m_turn == Definitions.Color.WHITE)
-		{
 			turnpieces = getWhite();
-		}
 		else
-		{
 			turnpieces = getBlack();
-		}
+
 		pawns = turnpieces & getPawns();
 		knights = turnpieces & getKnights();
 		bishops = turnpieces & getBishops();
@@ -502,13 +499,9 @@ public class LosersBoard extends Board
 							if (((moves >>> i) & 1L) == 1)
 							{
 								if (((1L << i) & allpieces) != 0)
-								{
-									captures.add(new Move(r, c, 7 - (i / 8), 7 - (i % 8)));										
-								}
+									captures.add(new Move(r, c, 7 - (i / 8), 7 - (i % 8)));
 								else
-								{
 									mvs.add(new Move(r, c, 7 - (i / 8), 7 - (i % 8)));
-								}
 							}
 						}
 					}
@@ -520,13 +513,9 @@ public class LosersBoard extends Board
 							if (((moves >>> i) & 1L) == 1)
 							{
 								if (((1L << i) & allpieces) != 0)
-								{
-									captures.add(new Move(r, c, 7 - (i / 8), 7 - (i % 8)));										
-								}
+									captures.add(new Move(r, c, 7 - (i / 8), 7 - (i % 8)));
 								else
-								{
 									mvs.add(new Move(r, c, 7 - (i / 8), 7 - (i % 8)));
-								}
 							}
 						}
 					}
@@ -538,13 +527,9 @@ public class LosersBoard extends Board
 							if (((moves >>> i) & 1L) == 1)
 							{
 								if (((1L << i) & allpieces) != 0)
-								{
-									captures.add(new Move(r, c, 7 - (i / 8), 7 - (i % 8)));										
-								}
+									captures.add(new Move(r, c, 7 - (i / 8), 7 - (i % 8)));
 								else
-								{
 									mvs.add(new Move(r, c, 7 - (i / 8), 7 - (i % 8)));
-								}
 							}
 						}
 					}
@@ -556,13 +541,9 @@ public class LosersBoard extends Board
 							if (((moves >>> i) & 1L) == 1)
 							{
 								if (((1L << i) & allpieces) != 0)
-								{
-									captures.add(new Move(r, c, 7 - (i / 8), 7 - (i % 8)));										
-								}
+									captures.add(new Move(r, c, 7 - (i / 8), 7 - (i % 8)));
 								else
-								{
 									mvs.add(new Move(r, c, 7 - (i / 8), 7 - (i % 8)));
-								}
 							}
 						}
 					}
@@ -574,13 +555,9 @@ public class LosersBoard extends Board
 							if (((moves >>> i) & 1L) == 1)
 							{
 								if (((1L << i) & allpieces) != 0)
-								{
 									captures.add(new Move(r, c, 7 - (i / 8), 7 - (i % 8)));										
-								}
 								else
-								{
 									mvs.add(new Move(r, c, 7 - (i / 8), 7 - (i % 8)));
-								}
 							}
 						}
 					}
@@ -589,13 +566,9 @@ public class LosersBoard extends Board
 		}
 
 		if (captures.size() > 0)
-		{	
 			return captures;
-		}
 		else
-		{
 			return mvs;
-		}
 	}
 
 	public void promotePawn(int r, int c)
@@ -637,12 +610,14 @@ public class LosersBoard extends Board
 			setKnights(getKnights() | (1L << sq));
 		}
 	}
+	
 
 	public LosersBoard clone()
 	{
 		return new LosersBoard(this);
 	}
 
+	
 	public String toString()
 	{
 		String str = "";
@@ -689,6 +664,7 @@ public class LosersBoard extends Board
 		return str;
 	}
 
+	
 	public String toFEN(boolean complete)
 	{
 		String FEN = "";
@@ -780,6 +756,7 @@ public class LosersBoard extends Board
 		return FEN;
 	}
 
+	
 	public void FENtoPosition(String srcFEN)
 	{
 		String[] FEN = srcFEN.split("/");
@@ -788,14 +765,10 @@ public class LosersBoard extends Board
 		String[] detailElems = details.split(" "); //[0]=turn, [1]=castling, [2]=enpassant, [3]=50-move count, [4]=turn num
 		String turn = detailElems[0];
 		if (turn.charAt(0) == 'w')
-		{
 			m_turn = Definitions.Color.WHITE;
-		}
 		else
-		{
 			m_turn = Definitions.Color.BLACK;
-		}
-
+	
 		//String castling = detailElems[1]; //hold '-' because no castling in Loser's Chess
 
 		int epcol = detailElems[2].charAt(0) - 'a';
@@ -824,10 +797,8 @@ public class LosersBoard extends Board
 
 				Definitions.Color color = Definitions.Color.WHITE;
 				if (Character.isLowerCase(p))
-				{
 					color = Definitions.Color.BLACK;
-				}				
-
+	
 				placePiece(p, color, r, c);
 			}
 		}

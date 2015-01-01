@@ -89,6 +89,11 @@ public class LosersGame extends Game
 
 	public void run()
 	{
+		mainGameLoop();
+	}
+	
+	public void mainGameLoop()
+	{
 		Definitions.State state = m_game_board.getState();
 		while (state == Definitions.State.NORMAL && m_game_board.getFiftymoverulecount() < 100) //50 moves for each side
 		{
@@ -105,7 +110,7 @@ public class LosersGame extends Game
 				if (m == null)
 					break;
 
-				processMove(m);
+				processMove(m, true);
 				flipTurn();
 				state = m_game_board.getState();
 			}
@@ -203,9 +208,10 @@ public class LosersGame extends Game
 	}
 	
 	//TODO: Might need clean up
-	public void processMove(Move newMove)
+	public void processMove(Move newMove, boolean animatePlease)
 	{
-		m_graphics.animateMove(newMove, getBoard());
+		if (animatePlease)
+			m_graphics.animateMove(newMove, getBoard());
 		
 		int row = newMove.r0;
 		int col = newMove.c0;

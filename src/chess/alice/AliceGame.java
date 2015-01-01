@@ -95,6 +95,11 @@ public class AliceGame extends Game
 
 	public void run()
 	{
+		mainGameLoop();
+	}
+	
+	public void mainGameLoop()
+	{
 		Definitions.State state = m_game_board.getState();
 		while (state == Definitions.State.NORMAL && m_game_board.getFiftymoverulecount() < 100) //50 moves for each side
 		{
@@ -113,7 +118,7 @@ public class AliceGame extends Game
 				int board = m_graphics.getActiveBoard();
 				AliceMove am = m_game_board.new AliceMove(m, board);
 				
-				processMove(am);
+				processMove(am, true);
 				flipTurn();
 				state = m_game_board.getState();
 			}
@@ -182,7 +187,7 @@ public class AliceGame extends Game
 	}
 
 	//TODO: Might need clean up
-	public void processMove(AliceMove newMove)
+	public void processMove(AliceMove newMove, boolean animatePlease)
 	{
 		int row = newMove.m.r0;
 		int col = newMove.m.c0;
@@ -267,11 +272,14 @@ public class AliceGame extends Game
 
 		if (correspondingRookMove == null)
 		{
-			m_graphics.animateMove(newMove, getBoard());
+			if (animatePlease)
+				m_graphics.animateMove(newMove, getBoard());
 			getBoard().move(newMove.m, board); //has to be down here for time being because en passant needs to know dest sq is empty; fix if you can
 		}
-		else {
-			m_graphics.animateCastlingMoves(newMove, correspondingRookMove, getBoard());
+		else 
+		{
+			if (animatePlease)
+				m_graphics.animateCastlingMoves(newMove, correspondingRookMove, getBoard());
 			getBoard().move(newMove.m, board);
 			getBoard().setTurn(Definitions.flip(getBoard().whoseTurn())); //to undo double flipping of moving king and then rook
 			getBoard().move(correspondingRookMove.m, board);

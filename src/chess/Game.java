@@ -11,6 +11,7 @@ public abstract class Game implements Runnable
 	protected Stack<String> movesHistory;
 	
 	abstract public void init(GameGraphics graphics, GameGUI gui);
+	abstract public void mainGameLoop();
 	
 	public Player getP1()
 	{

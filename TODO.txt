@@ -9,10 +9,14 @@ Standard Chess
 
 Loser's Chess
 - Threefold repetition (maybe 50 move rule too)
+- check FEN load/store
+- algebraic parsing
 
 Alice Chess
 - check edge cases
 - create AI
+- check FEN load/store
+- algebraic parsing
 
 Miscellaneous
 - Make a human-readable Move notation (e.g. g1-f3)

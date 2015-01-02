@@ -125,7 +125,7 @@ public class StandardGame extends Game
 						break;
 					else
 					{
-						System.out.println("This position has repeated itself. One more and game will be drawn.");
+						System.out.println("This position has repeated itself. One more and game will be drawn. hi");
 						repeats.put(FEN, 2);
 					}
 				}
@@ -189,6 +189,7 @@ public class StandardGame extends Game
 				repeats.put(FEN, repeats.get(FEN) + 1);
 			else
 			{
+			        
 				System.out.println("This position has repeated itself. One more and game will be drawn.");
 				repeats.put(FEN, 2);
 			}
@@ -438,14 +439,42 @@ public class StandardGame extends Game
 
 	public void undo()
 	{
+	    
 		if (movesHistory.size() >= 2 && m_canUndo)
 		{
 			m_game_board.decrementTurncount();
 
-			movesHistory.pop();
-			String returnMove = movesHistory.pop();
-
-			m_game_board.FENtoPosition(returnMove);
+			String returnMove2 = movesHistory.pop();
+			String returnMove1 = movesHistory.pop();
+			System.out.println(returnMove2 + " || " + returnMove1);
+			String[] returnMove2Parts = returnMove2.split(" ");
+			String returnMove2Key = "";
+			int i = 0;
+			for(i = 0; i < returnMove2Parts.length - 3; i++)
+			    returnMove2Key = returnMove2Key + returnMove2Parts[i] + " ";
+			
+			returnMove2Key += returnMove2Parts[i];
+			
+			String[] returnMove1Parts = returnMove1.split(" ");
+            String returnMove1Key = "";
+            for(i = 0; i < returnMove1Parts.length - 3; i++)
+                returnMove1Key = returnMove1Key + returnMove1Parts[i] + " ";
+          
+            returnMove1Key += returnMove1Parts[i];
+			
+            //no space after if just for william
+			if(repeats.get(returnMove2Key) > 1)
+			    repeats.put(returnMove2Key, repeats.get(returnMove2Key) - 1);
+			else
+			    repeats.remove(returnMove2Key);
+			
+			
+			if(repeats.get(returnMove1Key) > 1)
+                repeats.put(returnMove1Key, repeats.get(returnMove1Key) - 1);
+			else
+			    repeats.remove(returnMove1Key);
+			
+			m_game_board.FENtoPosition(returnMove1);
 		}
 	}
 

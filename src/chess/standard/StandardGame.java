@@ -37,12 +37,14 @@ public class StandardGame extends Game
 		movesHistory = new Stack<String>();
 		repeats = new HashMap<String, Integer>();
 
+		//initializes stuff we need for our bitboard functions
 		Definitions.makeInitB();
 		Definitions.makeMaskB();
 		Definitions.makeInitR();
 		Definitions.makeMaskR();
 		Definitions.makeRankR();
 
+		//These are some basic test scenarios we can load via FEN
 		//String testFEN = "8/8/7P/8/8/8/8/k5K1 w - - 0 37"; //white to promote soon; tests promotion
 		//String testFEN = "6k1/8/5r2/6K1/8/8/8/5q2 w - - 0 37"; //losing badly, tests player 2 checkmate power
 		//String testFEN = "k7/7Q/K7/8/8/8/8/8 w - - 0 37"; //winning badly, can use to test checkmate/stalemate
@@ -75,27 +77,24 @@ public class StandardGame extends Game
 			p1 = new StandardComputerPlayer("CPU WHITE", Definitions.Color.WHITE, this);
 			p2 = new StandardComputerPlayer("CPU BLACK", Definitions.Color.BLACK, this);
 		}
-		else
+		else //for cases like user closing window
 		{
 			System.exit(0);
 			return;
 		}
 		
+		//just testing
 		interpretMoveList("1.e4 e5 2.Nf3 Nc6 3.Bb5 a6 4.Bxc6+ dxc6 5.O-O Nf6");
 		
 		if (m_game_board.whoseTurn() == Definitions.Color.WHITE)
-		{
 			p1.promptMove();
-		}
 		else
-		{
 			p2.promptMove();
-		}
 	}
 
 	public void setupStandard()
 	{
-		//by default, the board is set up in the standard fashion
+		//by default, the board is set up in the standard fashion, so we need not do anything extra
 		m_game_board.setTurn(Definitions.Color.WHITE);
 	}
 
@@ -112,7 +111,7 @@ public class StandardGame extends Game
 			Player cur = (m_game_board.whoseTurn() == Definitions.Color.WHITE ? p1 : p2);
 			if (cur.getColor() == Definitions.Color.WHITE)
 				m_game_board.incrementTurncount();
-			if (!m_graphics.isAnimating() && cur instanceof HumanPlayer)
+			if (!m_graphics.isAnimating() && cur instanceof HumanPlayer) //only allow undo if not animating and is human player turn
 				m_canUndo = true;
 			if (!m_graphics.isAnimating() && cur.isDone())
 			{
@@ -132,7 +131,7 @@ public class StandardGame extends Game
 				m_canUndo = false;
 				movesHistory.push(m_game_board.toFEN(true));
 				Move m = cur.getMove();
-				if (m == null)
+				if (m == null) //null move might indicate CPU acknowledging getting checkmated
 					break;
 
 				processMove(m, true);
@@ -144,7 +143,8 @@ public class StandardGame extends Game
 			try { Thread.sleep(30); }
 			catch (InterruptedException e) {}
 		}
-		while (m_graphics.isAnimating()) {
+		while (m_graphics.isAnimating())
+		{
 			m_graphics.updateGameState();
 			m_applet.repaint();
 			try { Thread.sleep(30); }
@@ -174,12 +174,12 @@ public class StandardGame extends Game
 		System.out.println("The game has ended.");
 	}
 
+	//Special case for use with parsing algebraic notation, since that requires going move by move
 	private void inputOneMove(Move mv)
 	{
 		Player cur = (m_game_board.whoseTurn() == Definitions.Color.WHITE ? p1 : p2);
 		if (cur.getColor() == Definitions.Color.WHITE)
 			m_game_board.incrementTurncount();
-		//while (m_graphics.isAnimating()); //wait until animation stops
 		String FEN = m_game_board.toFEN(false); //we don't want turncounts making each position unique
 		if (!repeats.containsKey(FEN))
 			repeats.put(FEN, 1);
@@ -196,7 +196,6 @@ public class StandardGame extends Game
 		}
 		m_canUndo = false;
 		movesHistory.push(m_game_board.toFEN(true));
-		
 		processMove(mv, false);
 		flipTurn();
 	}
@@ -216,7 +215,8 @@ public class StandardGame extends Game
 		return m_game_board;
 	}
 	
-	private void flipTurn() //prompts next player's move; board does actual flipping of turns
+	//prompts next player's move; board does actual flipping of turns
+	private void flipTurn()
 	{	
 		Player next = (m_game_board.whoseTurn() == Definitions.Color.WHITE ? p1 : p2);
 		next.promptMove();
@@ -255,7 +255,7 @@ public class StandardGame extends Game
 		return new Move(7 - orow, 7 - ocol, drow, dcol);
 	}
 	
-	//input not entirely sanitized yet
+	//Parses algebraic move list into moves and processes them; input not entirely sanitized yet
 	public static Move algebraicToMove(StandardBoard b, Definitions.Color color, String algebraic)
 	{
 		//e4 Ne2 Nge2 Bxc6 Bxc6+ O-O O-O-O a8=Q+ Qxg7# are some cases
@@ -269,14 +269,14 @@ public class StandardGame extends Game
 		}
 		if (len < 2)
 			return null;
-		if (algebraic.equals("O-O"))
+		if (algebraic.equals("O-O")) //castling kingside
 		{
 			if (isWhite)
 				return new Move(7, 4, 7, 6);
 			else
 				return new Move(0, 4, 0, 6);
 		}
-		if (algebraic.equals("O-O-O") && color == Definitions.Color.BLACK)
+		if (algebraic.equals("O-O-O")) //castling queenside
 		{
 			if (isWhite)
 				return new Move(7, 4, 7, 2);
@@ -327,7 +327,7 @@ public class StandardGame extends Game
 						return null;
 					
 					char promo = 0;
-					if (len == 6)
+					if (len == 6) //exf8=Q case
 						promo = algebraic.charAt(5);
 					return new Move(8 - row, col, 7 - row, othercol, promo);
 				}
@@ -432,49 +432,48 @@ public class StandardGame extends Game
 				System.out.println("Invalid movelist.");
 				break;
 			}
-			//System.out.println(nextmove);
 			inputOneMove(nextmove);
 		}
 	}
 
 	public void undo()
-	{
-	    
+	{	    
 		if (movesHistory.size() >= 2 && m_canUndo)
 		{
 			m_game_board.decrementTurncount();
 
 			String returnMove2 = movesHistory.pop();
 			String returnMove1 = movesHistory.pop();
-			System.out.println(returnMove2 + " || " + returnMove1);
+			System.out.println(returnMove2 + " || " + returnMove1); //TODO
+
+			//Here, we reconstruct the FEN from movesHistory so as not to have turncount and 50movecount
 			String[] returnMove2Parts = returnMove2.split(" ");
 			String returnMove2Key = "";
-			int i = 0;
-			for(i = 0; i < returnMove2Parts.length - 3; i++)
-			    returnMove2Key = returnMove2Key + returnMove2Parts[i] + " ";
-			
+			int i;
+			for (i = 0; i < returnMove2Parts.length - 3; i++)
+				returnMove2Key = returnMove2Key + returnMove2Parts[i] + " ";			
 			returnMove2Key += returnMove2Parts[i];
 			
 			String[] returnMove1Parts = returnMove1.split(" ");
-            String returnMove1Key = "";
-            for(i = 0; i < returnMove1Parts.length - 3; i++)
-                returnMove1Key = returnMove1Key + returnMove1Parts[i] + " ";
-          
-            returnMove1Key += returnMove1Parts[i];
-			
-            //no space after if just for william
-			if(repeats.get(returnMove2Key) > 1)
-			    repeats.put(returnMove2Key, repeats.get(returnMove2Key) - 1);
+			String returnMove1Key = "";
+			for (i = 0; i < returnMove1Parts.length - 3; i++)
+				returnMove1Key = returnMove1Key + returnMove1Parts[i] + " ";
+
+			returnMove1Key += returnMove1Parts[i];
+
+			//decrement three move repetition hash table as necessary
+			if (repeats.get(returnMove2Key) > 1)
+				repeats.put(returnMove2Key, repeats.get(returnMove2Key) - 1);
+			else //remove from hash table if it only occurred once
+				repeats.remove(returnMove2Key);
+
+			//do same for other move that got undone
+			if (repeats.get(returnMove1Key) > 1)
+				repeats.put(returnMove1Key, repeats.get(returnMove1Key) - 1);
 			else
-			    repeats.remove(returnMove2Key);
-			
-			
-			if(repeats.get(returnMove1Key) > 1)
-                repeats.put(returnMove1Key, repeats.get(returnMove1Key) - 1);
-			else
-			    repeats.remove(returnMove1Key);
-			
-			m_game_board.FENtoPosition(returnMove1);
+				repeats.remove(returnMove1Key);
+
+			m_game_board.FENtoPosition(returnMove1); //restore position from two ply prior
 		}
 	}
 
@@ -488,13 +487,9 @@ public class StandardGame extends Game
 
 		int castlingRow;
 		if (getBoard().whoseTurn() == Definitions.Color.WHITE)
-		{
 			castlingRow = 7;
-		}
 		else //Black
-		{
 			castlingRow = 0;
-		}
 
 		Move correspondingRookMove = null; //if we have castling
 		getBoard().getData().m_enpassantCol = -1; //default
@@ -509,17 +504,14 @@ public class StandardGame extends Game
 				//en passant
 			{
 				if (getBoard().whoseTurn() == Definitions.Color.WHITE)
-				{
 					getBoard().removePiece(3, newMove.cf); //not sure if this is best way, but "move" call will not erase piece
-				}
 				else
-				{
 					getBoard().removePiece(4, newMove.cf);
-				}
 			}
 		}
 		else if (Character.toLowerCase(movedPiece) == 'k')
-		{			
+		{
+			//king that moves can no longer castle
 			if (getBoard().whoseTurn() == Definitions.Color.WHITE)
 			{
 				getBoard().getData().m_whiteCanCastleKingside = false;
@@ -535,50 +527,39 @@ public class StandardGame extends Game
 			if (row == castlingRow)
 			{
 				if (kingMoveLength == 2) //kingside
-				{
 					correspondingRookMove = new Move(castlingRow, 7, castlingRow, 5);
-				}
 				else if (kingMoveLength == -2) //queenside
-				{
 					correspondingRookMove = new Move(castlingRow, 0, castlingRow, 3);
-				}
 			}
 		}
 		else if (row == castlingRow)
 		{
+			//rook that moves can no longer be used for castling
 			if (col == 0) //queen's rook
 			{
 				if (getBoard().whoseTurn() == Definitions.Color.WHITE)
-				{
 					getBoard().getData().m_whiteCanCastleQueenside = false;
-				}
 				else
-				{
 					getBoard().getData().m_blackCanCastleQueenside = false;
-				}
 			}
 			else if (col == 7) //king's rook
 			{			
 				if (getBoard().whoseTurn() == Definitions.Color.WHITE)
-				{
 					getBoard().getData().m_whiteCanCastleKingside = false;
-				}
 				else
-				{
 					getBoard().getData().m_blackCanCastleKingside = false;
-				}
 			}
 		}
 
 		if (getBoard().getPiece(newMove.rf, newMove.cf) != 0) //capture was made
-		{
-			getBoard().getData().m_fiftymoverulecount = 0; //reset counter
-		}
+			getBoard().getData().m_fiftymoverulecount = 0; //reset fifty move counter
+
 		if (correspondingRookMove == null)
 		{
 			if (animatePlease)
 				m_graphics.animateMove(newMove, getBoard());
-			getBoard().move(newMove); //has to be down here for time being because en passant needs to know dest sq is empty; fix if you can
+			//TODO: has to be down here for time being because en passant needs to know dest sq is empty; fix if you can
+			getBoard().move(newMove);
 		}
 		else 
 		{

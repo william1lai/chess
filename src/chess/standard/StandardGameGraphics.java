@@ -18,11 +18,11 @@ import chess.Player;
 public class StandardGameGraphics extends GameGraphics
 {
 	private StandardGame m_game;
-	private int m_boardOffsetX, m_boardOffsetY, m_blockSize;
-	private Map<String, BufferedImage> m_gPieces;
+	private int m_boardOffsetX, m_boardOffsetY, m_blockSize; //for determining pixel coordinates of squares
+	private Map<String, BufferedImage> m_gPieces; //mapping of piece type to picture in img folder
 	private BufferedImage m_gMovable, m_gSelected;
 	private BufferedImage[] m_gBlocks = new BufferedImage[2];
-	private long m_movableBlocks, m_selectedBlocks;
+	private long m_movableBlocks, m_selectedBlocks; //bitmap of which squares are movable or have been selected
 	private Thread m_moveAnimator;
 	private MoveAnimation m_moveAnimation;
 	
@@ -39,36 +39,40 @@ public class StandardGameGraphics extends GameGraphics
 		m_blockSize = Definitions.HEIGHT*3/4 / Definitions.NUMROWS;
 		
 		m_gPieces = new HashMap<String, BufferedImage>();
-		try {
-			for (int i = 0; i < Definitions.NUMPIECES; i++) {
+		try //set up our images
+		{
+			for (int i = 0; i < Definitions.NUMPIECES; i++) //create mapping between pieces and images of pieces
 				m_gPieces.put(Definitions.PIECENAMES[i], ImageIO.read(getClass().getResourceAsStream("/Images/piece" + Definitions.PIECENAMES[i] + ".png")));
-			}
-			m_gBlocks[0] = ImageIO.read(getClass().getResourceAsStream("/Images/blockW.png"));
-			m_gBlocks[1] = ImageIO.read(getClass().getResourceAsStream("/Images/blockB.png"));
+			m_gBlocks[0] = ImageIO.read(getClass().getResourceAsStream("/Images/blockW.png")); //image of light square
+			m_gBlocks[1] = ImageIO.read(getClass().getResourceAsStream("/Images/blockB.png")); //image of dark square
 			m_gMovable = ImageIO.read(getClass().getResourceAsStream("/Images/blockMovable.png"));
 			m_gSelected = ImageIO.read(getClass().getResourceAsStream("/Images/blockSelected.png"));
 		}
-		catch (Exception ex) {
+		catch (Exception ex)
+		{
 			System.out.println("Error loading images!");
 		}
 		
-		try {
+		try //set up our fonts
+		{
 		    GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
 		    ge.registerFont(Font.createFont(Font.TRUETYPE_FONT, getClass().getResourceAsStream("/Fonts/LBRITE.TTF")));
 		    ge.registerFont(Font.createFont(Font.TRUETYPE_FONT, getClass().getResourceAsStream("/Fonts/LBRITED.TTF")));
 		    ge.registerFont(Font.createFont(Font.TRUETYPE_FONT, getClass().getResourceAsStream("/Fonts/LBRITEDI.TTF")));
 		    ge.registerFont(Font.createFont(Font.TRUETYPE_FONT, getClass().getResourceAsStream("/Fonts/LBRITEI.TTF")));
 		}
-		catch (Exception ex) {
+		catch (Exception ex)
+		{
 			System.out.println("Error loading fonts!");
 		}
 	}
 	
     public Dimension getPreferredSize()
     {
-        return new Dimension(640, 480);
+        return new Dimension(640, 480); //TODO: maybe move this to Definitions
     }
     
+    //For human players, we need to highlight the movable squares and the selected piece
     public void updateGameState()
     {
     	m_movableBlocks = 0;
@@ -90,7 +94,8 @@ public class StandardGameGraphics extends GameGraphics
 	
 	private void updateMovable(ArrayList<Move> moves)
 	{
-		for (Move m : moves) {
+		for (Move m : moves) //highlight all possible destination squares
+		{
 			int sq = m_game.getBoard().toSq(m.rf, m.cf);
 			m_movableBlocks |= (1L << sq);
 		}
@@ -98,7 +103,7 @@ public class StandardGameGraphics extends GameGraphics
 	
 	private void updateSelected(int sq)
 	{
-		if (sq >= 0)
+		if (sq >= 0) //if -1, we don't want to highlight anything
 			m_selectedBlocks |= (1L << sq);
 	}
 	
@@ -116,19 +121,19 @@ public class StandardGameGraphics extends GameGraphics
 		drawPieces(backg, m_game.getBoard());
 		drawGUI(backg);	
 		
-		if (isAnimating()) {
+		if (isAnimating())
 			backg.drawImage(m_moveAnimation.getFrame(), 0, 0, this);
-		}
 		
 		g.drawImage(backbuffer, 0, 0, this);
 	}
 	
 	public void drawBackground(Graphics g)
 	{
-		g.setColor(new Color(238, 238, 238));
+		g.setColor(new Color(238, 238, 238)); //TODO: Possibly move to Definitions
 		g.fillRect(0, 0, Definitions.WIDTH, Definitions.HEIGHT);
 	}
-	
+
+	//Write the player names on the right side; BOLD if it is that player's turn
 	public void drawNames(Graphics g, Player p1, Player p2, Definitions.Color turn)
 	{
 		g.setColor(Color.BLACK);
@@ -145,35 +150,28 @@ public class StandardGameGraphics extends GameGraphics
 		g.setFont(new Font("Lucida Bright", Font.BOLD, 25));
 		String message;
 		if (winner == null) //stalemate
-		{
 			message = "Draw by " + reason + "!";
-		}
 		else if (winner == Definitions.Color.WHITE)
-		{
 			message = "White wins!";
-		}
 		else //BLACK
-		{
 			message = "Black wins!";
-		}
 		g.drawString(message, m_boardOffsetX + m_blockSize * (Definitions.NUMCOLS+1) + 15, m_boardOffsetY + m_blockSize * (Definitions.NUMROWS-4));
-	
 	}
 	
+	//Draws each square on the board, highlighting appropriately if it is selected or movable to
 	public void drawBlock(Graphics g, int row, int col)
 	{
 		int x = getX(col);
 		int y = getY(row);
 		g.drawImage(m_gBlocks[(row+col)%2], x, y, m_blockSize, m_blockSize, null);
 		int sq = m_game.getBoard().toSq(row, col);
-		if ((m_selectedBlocks & (1L << sq)) != 0) {
+		if ((m_selectedBlocks & (1L << sq)) != 0)
 			g.drawImage(m_gSelected, x, y, m_blockSize, m_blockSize, null);
-		}
-		else if ((m_movableBlocks & (1L << sq)) != 0) {
+		else if ((m_movableBlocks & (1L << sq)) != 0)
 			g.drawImage(m_gMovable, x, y, m_blockSize, m_blockSize, null);
-		}
 	}
 	
+	//Draws the piece using the mapping we created above
 	public void drawPiece(Graphics g, char p, int x, int y)
 	{
 		String pstr;
@@ -184,6 +182,7 @@ public class StandardGameGraphics extends GameGraphics
 		g.drawImage(m_gPieces.get(pstr), x, y, m_blockSize, m_blockSize, null);
 	}
 	
+	//Helper function that takes row-col coordinate and converts to pixel coordinate before feeding into drawPiece
 	public void drawPieceInBoard(Graphics g, char p, int r, int c)
 	{
 		int y = getY(r);
@@ -191,53 +190,57 @@ public class StandardGameGraphics extends GameGraphics
 		drawPiece(g, p, x, y);
 	}
 	
+	//Draws the markers for rows (1-8) and columns (a-h) on the edges
 	public void drawMarkers(Graphics g)
 	{
 		g.setColor(Color.BLACK);
-		for (int row = 0, y = m_boardOffsetY + m_blockSize/2; row < Definitions.NUMROWS; row++, y += m_blockSize) {
+		for (int row = 0, y = m_boardOffsetY + m_blockSize/2; row < Definitions.NUMROWS; row++, y += m_blockSize)
+		{
 			g.drawString(Definitions.RMARKERS[row], m_boardOffsetX - m_blockSize/2, y);
 			g.drawString(Definitions.RMARKERS[row], m_boardOffsetX + m_blockSize * Definitions.NUMCOLS + m_blockSize/3, y);
 		}
-		for (int col = 0, x = m_boardOffsetX + m_blockSize/2; col < Definitions.NUMCOLS; col++, x += m_blockSize) {
+		for (int col = 0, x = m_boardOffsetX + m_blockSize/2; col < Definitions.NUMCOLS; col++, x += m_blockSize)
+		{
 			g.drawString(Definitions.CMARKERS[col], x, m_boardOffsetY - m_blockSize/3);
 			g.drawString(Definitions.CMARKERS[col], x, m_boardOffsetY + m_blockSize * Definitions.NUMROWS + m_blockSize/2);
 		}
 	}
 	
+	//Draws the square and board borders
 	public void drawBorders(Graphics g)
 	{
 		g.setColor(Color.BLACK);
-		for (int line = 0, y = m_boardOffsetY; line <= Definitions.NUMROWS; line++, y += m_blockSize) {
+		for (int line = 0, y = m_boardOffsetY; line <= Definitions.NUMROWS; line++, y += m_blockSize)
 			g.drawLine(m_boardOffsetX, y, m_boardOffsetX + Definitions.NUMCOLS*m_blockSize, y);
-		}
-		for (int line = 0, x = m_boardOffsetX; line <= Definitions.NUMCOLS; line++, x += m_blockSize) {
+		for (int line = 0, x = m_boardOffsetX; line <= Definitions.NUMCOLS; line++, x += m_blockSize)
 			g.drawLine(x, m_boardOffsetY, x, m_boardOffsetY + Definitions.NUMROWS*m_blockSize);
-		}
 	}
 	
+	//Draws every piece on the board
 	public void drawPieces(Graphics g, Board b)
 	{
-		for (int r = 0, y = m_boardOffsetY; r < Definitions.NUMROWS; r++, y += m_blockSize) {
-			for (int c = 0, x = m_boardOffsetX; c < Definitions.NUMCOLS; c++, x += m_blockSize) {
-				if (b.getPiece(r, c) != 0) {
-					drawPiece(g, b.getPiece(r, c), x, y);
-				}
-			}
+		for (int r = 0, y = m_boardOffsetY; r < Definitions.NUMROWS; r++, y += m_blockSize)
+		for (int c = 0, x = m_boardOffsetX; c < Definitions.NUMCOLS; c++, x += m_blockSize)
+		{
+			if (b.getPiece(r, c) != 0)
+				drawPiece(g, b.getPiece(r, c), x, y);
 		}
 	}
 	
 	public void drawBoard(Graphics g)
 	{
-		for (int r = 0; r < Definitions.NUMROWS; r++) {
-			for (int c = 0; c < Definitions.NUMCOLS; c++) {
+		for (int r = 0; r < Definitions.NUMROWS; r++)
+		for (int c = 0; c < Definitions.NUMCOLS; c++)
+		{
 				drawBlock(g, r, c);
-			}
 		}
 	}
 	
+	//Draws any GUI components (currently only buttons)
 	public void drawGUI(Graphics g)
 	{
-		for (EasyButton b : m_game.getGUI().getButtons()) {
+		for (EasyButton b : m_game.getGUI().getButtons())
+		{
 			BufferedImage img = (b.isPressed() ? b.getPressedImg() : b.getReleasedImg());
 			g.drawImage(img, b.getX(), b.getY(), b.getW(), b.getH(), null);
 		}
@@ -246,18 +249,16 @@ public class StandardGameGraphics extends GameGraphics
 	public int getRow(int y)
 	{
 		int relativeY = y - m_boardOffsetY;
-		if (relativeY < 0 || relativeY >= Definitions.NUMROWS*m_blockSize) {
+		if (relativeY < 0 || relativeY >= Definitions.NUMROWS*m_blockSize)
 			return -1;
-		}
 		return relativeY / m_blockSize;
 	}
 	
 	public int getCol(int x)
 	{
 		int relativeX = x - m_boardOffsetX;
-		if (relativeX < 0 || relativeX >= Definitions.NUMCOLS*m_blockSize) {
+		if (relativeX < 0 || relativeX >= Definitions.NUMCOLS*m_blockSize)
 			return -1;
-		}
 		return relativeX / m_blockSize;
 	}
 	
@@ -296,15 +297,18 @@ public class StandardGameGraphics extends GameGraphics
 		
 		public BufferedImage getFrame()
 		{
-			synchronized(this) {
+			synchronized(this)
+			{
 				return m_frame;
 			}
 		}
 
 		public void run()
 		{
-			for (int t = 0; t < NUMTICKS; t++) {
-				synchronized (this) {
+			for (int t = 0; t < NUMTICKS; t++)
+			{
+				synchronized (this)
+				{
 					curX += dX;
 					curY += dY;
 					Graphics2D g = (Graphics2D)m_frame.getGraphics();
@@ -333,8 +337,10 @@ public class StandardGameGraphics extends GameGraphics
 
 		public void run()
 		{
-			for (int t = 0; t < NUMTICKS; t++) {
-				synchronized (this) {
+			for (int t = 0; t < NUMTICKS; t++)
+			{
+				synchronized (this)
+				{
 					curX += dX;
 					curY += dY;
 					rook.curX += rook.dX;
@@ -359,7 +365,7 @@ public class StandardGameGraphics extends GameGraphics
 		if (isAnimating() || m_moveAnimation == null)
 			return;
 		m_moveAnimator = new Thread(m_moveAnimation);
-		m_moveAnimator.setPriority(Thread.MAX_PRIORITY);
+		m_moveAnimator.setPriority(Thread.MAX_PRIORITY); //to minimize lag
 		m_moveAnimator.start();
 	}
 

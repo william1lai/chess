@@ -8,6 +8,7 @@ import chess.HumanPlayer;
 import chess.Move;
 import chess.Definitions.Color;
 
+//See HumanPlayer for light documentation
 public class StandardHumanPlayer extends HumanPlayer 
 {
 	public StandardHumanPlayer(String name, Color c, Game g) 
@@ -51,12 +52,14 @@ public class StandardHumanPlayer extends HumanPlayer
 			else if (m_selected != -1)
 			{
 				m_move = new Move(7 - (m_selected / 8), 7 - (m_selected % 8), row, col);
-				if (g.getBoard().isLegalMove(m_move)) {
+				if (g.getBoard().isLegalMove(m_move))
+				{
 					m_selected = -1;
 					m_done = true;
 					getGame().m_applet.removeMouseListener(this);
 				}
-				else {
+				else
+				{
 					m_move = null;
 				}
 			}

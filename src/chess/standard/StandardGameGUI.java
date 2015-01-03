@@ -11,6 +11,7 @@ import chess.Game;
 import chess.GameApplet;
 import chess.GameGUI;
 
+//See GameGUI for light documentation
 public class StandardGameGUI extends GameGUI
 {
 	StandardGame m_game;
@@ -26,8 +27,11 @@ public class StandardGameGUI extends GameGUI
 	{
 		m_game = (StandardGame)game;
 		
-		try {
-			EasyButton b = new EasyButton("buttonUndo", 480, 220, 90, 30, new EasyButtonAction() {
+		try
+		{
+			//for now, our only button is the Undo button
+			EasyButton b = new EasyButton("buttonUndo", 480, 220, 90, 30, new EasyButtonAction()
+			{
 				public void on_press()
 				{
 					m_game.undo();
@@ -52,12 +56,12 @@ public class StandardGameGUI extends GameGUI
 	{
 		int x = e.getX();
 		int y = e.getY();
-		for (int i = 0; i < m_buttons.size(); i++) {
+		for (int i = 0; i < m_buttons.size(); i++)
+		{
 			int offX = x - m_buttons.get(i).getX();
 			int offY = y - m_buttons.get(i).getY();
-			if (offX >= 0 && offX <= m_buttons.get(i).getW() && offY >= 0 && offY <= m_buttons.get(i).getH()) {
+			if (offX >= 0 && offX <= m_buttons.get(i).getW() && offY >= 0 && offY <= m_buttons.get(i).getH())
 				m_buttons.get(i).press();
-			}
 		}
 	}
 	
@@ -65,7 +69,8 @@ public class StandardGameGUI extends GameGUI
 	{
 		int x = e.getX();
 		int y = e.getY();
-		for (int i = 0; i < m_buttons.size(); i++) {
+		for (int i = 0; i < m_buttons.size(); i++)
+		{
 			int offX = x - m_buttons.get(i).getX();
 			int offY = y - m_buttons.get(i).getY();
 			boolean releasedOnButton = offX >= 0 &&

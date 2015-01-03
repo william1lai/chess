@@ -1,4 +1,10 @@
 Name: William Lai
+Date: 01-02-2015
+Description: Documentation Part 2
+    * Did most of documentation for Standard mode
+    * StandardComputerPlayer and StandardBoard still need documenting
+
+Name: William Lai
 Date: 01-01-2015
 Description: Documentation Part 1
     * Did some easy documentation (superclass stuff mostly)

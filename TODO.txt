@@ -3,7 +3,6 @@ UI
 - Move list in game
 
 Standard Chess
-- Threefold repetition doesn't work well with undo (fix asap)
 - Test 50 move rule and threefold repetition
 - Different level AI's
 

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import chess.ComputerPlayer;
+import chess.Debug;
 import chess.Definitions;
 import chess.Game;
 import chess.Move;
@@ -110,7 +111,7 @@ public class AliceComputerPlayer extends ComputerPlayer
 			long endtime = System.nanoTime();
 			double duration = getDuration(starttime, endtime);
 			highScore = bms.getScore();
-			System.out.println("Depth " + d + ": " + bms.getMovelist() + ", " + highScore + "; " + duration + " s, B-Factor: " + Math.pow(branches, 0.5/d));
+			Debug.Log("Depth " + d + ": " + bms.getMovelist() + ", " + highScore + "; " + duration + " s, B-Factor: " + Math.pow(branches, 0.5/d));
 
 			if (stop)
 				break;

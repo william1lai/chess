@@ -3,6 +3,7 @@ package chess.alice;
 import java.awt.event.MouseEvent;
 import javax.swing.JOptionPane;
 
+import chess.Debug;
 import chess.Definitions;
 import chess.Game;
 import chess.GameApplet;
@@ -50,7 +51,7 @@ public class AliceGame extends Game
 		//setupStandard();
 
 		String[] param = { "White vs AI", "Black vs AI", "Hotseat Game", "AI vs AI" };
-		String input = (String) JOptionPane.showInputDialog(null, "Game Mode?", "Choose your mode", JOptionPane.QUESTION_MESSAGE, null, param, param[0]);
+		String input = (String) JOptionPane.showInputDialog(null, "Game Mode?", "Choose your mode" + (Debug.IsDebugging() ? " (DEBUG Mode)" : ""), JOptionPane.QUESTION_MESSAGE, null, param, param[0]);
 
 		if (input == "White vs AI")
 		{

@@ -51,7 +51,7 @@ public class GameApplet extends JApplet implements Runnable, MouseListener
 	public boolean chooseGame()
 	{
 		String[] param = { "Standard Chess", "Loser's Chess", "Alice Chess" };
-		String input = (String) JOptionPane.showInputDialog(null, "Game Type?", "Choose your game", JOptionPane.QUESTION_MESSAGE, null, param, param[0]);
+		String input = (String) JOptionPane.showInputDialog(null, "Game Type?", "Choose your game" + (Debug.IsDebugging() ? " (DEBUG Mode)" : ""), JOptionPane.QUESTION_MESSAGE, null, param, param[0]);
 
 		if (input == "Standard Chess")
 		{

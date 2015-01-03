@@ -113,7 +113,7 @@ public class LosersGameGraphics extends GameGraphics
 		drawBoard(backg);
 		drawBorders(backg);
 		drawMarkers(backg);
-		drawNames(backg, m_game.getP2(), m_game.getP2(), m_game.getBoard().whoseTurn());
+		drawNames(backg, m_game.getP1(), m_game.getP2(), m_game.getBoard().whoseTurn());
 		drawPieces(backg, m_game.getBoard());
 		drawGUI(backg);	
 		

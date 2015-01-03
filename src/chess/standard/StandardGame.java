@@ -3,6 +3,7 @@ package chess.standard;
 import java.awt.event.MouseEvent;
 import javax.swing.JOptionPane;
 
+import chess.Debug;
 import chess.Definitions;
 import chess.Game;
 import chess.GameApplet;
@@ -55,7 +56,7 @@ public class StandardGame extends Game
 		setupStandard();
 
 		String[] param = { "White vs AI", "Black vs AI", "Hotseat Game", "AI vs AI" };
-		String input = (String) JOptionPane.showInputDialog(null, "Game Mode?", "Choose your mode", JOptionPane.QUESTION_MESSAGE, null, param, param[0]);
+		String input = (String) JOptionPane.showInputDialog(null, "Game Mode?", "Choose your mode" + (Debug.IsDebugging() ? " (DEBUG Mode)" : ""), JOptionPane.QUESTION_MESSAGE, null, param, param[0]);
 
 		if (input == "White vs AI")
 		{
@@ -83,8 +84,11 @@ public class StandardGame extends Game
 			return;
 		}
 		
-		//just testing
-		interpretMoveList("1.e4 e5 2.Nf3 Nc6 3.Bb5 a6 4.Bxc6+ dxc6 5.O-O Nf6");
+		if (Debug.IsDebugging())
+		{
+			//just testing
+			interpretMoveList("1.e4 e5 2.Nf3 Nc6 3.Bb5 a6 4.Bxc6+ dxc6 5.O-O Nf6");
+		}
 		
 		if (m_game_board.whoseTurn() == Definitions.Color.WHITE)
 			p1.promptMove();

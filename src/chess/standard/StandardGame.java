@@ -22,7 +22,7 @@ public class StandardGame extends Game
 	private StandardGameGUI m_gui;
 	private StandardBoard m_game_board;
 	private boolean m_canUndo;
-	private HashMap<String, Integer> repeats;
+	private HashMap<String, Integer> repeats; //mapping from position FEN to number of occurrences in game
 	
 	public StandardGame(GameApplet applet)
 	{
@@ -56,7 +56,7 @@ public class StandardGame extends Game
 		setupStandard();
 
 		String[] param = { "White vs AI", "Black vs AI", "Hotseat Game", "AI vs AI" };
-		String input = (String) JOptionPane.showInputDialog(null, "Game Mode?", "Choose your mode" + (Debug.IsDebugging() ? " (DEBUG Mode)" : ""), JOptionPane.QUESTION_MESSAGE, null, param, param[0]);
+		String input = (String) JOptionPane.showInputDialog(null, "Game Mode?", "Choose your mode", JOptionPane.QUESTION_MESSAGE, null, param, param[0]);
 
 		if (input == "White vs AI")
 		{
@@ -83,7 +83,8 @@ public class StandardGame extends Game
 			System.exit(0);
 			return;
 		}
-		
+
+		//TODO
 		if (Debug.IsDebugging())
 		{
 			//just testing
@@ -128,7 +129,7 @@ public class StandardGame extends Game
 						break;
 					else
 					{
-						System.out.println("This position has repeated itself. One more and game will be drawn. hi");
+						Debug.Log("This position has repeated itself. One more and game will be drawn. hi");
 						repeats.put(FEN, 2);
 					}
 				}
@@ -175,7 +176,7 @@ public class StandardGame extends Game
 		}
 
 		JOptionPane.showMessageDialog(null, reason, "Game has ended", JOptionPane.PLAIN_MESSAGE);
-		System.out.println("The game has ended.");
+		Debug.Log("The game has ended.");
 	}
 
 	//Special case for use with parsing algebraic notation, since that requires going move by move
@@ -194,7 +195,7 @@ public class StandardGame extends Game
 			else
 			{
 			        
-				System.out.println("This position has repeated itself. One more and game will be drawn.");
+				Debug.Log("This position has repeated itself. One more and game will be drawn.");
 				repeats.put(FEN, 2);
 			}
 		}
@@ -371,7 +372,7 @@ public class StandardGame extends Game
 			if (isWhite)
 				piecesofinterest = b.getBishops() & b.getWhite();
 			possorigin = Definitions.bishopAttacks(dsq, free) & piecesofinterest;
-			//System.out.println(String.format("0x%16s", Long.toHexString(possorigin)).replace(' ', '0'));
+			//Debug.Log(String.format("0x%16s", Long.toHexString(possorigin)).replace(' ', '0'));
 		}
 		else if (first == 'R')
 		{
@@ -411,6 +412,7 @@ public class StandardGame extends Game
 		return algebraicHelper(possorigin, orow, ocol, drow, dcol);
 	}
 
+	//Contains print statements
 	public void interpretMoveList(String movelist) //needs testing
 	{
 		//start with naive format of "1.e4 c5 2.Nc3 Nc6 3.f4 g6 4.Bb5 Nd4", with proper spacing and all
@@ -448,7 +450,6 @@ public class StandardGame extends Game
 
 			String returnMove2 = movesHistory.pop();
 			String returnMove1 = movesHistory.pop();
-			System.out.println(returnMove2 + " || " + returnMove1); //TODO
 
 			//Here, we reconstruct the FEN from movesHistory so as not to have turncount and 50movecount
 			String[] returnMove2Parts = returnMove2.split(" ");

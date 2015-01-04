@@ -9,8 +9,10 @@ import chess.Definitions;
 import chess.Game;
 import chess.Move;
 
-public class StandardComputerPlayer extends ComputerPlayer 
+public class StandardComputerPlayer extends ComputerPlayer
 {
+	//The following are bonus scores given to each piece type for their position on the board
+	//These are from White's perspective
 	private double [][] PawnVals = {
 			{ 800, 800, 800, 800, 800, 800, 800, 800, },
 			{	5,  10,  15,  20,  20,  15,  10,   5, },
@@ -54,9 +56,10 @@ public class StandardComputerPlayer extends ComputerPlayer
 	private int branches;
 	private long m_starttime;
 	private boolean stop;
-	private HashMap<String, Move> m_book;
+	private HashMap<String, Move> m_book; //an "opening book" that tells the CPU what moves to make at the start of games
 	private ArrayList<Move> hashmoves;
-	//killer moves, to be used in evaluation
+	
+	//killer moves are follow-up moves that consistently "kill" the branch, so we consider first in future branches
 	private Move killer;
 	private Move killer2;
 
@@ -64,12 +67,12 @@ public class StandardComputerPlayer extends ComputerPlayer
 	public StandardComputerPlayer(String name, Definitions.Color c, Game g) 
 	{
 		super(name, c, g);
+		initOpeningBook();
 	}
 
 	public void run()
 	{
 		Game g = getGame();
-		initOpeningBook();
 		m_move = evaluate(((StandardGame)g).getBoard(), Definitions.MAXDEPTH);
 		m_done = true;
 	}
@@ -77,7 +80,7 @@ public class StandardComputerPlayer extends ComputerPlayer
 	public Move evaluate(StandardBoard scb, int maxdepth)
 	{
 		String completeFEN = scb.toFEN(false);
-		System.out.println(completeFEN);
+		Debug.Log(completeFEN);
 		Move opening = m_book.get(completeFEN);
 		if (opening != null)
 			return opening; //found in book
@@ -86,7 +89,7 @@ public class StandardComputerPlayer extends ComputerPlayer
 			return null;
 
 		double highScore = staticEval(scb);
-		System.out.println("Current Score: " + highScore);
+		Debug.Log("Current Score: " + highScore);
 		MovelistScore bms = new MovelistScore(null, 0);
 		hashmoves = new ArrayList<Move>();
 
@@ -115,7 +118,7 @@ public class StandardComputerPlayer extends ComputerPlayer
 			if (highScore > MATE_SCORE)
 				break; //if we found checkmate, don't look deeper
 		}
-		System.out.println();
+		Debug.Log("");
 		return hashmoves.get(0); //the best next move
 	}
 
@@ -132,7 +135,7 @@ public class StandardComputerPlayer extends ComputerPlayer
 
 		if (ply == maxply)
 		{
-			if (existsThreatByLower(scb))
+			if (existsThreatByLower(scb)) //if there is a threat of weaker piece taking stronger piece, look a bit deeper
 			{
 				maxply++;
 			}
@@ -166,7 +169,6 @@ public class StandardComputerPlayer extends ComputerPlayer
 		if (considerHashMoves && hashmoves.size() > ply)
 		{
 			StandardBoard temp = scb.clone();
-
 			if (!scb.isLegalMove(hashmoves.get(ply)))
 			{
 				considerHashMoves = false;
@@ -399,16 +401,12 @@ public class StandardComputerPlayer extends ComputerPlayer
 		{
 			//if opposing pawn threatens one of our nonpawns
 			if ((Definitions.bpawnAttacks(otherpieces & scb.getPawns()) & turnpieces) != 0)
-			{
 				return true;
-			}
 		}
 		else
 		{
 			if ((Definitions.wpawnAttacks(otherpieces & scb.getPawns()) & turnpieces) != 0)
-			{
 				return true;
-			}
 		}
 
 		//knight and bishop threats
@@ -461,67 +459,39 @@ public class StandardComputerPlayer extends ComputerPlayer
 				{
 					int rr;
 					if (scb.whoseTurn() == Definitions.Color.WHITE)
-					{
 						rr = r;
-					}
 					else
-					{
 						rr = 7 - r;
-					}
 
 					if (Character.isUpperCase(p) ^ (scb.whoseTurn() == Definitions.Color.BLACK)) //turn matches piece color
 					{
 						if (Character.toLowerCase(p) == 'p')
-						{
 							score = score + 100 + PawnVals[rr][c];
-						}
 						else if (Character.toLowerCase(p) == 'n')
-						{
 							score = score + 325 + KnightVals[rr][c];
-						}
 						else if (Character.toLowerCase(p) == 'b')
-						{
 							score = score + 325 + BishopVals[rr][c];
-						}
 						else if (Character.toLowerCase(p) == 'r')
-						{
 							score = score + 500;
-						}
 						else if (Character.toLowerCase(p) == 'q')
-						{
 							score = score + 975;
-						}
 						else //King
-						{
 							score = score + 1000000 + KingVals[rr][c];
-						}
 					}
 					else
 					{
 						if (Character.toLowerCase(p) == 'p')
-						{
 							score = score - 100 - PawnVals[7-rr][c];
-						}
 						else if (Character.toLowerCase(p) == 'n')
-						{
 							score = score - 325 - KnightVals[7-rr][c];
-						}
 						else if (Character.toLowerCase(p) == 'b')
-						{
 							score = score - 325 - BishopVals[7-rr][c];
-						}
 						else if (Character.toLowerCase(p) == 'r')
-						{
 							score = score - 500;
-						}
 						else if (Character.toLowerCase(p) == 'q')
-						{
 							score = score - 975;
-						}
 						else //King
-						{
 							score = score - 1000000 - KingVals[7-rr][c];
-						}
 					}
 				}
 			}
@@ -530,6 +500,7 @@ public class StandardComputerPlayer extends ComputerPlayer
 		return score / 100;
 	}
 
+	//Order the moves by putting killer moves and captures first
 	private ArrayList<Move> orderMoves(StandardBoard scb, ArrayList<Move> mvs, boolean partial)
 	{
 		ArrayList<Move> order = new ArrayList<Move>();
@@ -585,6 +556,7 @@ public class StandardComputerPlayer extends ComputerPlayer
 		return order;
 	}
 
+	//Basic opening book; maybe move to file that we read in instead of hard-coding
 	public void initOpeningBook() 
 	{
 		m_book = new HashMap<String, Move>();
@@ -604,6 +576,4 @@ public class StandardComputerPlayer extends ComputerPlayer
 		m_book.put("r1bqkbnr/pppp1ppp/2n5/1B2p3/4P3/5N2/PPPP1PPP/RNBQK2R b KQkq -", new Move(1, 5, 3, 5)); //1.e4 e5 2.Nf3 Nc6 3.Bb5 f5
 		m_book.put("rnbqkbnr/pppppppp/8/8/3P4/8/PPP1PPPP/RNBQKBNR b KQkq d3", new Move(1, 5, 3, 5)); //1.d4 f5
 	}
-
-
 }

@@ -22,7 +22,6 @@ public class StandardBoard extends Board
 		public int m_fiftymoverulecount;
 		public int m_turncount;
 		public StandardGame m_game;
-		//public HashMap<String, Integer> positionTable;
 
 		public GameData(StandardGame scg)
 		{
@@ -162,13 +161,9 @@ public class StandardBoard extends Board
 		setKings(getKings() & mask);
 		
 		if (color == Definitions.Color.WHITE)
-		{
 			setWhite(getWhite() | s);
-		}
 		else
-		{
 			setBlack(getBlack() | s);
-		}
 		
 		switch (piece)
 		{
@@ -260,6 +255,9 @@ public class StandardBoard extends Board
 	{
 		m_turn = color;
 	}
+
+	
+	//The following three functions convert between row-column coordinates and bitboard vector square number
 	
 	public int toSq(int row, int col)
 	{
@@ -281,21 +279,15 @@ public class StandardBoard extends Board
 		boolean isInCheck = inCheck();
 		int moves = allMoves().size();
 
-		if (moves == 0)
+		if (moves == 0) //we are unable to move
 		{
 			if (isInCheck)
-			{
 				return Definitions.State.CHECKMATE;
-			}
 			else
-			{
 				return Definitions.State.STALEMATE;
-			}
 		}
 		else
-		{
 			return Definitions.State.NORMAL;
-		}
 	}
 
 	public void move(Move m)
@@ -323,7 +315,6 @@ public class StandardBoard extends Board
 			setBishops(getBishops() & ~(1L << dest));
 			setRooks(getRooks() & ~(1L << dest));
 			setQueens(getQueens() & ~(1L << dest));
-			//no king because it shouldn't be able to be captured
 		}
 		else if ((getBishops() & (1L << orig)) != 0)
 		{
@@ -333,7 +324,6 @@ public class StandardBoard extends Board
 			setKnights(getKnights() & ~(1L << dest));
 			setRooks(getRooks() & ~(1L << dest));
 			setQueens(getQueens() & ~(1L << dest));
-			//no king because it shouldn't be able to be captured
 		}
 		else if ((getRooks() & (1L << orig)) != 0)
 		{
@@ -343,7 +333,6 @@ public class StandardBoard extends Board
 			setKnights(getKnights() & ~(1L << dest));
 			setBishops(getBishops() & ~(1L << dest));
 			setQueens(getQueens() & ~(1L << dest));
-			//no king because it shouldn't be able to be captured
 		}
 		else if ((getQueens() & (1L << orig)) != 0)
 		{
@@ -353,7 +342,6 @@ public class StandardBoard extends Board
 			setKnights(getKnights() & ~(1L << dest));
 			setBishops(getBishops() & ~(1L << dest));
 			setRooks(getRooks() & ~(1L << dest));
-			//no king because it shouldn't be able to be captured
 		}
 		else if ((getKings() & (1L << orig)) != 0)
 		{
@@ -388,6 +376,7 @@ public class StandardBoard extends Board
 		return allMoves().contains(m);
 	}
 
+	//return list of all moves that piece at row r and column c can move to
 	public ArrayList<Move> allMovesPiece(int r, int c)
 	{
 		ArrayList<Move> all = allMoves();
@@ -399,7 +388,8 @@ public class StandardBoard extends Board
 		}
 		return pmoves;
 	}
-	
+
+	//returns list of all moves possible for the color whose turn it is
 	public ArrayList<Move> allMoves()
 	{
 		ArrayList<Move> legalMoves = new ArrayList<Move>();
@@ -426,7 +416,6 @@ public class StandardBoard extends Board
 			for (int c = 0; c < 8; c++)
 			{
 				int sq = (7-r)*8 + (7-c);
-
 				if (((turnpieces >>> sq) & 1) == 1)
 				{
 					if (((pawns >>> sq) & 1) == 1) //pawn
@@ -449,9 +438,7 @@ public class StandardBoard extends Board
 								temp.move(new Move(r, c, 7 - (dsq / 8), 7 - (dsq % 8)));
 
 								if (!Definitions.isAttacked(temp, kingsq, Definitions.flip(m_turn)))
-								{
 									legalMoves.add(new Move(r, c, 7 - (dsq / 8), 7 - (dsq % 8)));
-								}
 							}
 							if (((bitsq << 9) & attacks & ~Definitions.allH) != 0 && 
 									((bitsq << 9) & getBlack()) != 0 || (epcol >= 0 && epcol == c-1 && r == 3))
@@ -461,9 +448,7 @@ public class StandardBoard extends Board
 								temp.move(new Move(r, c, 7 - (dsq / 8), 7 - (dsq % 8)));
 
 								if (!Definitions.isAttacked(temp, kingsq, Definitions.flip(m_turn)))
-								{
 									legalMoves.add(new Move(r, c, 7 - (dsq / 8), 7 - (dsq % 8)));
-								}
 							}
 							if (((bitsq << 8) & moves) != 0 && ((bitsq << 8) & allpieces) == 0)
 							{
@@ -472,9 +457,7 @@ public class StandardBoard extends Board
 								temp.move(new Move(r, c, 7 - (dsq / 8), 7 - (dsq % 8)));
 
 								if (!Definitions.isAttacked(temp, kingsq, Definitions.flip(m_turn)))
-								{
 									legalMoves.add(new Move(r, c, 7 - (dsq / 8), 7 - (dsq % 8)));
-								}
 							}
 
 							if (((bitsq << 16) & moves) != 0 && ((bitsq << 16) & allpieces) == 0
@@ -485,9 +468,7 @@ public class StandardBoard extends Board
 								temp.move(new Move(r, c, 7 - (dsq / 8), 7 - (dsq % 8)));
 
 								if (!Definitions.isAttacked(temp, kingsq, Definitions.flip(m_turn)))
-								{
 									legalMoves.add(new Move(r, c, 7 - (dsq / 8), 7 - (dsq % 8)));
-								}
 							}
 						}
 						else
@@ -503,9 +484,7 @@ public class StandardBoard extends Board
 								temp.move(new Move(r, c, 7 - (dsq / 8), 7 - (dsq % 8)));
 
 								if (!Definitions.isAttacked(temp, kingsq, Definitions.flip(m_turn)))
-								{
 									legalMoves.add(new Move(r, c, 7 - (dsq / 8), 7 - (dsq % 8)));
-								}
 							}
 							if (((bitsq >>> 9) & attacks & ~Definitions.allA) != 0 && 
 									((bitsq >>> 9) & getWhite()) != 0 || (epcol >= 0 && epcol == c+1 && r == 4))
@@ -515,9 +494,7 @@ public class StandardBoard extends Board
 								temp.move(new Move(r, c, 7 - (dsq / 8), 7 - (dsq % 8)));
 
 								if (!Definitions.isAttacked(temp, kingsq, Definitions.flip(m_turn)))
-								{
 									legalMoves.add(new Move(r, c, 7 - (dsq / 8), 7 - (dsq % 8)));
-								}
 							}
 							if (((bitsq >>> 8) & moves) != 0 && ((bitsq >>> 8) & allpieces) == 0)
 							{
@@ -526,9 +503,7 @@ public class StandardBoard extends Board
 								temp.move(new Move(r, c, 7 - (dsq / 8), 7 - (dsq % 8)));
 
 								if (!Definitions.isAttacked(temp, kingsq, Definitions.flip(m_turn)))
-								{
 									legalMoves.add(new Move(r, c, 7 - (dsq / 8), 7 - (dsq % 8)));
-								}
 							}
 
 							if (((bitsq >>> 16) & moves) != 0 && ((bitsq >>> 16) & allpieces) == 0
@@ -539,9 +514,7 @@ public class StandardBoard extends Board
 								temp.move(new Move(r, c, 7 - (dsq / 8), 7 - (dsq % 8)));
 
 								if (!Definitions.isAttacked(temp, kingsq, Definitions.flip(m_turn)))
-								{
 									legalMoves.add(new Move(r, c, 7 - (dsq / 8), 7 - (dsq % 8)));
-								}
 							}
 						}
 					}
@@ -580,9 +553,7 @@ public class StandardBoard extends Board
 								temp.move(new Move(r, c, 7 - (i / 8), 7 - (i % 8)));
 
 								if (!Definitions.isAttacked(temp, i, Definitions.flip(m_turn)))
-								{
 									legalMoves.add(new Move(r, c, 7 - (i / 8), 7 - (i % 8)));
-								}
 							}
 						}
 
@@ -635,6 +606,7 @@ public class StandardBoard extends Board
 		return legalMoves;
 	}
 
+	//helper function for allMoves; prevents a little repetition
 	private ArrayList<Move> allMovesHelper(int r, int c, long moves, int kingsq)
 	{
 		ArrayList<Move> mvs = new ArrayList<Move>();
@@ -646,9 +618,7 @@ public class StandardBoard extends Board
 				temp.move(new Move(r, c, 7 - (i / 8), 7 - (i % 8)));
 
 				if (!Definitions.isAttacked(temp, kingsq, Definitions.flip(m_turn)))
-				{
 					mvs.add(new Move(r, c, 7 - (i / 8), 7 - (i % 8)));
-				}
 			}
 		}
 		return mvs;
@@ -690,23 +660,15 @@ public class StandardBoard extends Board
 			int sq = (7-r)*8 + (7-c);
 			setPawns(getPawns() & ~(1L << sq));
 			if (input == "Queen")
-			{
 				setQueens(getQueens() | (1L << sq));
-			}
 			else if (input == "Rook")
-			{
 				setRooks(getRooks() | (1L << sq));
-			}
 			else if (input == "Knight")
-			{
 				setKnights(getKnights() | (1L << sq));		
-			}
 			else //Bishop
-			{
 				setBishops(getBishops() | (1L << sq));
-			}
 		}
-		else //AI chooses queen for now
+		else //TODO: AI chooses queen for now
 		{
 			int sq = (7-r)*8 + (7-c);
 			setPawns(getPawns() & ~(1L << sq));
@@ -719,6 +681,7 @@ public class StandardBoard extends Board
 		return new StandardBoard(this);
 	}
 
+	//gives a graphical representation of the board (NOT FEN notation)
 	public String toString()
 	{
 		String str = "";
@@ -764,7 +727,8 @@ public class StandardBoard extends Board
 		
 		return str;
 	}
-	
+
+	//returns an FEN representation of the board
 	public String toFEN(boolean complete)
 	{
 		String FEN = "";
@@ -866,6 +830,7 @@ public class StandardBoard extends Board
 		return FEN;
 	}
 
+	//loads position from given source FEN string
 	public void FENtoPosition(String srcFEN)
 	{
 		String[] FEN = srcFEN.split("/");
@@ -879,31 +844,19 @@ public class StandardBoard extends Board
 		String[] detailElems = details.split(" "); //[0]=turn, [1]=castling, [2]=enpassant, [3]=50-move count, [4]=turn num
 		String turn = detailElems[0];
 		if (turn.charAt(0) == 'w')
-		{
 			m_turn = Definitions.Color.WHITE;
-		}
 		else
-		{
 			m_turn = Definitions.Color.BLACK;
-		}
 
 		String castling = detailElems[1];
 		if (castling.contains("Q"))
-		{
 			m_data.m_whiteCanCastleQueenside = true;
-		}
 		if (castling.contains("K"))
-		{
 			m_data.m_whiteCanCastleKingside = true;
-		}
 		if (castling.contains("q"))
-		{
 			m_data.m_blackCanCastleQueenside = true;
-		}
 		if (castling.contains("k"))
-		{
 			m_data.m_blackCanCastleKingside = true;
-		}
 
 		int epcol = detailElems[2].charAt(0) - 'a';
 		if (epcol >= 0 && epcol < 8)
@@ -931,9 +884,7 @@ public class StandardBoard extends Board
 
 				Definitions.Color color = Definitions.Color.WHITE;
 				if (Character.isLowerCase(p))
-				{
 					color = Definitions.Color.BLACK;
-				}				
 				
 				placePiece(p, color, r, c);
 			}

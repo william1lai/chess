@@ -1,4 +1,11 @@
 Name: William Lai
+Date: 01-04-2015
+Description: Documentation Part 3
+    * Finished off documentation for Standard Mode
+    * Made formatting of code a bit more consistent
+    * Aligned Standard mode debug print statements with new Debug class
+
+Name: William Lai
 Date: 01-02-2015
 Description: Documentation Part 2
     * Did most of documentation for Standard mode

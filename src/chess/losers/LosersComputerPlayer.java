@@ -10,6 +10,7 @@ import chess.Game;
 import chess.Move;
 import chess.standard.StandardGame;
 
+//See StandardComputerPlayer for more detailed documentation
 public class LosersComputerPlayer extends ComputerPlayer 
 {
 	private double [][] PawnVals = {
@@ -63,12 +64,12 @@ public class LosersComputerPlayer extends ComputerPlayer
 	public LosersComputerPlayer(String name, Definitions.Color c, Game g) 
 	{
 		super(name, c, g);
+		initOpeningBook();
 	}
 
 	public void run()
 	{
 		Game g = getGame();
-		initOpeningBook();
 		m_move = evaluate(((LosersGame)g).getBoard());
 		m_done = true;
 	}
@@ -76,7 +77,7 @@ public class LosersComputerPlayer extends ComputerPlayer
 	public Move evaluate(LosersBoard lcb)
 	{
 		String completeFEN = lcb.toFEN(false);
-		System.out.println(completeFEN);
+		Debug.Log(completeFEN);
 		Move opening = m_book.get(completeFEN);
 		if (opening != null)
 			return opening; //found in book
@@ -85,7 +86,7 @@ public class LosersComputerPlayer extends ComputerPlayer
 			return null;
 
 		double highScore = staticEval(lcb);
-		System.out.println("Current Score: " + highScore);
+		Debug.Log("Current Score: " + highScore);
 		MovelistScore bms = new MovelistScore(null, 0);
 		hashmoves = new ArrayList<Move>();
 
@@ -112,7 +113,7 @@ public class LosersComputerPlayer extends ComputerPlayer
 			if (highScore > MATE_SCORE)
 				break; //if we found checkmate, don't look deeper
 		}
-		System.out.println();
+		Debug.Log("");
 		return hashmoves.get(0); //the best next move
 	}
 
@@ -163,7 +164,6 @@ public class LosersComputerPlayer extends ComputerPlayer
 			else
 			{
 				temp.move(hashmoves.get(ply));
-
 				bms = alphabetaMin(temp, alpha, beta, ply + 1, maxply, true, extended);
 
 				if (stop) //time's up
@@ -171,9 +171,7 @@ public class LosersComputerPlayer extends ComputerPlayer
 				score = bms.getScore();
 
 				if (score >= beta)
-				{
 					return new MovelistScore(movelist, beta); //fail hard beta-cutoff
-				}
 				if (score > alpha)
 				{
 					alpha = score;
@@ -195,9 +193,7 @@ public class LosersComputerPlayer extends ComputerPlayer
 			score = bms.getScore();
 
 			if (score >= beta)
-			{
 				return new MovelistScore(movelist, beta); //fail hard beta-cutoff
-			}
 			if (score > alpha)
 			{
 				alpha = score;
@@ -261,9 +257,7 @@ public class LosersComputerPlayer extends ComputerPlayer
 				score = bms.getScore();
 
 				if (score <= alpha)
-				{
 					return new MovelistScore(movelist, alpha); //fail hard beta-cutoff
-				}
 				if (score < beta)
 				{
 					beta = score;
@@ -291,16 +285,13 @@ public class LosersComputerPlayer extends ComputerPlayer
 		{
 			temp = lcb.clone();
 			temp.move(m);
-
 			bms = alphabetaMax(temp, alpha, beta, ply + 1, maxply, true, extended);
 
 			if (stop) //time's up
 				return null;
 			score = bms.getScore();
 			if (score <= alpha)
-			{
 				return new MovelistScore(movelist, alpha); //fail hard alpha-cutoff
-			}
 			if (score < beta)
 			{
 				beta = score;
@@ -326,13 +317,9 @@ public class LosersComputerPlayer extends ComputerPlayer
 		{
 			Definitions.State state = lcb.getState();
 			if (state == Definitions.State.CHECKMATE) //instant loss
-			{
 				return -MATE_SCORE;
-			}
 			else if (state == Definitions.State.STALEMATE)
-			{
 				return MATE_SCORE;
-			}
 		}
 
 		double score = 0.0;
@@ -345,67 +332,39 @@ public class LosersComputerPlayer extends ComputerPlayer
 				{
 					int rr;
 					if (lcb.whoseTurn() == Definitions.Color.WHITE)
-					{
 						rr = r;
-					}
 					else
-					{
 						rr = 7 - r;
-					}
 
 					if (Character.isUpperCase(p) ^ (lcb.whoseTurn() == Definitions.Color.BLACK)) //turn matches piece color
 					{
 						if (Character.toLowerCase(p) == 'p')
-						{
 							score = score - 100 + PawnVals[rr][c];
-						}
 						else if (Character.toLowerCase(p) == 'n')
-						{
 							score = score - 325 + KnightVals[rr][c];
-						}
 						else if (Character.toLowerCase(p) == 'b')
-						{
 							score = score - 325 + BishopVals[rr][c];
-						}
 						else if (Character.toLowerCase(p) == 'r')
-						{
 							score = score - 500;
-						}
 						else if (Character.toLowerCase(p) == 'q')
-						{
 							score = score - 975;
-						}
 						else //King
-						{
 							score = score - 400 + KingVals[rr][c];
-						}
 					}
 					else
 					{
 						if (Character.toLowerCase(p) == 'p')
-						{
 							score = score + 100 - PawnVals[7-rr][c];
-						}
 						else if (Character.toLowerCase(p) == 'n')
-						{
 							score = score + 325 - KnightVals[7-rr][c];
-						}
 						else if (Character.toLowerCase(p) == 'b')
-						{
 							score = score + 325 - BishopVals[7-rr][c];
-						}
 						else if (Character.toLowerCase(p) == 'r')
-						{
 							score = score + 500;
-						}
 						else if (Character.toLowerCase(p) == 'q')
-						{
 							score = score + 975;
-						}
 						else //King
-						{
 							score = score + 400 - KingVals[7-rr][c];
-						}
 					}
 				}
 			}

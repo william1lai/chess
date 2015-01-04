@@ -2,33 +2,32 @@ package chess;
 
 import java.io.PrintWriter;
 
-public final class Debug {
+public final class Debug
+{
 	private static boolean m_isDebug = false;
 	private static PrintWriter logWriter = null;
 	
 	public static void Initialize(String[] args)
 	{
-		for( String arg : args )
+		for (String arg : args)
 		{
-			if ( arg.toUpperCase().equals("-DEBUG") )
-			{
+			if (arg.toUpperCase().equals("-DEBUG"))
 				m_isDebug = true;				
-			}
 		}
 		
-		if ( IsDebugging() )
+		if (IsDebugging())
 		{
 			try
 			{
 				logWriter = new PrintWriter("ChessDebug.log", "UTF-8");
 				Log("Debug Mode is enabled.");
 			}
-			catch( Exception ex )
+			catch (Exception ex)
 			{
-				System.out.println( ex.toString() );
-				assert( false );
+				System.out.println(ex.toString());
+				assert(false);
 			}
-			assert( logWriter != null );
+			assert(logWriter != null);
 		}
 	}
 	
@@ -37,14 +36,14 @@ public final class Debug {
 		return m_isDebug;
 	}
 	
-	public static void Log( String message )
+	public static void Log(String message)
 	{
 		if (IsDebugging())
 		{
-			assert( logWriter != null );
-			logWriter.println( message );
+			assert(logWriter != null);
+			logWriter.println(message);
 			logWriter.flush();
 		}
-		System.out.println( message );
+		System.out.println(message);
 	}
 }
